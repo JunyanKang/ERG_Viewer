@@ -1043,7 +1043,7 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
   const [themeOpen, setThemeOpen] = useState(false)
   const [themeIdx, setThemeIdx] = useState(0)
   const [lang, setLang] = useState(()=>{
-    try{ return localStorage.getItem('ergViewer.lang') || 'zh' }catch(_e){ return 'zh' }
+    try{ return localStorage.getItem('ergViewer.lang') || 'en' }catch(_e){ return 'en' }
   })
   const dict = I18N[lang] || I18N.zh
   const t = (key, ...args)=>{
