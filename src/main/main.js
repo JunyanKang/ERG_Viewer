@@ -1,4 +1,4 @@
-const { app, BrowserWindow, dialog, ipcMain, clipboard, nativeImage, Menu } = require('electron')
+const { app, BrowserWindow, dialog, ipcMain, clipboard, nativeImage, Menu, screen } = require('electron')
 const path = require('path')
 const fs = require('fs')
 // network/crypto modules not needed after removing usage tracking
@@ -337,7 +337,18 @@ ipcMain.handle('resize-window', (event, width, height) => {
     const dw = (os[0] - cs[0])
     const dh = (os[1] - cs[1])
     const b = win.getBounds()        // {x,y,width,height}
-    win.setBounds({ x: b.x, y: b.y, width: w + dw, height: h + dh }, false)
+    const next = { x: b.x, y: b.y, width: w + dw, height: h + dh }
+    const display = screen.getDisplayMatching(b)
+    const area = display && display.workArea ? display.workArea : null
+    if(area){
+      if(next.width <= area.width){
+        next.x = Math.min(Math.max(next.x, area.x), area.x + area.width - next.width)
+      }
+      if(next.height <= area.height){
+        next.y = Math.min(Math.max(next.y, area.y), area.y + area.height - next.height)
+      }
+    }
+    win.setBounds(next, false)
 
     LAST_CONTENT_SIZE.set(win, { w, h })
   } catch (e) { return { ok:false, error: e.message } }
@@ -345,10 +356,3 @@ ipcMain.handle('resize-window', (event, width, height) => {
 })
 
 ipcMain.handle('get-ui-sizes', () => ({ ok:true, data: UI_SIZES }))
-
-ipcMain.handle('center-window', (event) => {
-  const win = BrowserWindow.fromWebContents(event.sender)
-  if(!win) return { ok:false, error:'no window' }
-  try{ win.center() }catch(e){ return { ok:false, error:e.message } }
-  return { ok:true }
-})

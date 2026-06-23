@@ -31,6 +31,7 @@
         color:var(--fg);
         font-size:13px;
         letter-spacing:0;
+        line-height:1.25;
       }
       .app{display:flex;flex-direction:column;height:100%}
       header{position:sticky;top:0;z-index:20;backdrop-filter:saturate(180%) blur(14px);background:var(--header-bg);border-bottom:1px solid var(--border)}
@@ -40,21 +41,24 @@
       .ecg path{fill:none;stroke:var(--primary);stroke-width:2;stroke-linejoin:round;stroke-linecap:round;stroke-dasharray:120;animation:ecg-dash 1.8s linear infinite}
       @keyframes ecg-dash{from{stroke-dashoffset:120}to{stroke-dashoffset:0}}
       .actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;min-width:0}
-      .actions button{height:30px;padding:0 10px;border-radius:8px;border:1px solid var(--border);background:var(--btn-bg);color:var(--btn-fg);cursor:pointer;transition:transform .15s ease,background .2s,border-color .2s;white-space:nowrap;font-size:12px}
+      .actions button{width:62px;height:32px;padding:0 8px;border-radius:8px;border:1px solid var(--border);background:var(--btn-bg);color:var(--btn-fg);cursor:pointer;transition:transform .15s ease,background .2s,border-color .2s;white-space:nowrap;font-size:12px;overflow:hidden;text-overflow:ellipsis}
       .actions button:hover{transform:translateY(-1px);background:var(--btn-bg-hover);border-color:var(--primary)}
       .primary{background:var(--primary);border-color:var(--primary);color:var(--primary-fg)}
       .primary:hover{background:var(--primary-hover)}
-      .lang-select{width:66px;height:30px;padding:0 22px 0 9px;border:1px solid var(--border);border-radius:8px;background:var(--select-bg);color:var(--fg);font-size:12px;font-weight:650;text-align:center;text-align-last:center;cursor:pointer}
+      .lang-select{appearance:none;-webkit-appearance:none;width:58px;height:32px;padding:0 8px;border:1px solid var(--border);border-radius:8px;background:var(--select-bg);background-image:none;color:var(--fg);font-size:12px;font-weight:650;text-align:center;text-align-last:center;cursor:pointer}
+      .lang-select::-ms-expand{display:none}
       .lang-select:focus{outline:none;border-color:var(--primary)}
-      main{flex:1;display:flex;align-items:flex-start;gap:12px;padding:12px;overflow:auto}
-      .left{width:300px;min-width:280px;display:flex;flex-direction:column;gap:12px;overflow:visible}
-      .card{background:var(--card-bg);border:1px solid var(--border);border-radius:8px;padding:12px;box-shadow:0 8px 20px rgba(40,52,70,.08)}
+      main{flex:1;min-height:0;display:flex;align-items:stretch;gap:12px;padding:12px;overflow:hidden}
+      .left{width:300px;min-width:280px;height:100%;display:flex;flex-direction:column;gap:12px;overflow:auto;padding-bottom:2px;scrollbar-width:none;-ms-overflow-style:none}
+      .left::-webkit-scrollbar{width:0;height:0;display:none}
+      .card{background:var(--card-bg);border:1px solid var(--border);border-radius:8px;padding:11px;box-shadow:0 8px 20px rgba(40,52,70,.08)}
       .card h3{margin:0 0 8px;font-size:13px;font-weight:700;opacity:.92}
       .kv{display:grid;grid-template-columns:90px 1fr;gap:6px;font-size:12px}
       .kv div{opacity:.9;min-width:0;overflow-wrap:anywhere}
-      .center{flex:1;min-width:0;display:flex;flex-direction:column;gap:12px;overflow:visible}
+      .center{flex:1;min-width:0;height:100%;display:flex;flex-direction:column;gap:12px;overflow:auto;padding-bottom:2px;scrollbar-width:none;-ms-overflow-style:none}
+      .center::-webkit-scrollbar{width:0;height:0;display:none}
       .group-nav{display:flex;align-items:center;gap:8px}
-      .group-nav button{padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--btn-bg);color:var(--btn-fg);cursor:pointer;white-space:nowrap}
+      .group-nav button{width:58px;min-height:58px;padding:0 8px;border-radius:8px;border:1px solid var(--border);background:var(--btn-bg);color:var(--btn-fg);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
       /* Ensure group label and dropdown align in width and typography */
       .group-nav .chip{display:block;box-sizing:border-box;padding:6px 16px}
       .group-nav .select{box-sizing:border-box}
@@ -72,26 +76,36 @@
       .ops-hover{position:absolute;left:50%;top:0;transform:translate(-50%, -110%);display:flex;gap:6px;background:var(--overlay-bg);border:1px solid var(--overlay-border);border-radius:8px;padding:4px 6px;z-index:10;box-shadow:0 8px 18px rgba(40,52,70,.16)}
       .btn-mini{padding:4px 8px;border-radius:8px;border:1px solid var(--border);background:var(--btn-bg);color:var(--btn-fg);cursor:pointer;font-size:12px;white-space:nowrap;min-width:44px;display:inline-flex;align-items:center;justify-content:center}
       .btn-mini:hover{background:var(--btn-bg-hover)}
-      .plot-card{display:flex;flex-direction:column;gap:8px}
-      .titlebar{display:flex;justify-content:center;align-items:center;gap:8px}
+      .plot-card{display:flex;flex-direction:column;gap:8px;min-width:0}
+      .titlebar{height:20px;display:flex;justify-content:center;align-items:center;gap:8px;font-size:13px;font-weight:600}
+      .titlebar > div{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
       .plot-wrap{position:relative}
-      .plot{height:320px;border-radius:8px;overflow:hidden;background:var(--plot-bg);border:1px solid var(--border)}
+      .plot{height:322px;border-radius:8px;overflow:hidden;background:var(--plot-bg);border:1px solid var(--border)}
       .annot-overlay{position:absolute;right:8px;top:8px;background:var(--overlay-bg);border:1px solid var(--overlay-border);border-radius:8px;padding:4px 8px;font-size:12px;color:var(--overlay-fg);pointer-events:none}
       .magnifier{position:fixed;left:16px;top:100px;width:280px;background:var(--magnifier-bg);border:1px solid var(--magnifier-border);border-radius:8px;box-shadow:0 12px 28px rgba(40,52,70,.18);z-index:50}
       .magnifier-header{display:flex;justify-content:space-between;align-items:center;padding:6px 10px;font-size:12px;color:var(--magnifier-fg);border-bottom:1px solid var(--magnifier-border)}
       .magnifier-body{padding:6px}
       .magnifier-plot{height:160px;border-radius:8px;overflow:hidden;background:var(--plot-bg);border:1px solid var(--border)}
-      .controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-      .controls .export{display:inline-flex;gap:8px;white-space:nowrap}
-      .select{appearance:none;-webkit-appearance:none;background:var(--select-bg);border:1px solid var(--border);color:var(--fg);border-radius:8px;padding:6px 16px;position:relative;text-align:center;text-align-last:center;font-size:12px}
+      .controls{display:flex;gap:8px;align-items:center;min-height:32px}
+      .axis-controls{display:grid;grid-template-columns:minmax(0,1fr) 76px minmax(0,1fr);gap:8px;align-items:center}
+      .axis-group{display:grid;grid-template-columns:96px 32px 32px;gap:6px;align-items:center;min-width:0}
+      .axis-group.axis-max{justify-content:end}
+      .axis-chip{height:32px;display:flex;align-items:center;justify-content:center;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+      .axis-btn{width:32px;height:32px;padding:0}
+      .step-box{display:flex;align-items:center;justify-content:center;min-width:0}
+      .step-select{width:76px;height:32px;padding:0 18px 0 8px}
+      .export-controls{display:grid;grid-template-columns:62px minmax(0,1fr) auto;align-items:center}
+      .controls .export{display:grid;grid-template-columns:repeat(5,56px);gap:6px;white-space:nowrap}
+      .controls .export .btn{width:56px;padding-left:4px;padding-right:4px;overflow:hidden;text-overflow:ellipsis}
+      .select{appearance:none;-webkit-appearance:none;background:var(--select-bg);border:1px solid var(--border);color:var(--fg);border-radius:8px;padding:0 16px;position:relative;text-align:center;text-align-last:center;font-size:12px;min-height:32px}
       .select option{text-align:center}
       .select:focus{outline:none;border-color:var(--primary)}
       .select::-ms-expand{display:none}
       .marks{font-size:12px;text-align:center;justify-items:center}
       .chip{padding:4px 8px;border-radius:8px;background:var(--chip-bg);border:1px solid var(--border);font-size:12px}
-      .btn{min-height:28px;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--btn-bg);color:var(--btn-fg);cursor:pointer;white-space:nowrap}
+      .btn{height:32px;min-height:32px;padding:0 10px;border-radius:8px;border:1px solid var(--border);background:var(--btn-bg);color:var(--btn-fg);cursor:pointer;white-space:nowrap}
       .btn:hover{background:var(--btn-bg-hover);border-color:var(--primary)}
-      .btn-sm{padding:4px 8px;font-size:12px}
+      .btn-sm{height:30px;min-height:30px;padding:0 8px;font-size:12px}
       .label-sm{font-size:12px;display:flex;align-items:center;justify-content:center;width:100%;text-align:center}
       .ops-grid .label-sm{width:auto}
       .warn{color:#f59e0b}

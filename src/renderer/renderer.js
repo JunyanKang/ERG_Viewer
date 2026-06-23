@@ -146,7 +146,7 @@ const I18N = {
     fileInfo:'文件信息', inputFile:'输入文件', examItem:'检查项目', hospital:'医院', patient:'病人', examDate:'检查日期',
     prevGroup:'上一组', nextGroup:'下一组', groupCount:(a,b)=>`第 ${a} / ${b} 组`,
     eyeParams:(eye)=>`${eye}检测参数`, machine:'机器识别结果', manual:'手动标注结果', recalculated:'从头计算结果',
-    plot:'绘图', timeAxis:'时间 (ms)', amplitudeAxis:'振幅 (μv)', reset:'重置', copyImage:'复制图像', copyData:'复制数据', exportPdf:'导出PDF', exportSvg:'导出SVG', exportData:'导出数据',
+    plot:'绘图', timeAxis:'时间 (ms)', amplitudeAxis:'振幅 (μv)', reset:'重置', copyImage:'图像', copyData:'数据', exportPdf:'PDF', exportSvg:'SVG', exportData:'表格',
     imageCopied:'当前图像已复制到剪贴板', dataCopied:'当前绘图数据已复制到剪贴板',
     annotateA:(eye)=>`标注${eye}a波`, annotateB:(eye)=>`标注${eye}b波`, annotatingA:'正在标注a波', annotatingB:'正在标注b波',
     annotatePoint:(point)=>`手动标注${point}`, annotatingPoint:(point)=>`正在标注${point}`,
@@ -168,7 +168,7 @@ const I18N = {
     fileInfo:'File', inputFile:'Input', examItem:'Exam', hospital:'Hospital', patient:'Patient', examDate:'Date',
     prevGroup:'Prev', nextGroup:'Next', groupCount:(a,b)=>`${a} / ${b}`,
     eyeParams:(eye)=>`${eye} parameters`, machine:'Machine', manual:'Manual', recalculated:'Recomputed',
-    plot:'Plot', timeAxis:'Time (ms)', amplitudeAxis:'Amplitude (μv)', reset:'Reset', copyImage:'Copy image', copyData:'Copy data', exportPdf:'PDF', exportSvg:'SVG', exportData:'Data',
+    plot:'Plot', timeAxis:'Time (ms)', amplitudeAxis:'Amplitude (μv)', reset:'Reset', copyImage:'Img', copyData:'Data', exportPdf:'PDF', exportSvg:'SVG', exportData:'XLSX',
     imageCopied:'Image copied', dataCopied:'Plot data copied',
     annotateA:(eye)=>`${eye} a-wave`, annotateB:(eye)=>`${eye} b-wave`, annotatingA:'Marking a-wave', annotatingB:'Marking b-wave',
     annotatePoint:(point)=>`Mark ${point}`, annotatingPoint:(point)=>`Marking ${point}`,
@@ -190,7 +190,7 @@ const I18N = {
     fileInfo:'Файл', inputFile:'Файл', examItem:'Тест', hospital:'Клиника', patient:'Пациент', examDate:'Дата',
     prevGroup:'Назад', nextGroup:'Далее', groupCount:(a,b)=>`${a} / ${b}`,
     eyeParams:(eye)=>`${eye}: параметры`, machine:'Авто', manual:'Вручную', recalculated:'Расчет',
-    plot:'График', timeAxis:'Время (ms)', amplitudeAxis:'Ампл. (μv)', reset:'Сброс', copyImage:'Коп. рис.', copyData:'Коп. дан.', exportPdf:'PDF', exportSvg:'SVG', exportData:'Данные',
+    plot:'График', timeAxis:'Время (ms)', amplitudeAxis:'Ампл. (μv)', reset:'Сброс', copyImage:'Рис.', copyData:'Дан.', exportPdf:'PDF', exportSvg:'SVG', exportData:'XLSX',
     imageCopied:'Рисунок скопирован', dataCopied:'Данные скопированы',
     annotateA:(eye)=>`${eye} a`, annotateB:(eye)=>`${eye} b`, annotatingA:'Метка a', annotatingB:'Метка b',
     annotatePoint:(point)=>`Метка ${point}`, annotatingPoint:(point)=>`Метка ${point}`,
@@ -212,7 +212,7 @@ const I18N = {
     fileInfo:'Tabula', inputFile:'Fons', examItem:'Examen', hospital:'Nosoc.', patient:'Aeger', examDate:'Dies',
     prevGroup:'Prior', nextGroup:'Prox.', groupCount:(a,b)=>`${a} / ${b}`,
     eyeParams:(eye)=>`${eye} param.`, machine:'Machina', manual:'Manuale', recalculated:'Recalc.',
-    plot:'Graph.', timeAxis:'Tempus (ms)', amplitudeAxis:'Ampl. (μv)', reset:'Init.', copyImage:'Copia fig.', copyData:'Copia dat.', exportPdf:'PDF', exportSvg:'SVG', exportData:'Data',
+    plot:'Graph.', timeAxis:'Tempus (ms)', amplitudeAxis:'Ampl. (μv)', reset:'Init.', copyImage:'Fig.', copyData:'Data', exportPdf:'PDF', exportSvg:'SVG', exportData:'XLSX',
     imageCopied:'Figura copiata', dataCopied:'Data copiata',
     annotateA:(eye)=>`${eye} a`, annotateB:(eye)=>`${eye} b`, annotatingA:'Notatur a', annotatingB:'Notatur b',
     annotatePoint:(point)=>`Nota ${point}`, annotatingPoint:(point)=>`Notatur ${point}`,
@@ -234,7 +234,7 @@ const I18N = {
     fileInfo:'Fichier', inputFile:'Entrée', examItem:'Examen', hospital:'Hôpital', patient:'Patient', examDate:'Date',
     prevGroup:'Préc.', nextGroup:'Suiv.', groupCount:(a,b)=>`${a} / ${b}`,
     eyeParams:(eye)=>`${eye} paramètres`, machine:'Machine', manual:'Manuel', recalculated:'Recalculé',
-    plot:'Tracé', timeAxis:'Temps (ms)', amplitudeAxis:'Amplitude (μv)', reset:'Reset', copyImage:'Copier fig.', copyData:'Copier data', exportPdf:'PDF', exportSvg:'SVG', exportData:'Données',
+    plot:'Tracé', timeAxis:'Temps (ms)', amplitudeAxis:'Amplitude (μv)', reset:'Reset', copyImage:'Img', copyData:'Data', exportPdf:'PDF', exportSvg:'SVG', exportData:'XLSX',
     imageCopied:'Image copiée', dataCopied:'Données copiées',
     annotateA:(eye)=>`${eye} a-wave`, annotateB:(eye)=>`${eye} b-wave`, annotatingA:'Annotation a', annotatingB:'Annotation b',
     annotatePoint:(point)=>`Annoter ${point}`, annotatingPoint:(point)=>`Annotation ${point}`,
@@ -256,7 +256,7 @@ const I18N = {
     fileInfo:'Datei', inputFile:'Eingabe', examItem:'Test', hospital:'Klinik', patient:'Patient', examDate:'Datum',
     prevGroup:'Zurück', nextGroup:'Weiter', groupCount:(a,b)=>`${a} / ${b}`,
     eyeParams:(eye)=>`${eye} Parameter`, machine:'Automat.', manual:'Manuell', recalculated:'Berechnet',
-    plot:'Kurve', timeAxis:'Zeit (ms)', amplitudeAxis:'Amplitude (μv)', reset:'Reset', copyImage:'Bild kop.', copyData:'Daten kop.', exportPdf:'PDF', exportSvg:'SVG', exportData:'Daten',
+    plot:'Kurve', timeAxis:'Zeit (ms)', amplitudeAxis:'Amplitude (μv)', reset:'Reset', copyImage:'Bild', copyData:'Data', exportPdf:'PDF', exportSvg:'SVG', exportData:'XLSX',
     imageCopied:'Bild kopiert', dataCopied:'Daten kopiert',
     annotateA:(eye)=>`${eye} a-Welle`, annotateB:(eye)=>`${eye} b-Welle`, annotatingA:'a-Welle', annotatingB:'b-Welle',
     annotatePoint:(point)=>`${point} markieren`, annotatingPoint:(point)=>`${point} aktiv`,
@@ -618,17 +618,19 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
       // Keep current group's X zoom/pan only within this group+side
       // Changing group will change uirevision and reset X to autorange
       uirevision: `${side}-${group?.idx ?? 'nogrp'}`,
-      margin:{l:50,r:10,t:10,b:40},
+      margin:{l:56,r:10,t:8,b:54},
       paper_bgcolor:'rgba(0,0,0,0)',
       plot_bgcolor:'rgba(0,0,0,0)',
-      font:{ color: fgColor },
+      font:{ color: fgColor, family:'system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial', size:12 },
       hoverdistance: spikesOn? 1 : 20,
       spikedistance: spikesOn? -1 : 20,
       xaxis:{
-        title: ui?.timeAxis || 'Time (ms)',
+        title: { text: ui?.timeAxis || 'Time (ms)', font:{size:13}, standoff:8 },
         color: axisColor,
         gridcolor: gridColor,
         zeroline:false,
+        automargin:false,
+        tickfont:{size:12},
         tickvals: tickVals,
         // if we have persisted x-range, apply it; otherwise let autorange
         ...(xr0!=null && xr1!=null ? { range: [xr0, xr1] } : (padXRange? { range: padXRange } : {})),
@@ -642,10 +644,12 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
         linewidth:1
       },
       yaxis:{
-        title: ui?.amplitudeAxis || 'Amplitude (μv)',
+        title: { text: ui?.amplitudeAxis || 'Amplitude (μv)', font:{size:13}, standoff:8 },
         color: axisColor,
         gridcolor: gridColor,
         zeroline:false,
+        automargin:false,
+        tickfont:{size:12},
         range:[yn, ym],
         showspikes: spikesOn,
         spikemode: 'across',
@@ -971,37 +975,37 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
       })()),
       toastMsg && R.createElement('div',{key:'copytoast', className:'plot-toast'}, toastMsg)
     ]),
-    R.createElement('div',{key:'ctrl1', className:'controls', style:{justifyContent:'space-between'}},[
-      R.createElement('div',{style:{display:'flex',gap:8,alignItems:'center'}},[
-      R.createElement('span',{className:'chip'}, (()=>{
+    R.createElement('div',{key:'ctrl1', className:'controls axis-controls'},[
+      R.createElement('div',{className:'axis-group axis-min'},[
+      R.createElement('span',{className:'chip axis-chip'}, (()=>{
           if(!y.length) return 'ymin: —'
           const maxAbs = Math.max(...y.map(v=>Math.abs(v)))
           const initY = niceY(maxAbs*1.2 || 10)
           const yn = (ymin ?? -initY)
           return `ymin: ${yn}`
         })() ),
-        R.createElement('button',{className:'btn', disabled, onClick:()=>!disabled&&changeYMin(-1)}, '−'),
-        R.createElement('button',{className:'btn', disabled, onClick:()=>!disabled&&changeYMin(1)}, '+')
+        R.createElement('button',{className:'btn axis-btn', disabled, onClick:()=>!disabled&&changeYMin(-1)}, '−'),
+        R.createElement('button',{className:'btn axis-btn', disabled, onClick:()=>!disabled&&changeYMin(1)}, '+')
       ]),
       // center step selector
-      R.createElement('div',{style:{flex:1,display:'flex',justifyContent:'center',alignItems:'center'}},
-        R.createElement('select',{className:'select', disabled, value:step, onChange:e=>setStep(Number(e.target.value))},
+      R.createElement('div',{className:'step-box'},
+        R.createElement('select',{className:'select step-select', disabled, value:step, onChange:e=>setStep(Number(e.target.value))},
           [10,20,30,50,150,200,500].map(v=> R.createElement('option',{key:v, value:v}, v))
         )
       ),
-      R.createElement('div',{style:{display:'flex',gap:8,alignItems:'center'}},[
-      R.createElement('span',{className:'chip'}, (()=>{
+      R.createElement('div',{className:'axis-group axis-max'},[
+      R.createElement('span',{className:'chip axis-chip'}, (()=>{
           if(!y.length) return 'ymax: —'
           const maxAbs = Math.max(...y.map(v=>Math.abs(v)))
           const initY = niceY(maxAbs*1.2 || 10)
           const ym = (ymax ?? initY)
           return `ymax: ${ym}`
         })() ),
-        R.createElement('button',{className:'btn', disabled, onClick:()=>!disabled&&changeYMax(-1)}, '−'),
-        R.createElement('button',{className:'btn', disabled, onClick:()=>!disabled&&changeYMax(1)}, '+')
+        R.createElement('button',{className:'btn axis-btn', disabled, onClick:()=>!disabled&&changeYMax(-1)}, '−'),
+        R.createElement('button',{className:'btn axis-btn', disabled, onClick:()=>!disabled&&changeYMax(1)}, '+')
       ])
     ]),
-    R.createElement('div',{key:'ctrl2', className:'controls'},[
+    R.createElement('div',{key:'ctrl2', className:'controls export-controls'},[
       // row 2: reset to initial x/y, and exports (smaller buttons)
       (function(){ const resetDisabled = Boolean(disabled && !(activeAnnotate || marking)); return R.createElement('button',{className:'btn btn-sm', disabled: resetDisabled, onClick:()=>{ if(resetDisabled) return; resetAxes() }}, ui?.reset || '重置') })(),
       R.createElement('span',{style:{flex:1}}),
@@ -1320,24 +1324,17 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
 
   const lastDimsRef = useRef({ w: null, h: null })
 
-  // Resize by both column count and current analysis mode so short pages do not leave a dead band at the bottom.
+  // Keep the loaded workspace size stable. Group changes update content only, so Prev/Next never moves the window.
   useEffect(()=>{
     if(!uiSizes || !window.electronAPI?.resizeWindow) return
-    const colsMode = !hasValid ? 'compact' : ((showR && showL) ? 'both' : 'single')
-    const base = colsMode==='compact' ? uiSizes.main.compact : (colsMode==='single' ? (uiSizes.main.single||uiSizes.main.expanded) : uiSizes.main.expanded)
-    const desiredW = (base && base.width) || (colsMode==='single'? 880 : 1250)
-    const desiredH = !hasValid
-      ? (uiSizes.main?.compact?.height || 500)
-      : (isDops ? (uiSizes.modes?.dOps || 755)
-        : (isFlicker ? (uiSizes.modes?.lFlicker || 675)
-          : (isFVEP ? (uiSizes.modes?.FVEP || 705)
-            : (enableAnnotate ? (uiSizes.modes?.dRod_dMax_lCone || 705) : (uiSizes.main?.expanded?.height || 705)))))
+    const base = hasValid ? uiSizes.main.expanded : uiSizes.main.compact
+    const desiredW = (base && base.width) || (hasValid ? 1250 : 960)
+    const desiredH = (base && base.height) || (hasValid ? 705 : 500)
     const prev = lastDimsRef.current
     if(prev && prev.w === desiredW && prev.h === desiredH) return
     try{ window.electronAPI.resizeWindow(desiredW, desiredH) }catch(_e){}
     lastDimsRef.current = { w: desiredW, h: desiredH }
-    if(prev && (prev.w !== null || prev.h !== null)){ try{ window.electronAPI.centerWindow && window.electronAPI.centerWindow() }catch(_e){} }
-  }, [uiSizes, hasValid, showR, showL, isDops, isFlicker, isFVEP, enableAnnotate])
+  }, [uiSizes, hasValid])
   const annoting = Boolean(annotMode.R || annotMode.L || (opsMode.R && opsMode.R.kind) || (opsMode.L && opsMode.L.kind))
 
   // removed peer usage sync

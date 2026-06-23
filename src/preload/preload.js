@@ -32,7 +32,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // basic window sizing (no auto height/limits)
   resizeWindow: (w,h) => ipcRenderer.invoke('resize-window', w, h),
   getUiSizes: () => ipcRenderer.invoke('get-ui-sizes'),
-  centerWindow: () => ipcRenderer.invoke('center-window'),
   showWarning: (msg) => ipcRenderer.invoke('show-warning', msg)
 })
 
