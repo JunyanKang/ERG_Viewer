@@ -159,7 +159,7 @@ const I18N = {
     warningInvalid:'请选择标准的OPTOPROBE导出文件进行分析', warningParse:(msg)=>`Excel解析失败：${msg}`, warningNeedA:'请首先标注a波', warningOps:'Ops标注数据不完整，请标注完整后再尝试',
     apiUnavailable:'系统接口不可用，请重启应用', readFail:(msg)=>`读取文件失败: ${msg}`, saveFail:(msg)=>`保存失败: ${msg}`, copyFail:(msg)=>`复制失败: ${msg}`, pdfFail:(msg)=>`导出PDF失败: ${msg}`,
     noSheet:'Excel 文件没有可读取的工作表',
-    lab:'实验', viewer:'查看', experimentAnalysis:'实验分析', addFiles:'添加文件', exportMetrics:'导出指标', exportSummary:'导出汇总',
+    lab:'实验', viewer:'查看', experimentAnalysis:'实验分析', addFiles:'添加文件', loadDemo:'Demo', exportMetrics:'导出指标', exportSummary:'导出汇总',
     loadedFiles:'文件', subjects:'样本', cohorts:'分组', signals:'波形', metricCount:'指标', cohortSummary:'分组汇总', metricExplorer:'指标概览', rawMetrics:'原始指标',
     cohort:'组别', mode:'模式', signal:'信号', side:'眼别', metric:'指标', value:'数值', meanSem:'均值±SEM', noAnalysisData:'暂无实验分析数据', analysisHint:'添加多个 OPTOPROBE Excel 文件，生成批量指标、分组汇总和导出表。'
   },
@@ -184,7 +184,7 @@ const I18N = {
     warningInvalid:'Please choose a standard OPTOPROBE export file.', warningParse:(msg)=>`Excel parse failed: ${msg}`, warningNeedA:'Mark a-wave first.', warningOps:'Ops annotations are incomplete.',
     apiUnavailable:'System API unavailable. Restart the app.', readFail:(msg)=>`Read failed: ${msg}`, saveFail:(msg)=>`Save failed: ${msg}`, copyFail:(msg)=>`Copy failed: ${msg}`, pdfFail:(msg)=>`PDF export failed: ${msg}`,
     noSheet:'No readable worksheet found.',
-    lab:'Lab', viewer:'View', experimentAnalysis:'Experiment analysis', addFiles:'Add files', exportMetrics:'Export metrics', exportSummary:'Export summary',
+    lab:'Lab', viewer:'View', experimentAnalysis:'Experiment analysis', addFiles:'Add files', loadDemo:'Demo', exportMetrics:'Export metrics', exportSummary:'Export summary',
     loadedFiles:'Files', subjects:'Subjects', cohorts:'Cohorts', signals:'Signals', metricCount:'Metrics', cohortSummary:'Cohort summary', metricExplorer:'Metric overview', rawMetrics:'Raw metrics',
     cohort:'Cohort', mode:'Mode', signal:'Signal', side:'Eye', metric:'Metric', value:'Value', meanSem:'Mean ± SEM', noAnalysisData:'No experiment data', analysisHint:'Add OPTOPROBE Excel files to build batch metrics, cohort summaries, and export tables.'
   },
@@ -209,7 +209,7 @@ const I18N = {
     warningInvalid:'Выберите стандартный экспорт OPTOPROBE.', warningParse:(msg)=>`Ошибка Excel: ${msg}`, warningNeedA:'Сначала отметьте a-wave.', warningOps:'Разметка Ops неполная.',
     apiUnavailable:'Системный API недоступен.', readFail:(msg)=>`Ошибка чтения: ${msg}`, saveFail:(msg)=>`Ошибка сохранения: ${msg}`, copyFail:(msg)=>`Ошибка копирования: ${msg}`, pdfFail:(msg)=>`Ошибка PDF: ${msg}`,
     noSheet:'Нет читаемого листа.',
-    lab:'Lab', viewer:'View', experimentAnalysis:'Анализ', addFiles:'Файлы', exportMetrics:'Экспорт', exportSummary:'Сводка',
+    lab:'Lab', viewer:'View', experimentAnalysis:'Анализ', addFiles:'Файлы', loadDemo:'Demo', exportMetrics:'Экспорт', exportSummary:'Сводка',
     loadedFiles:'Файлы', subjects:'Образцы', cohorts:'Группы', signals:'Сигналы', metricCount:'Метрики', cohortSummary:'Сводка групп', metricExplorer:'Обзор метрик', rawMetrics:'Метрики',
     cohort:'Группа', mode:'Режим', signal:'Сигнал', side:'Глаз', metric:'Метрика', value:'Знач.', meanSem:'Mean ± SEM', noAnalysisData:'Нет данных', analysisHint:'Добавьте Excel-файлы OPTOPROBE для пакетных метрик и экспорта.'
   },
@@ -234,7 +234,7 @@ const I18N = {
     warningInvalid:'Elige exportum OPTOPROBE rectum.', warningParse:(msg)=>`Excel error: ${msg}`, warningNeedA:'Primum nota a-wave.', warningOps:'Notae Ops incompletae.',
     apiUnavailable:'API systematis deest.', readFail:(msg)=>`Lectio deficit: ${msg}`, saveFail:(msg)=>`Servare deficit: ${msg}`, copyFail:(msg)=>`Copia deficit: ${msg}`, pdfFail:(msg)=>`PDF deficit: ${msg}`,
     noSheet:'Nulla pagina legibilis.',
-    lab:'Lab', viewer:'Vis.', experimentAnalysis:'Analysis', addFiles:'Addere', exportMetrics:'Export', exportSummary:'Summ.',
+    lab:'Lab', viewer:'Vis.', experimentAnalysis:'Analysis', addFiles:'Addere', loadDemo:'Demo', exportMetrics:'Export', exportSummary:'Summ.',
     loadedFiles:'Tabulae', subjects:'Subj.', cohorts:'Cohortes', signals:'Signa', metricCount:'Metrics', cohortSummary:'Summarium', metricExplorer:'Metrics', rawMetrics:'Raw',
     cohort:'Cohors', mode:'Modus', signal:'Signum', side:'Oculus', metric:'Metric', value:'Valor', meanSem:'Mean ± SEM', noAnalysisData:'Nulla data', analysisHint:'Adde tabulas OPTOPROBE Excel ad metricas et exportum.'
   },
@@ -259,7 +259,7 @@ const I18N = {
     warningInvalid:'Choisissez un export OPTOPROBE standard.', warningParse:(msg)=>`Erreur Excel : ${msg}`, warningNeedA:'Annotez d’abord a-wave.', warningOps:'Annotations Ops incomplètes.',
     apiUnavailable:'API système indisponible.', readFail:(msg)=>`Lecture échouée : ${msg}`, saveFail:(msg)=>`Enregistrement échoué : ${msg}`, copyFail:(msg)=>`Copie échouée : ${msg}`, pdfFail:(msg)=>`Export PDF échoué : ${msg}`,
     noSheet:'Aucune feuille lisible.',
-    lab:'Lab', viewer:'Voir', experimentAnalysis:'Analyse', addFiles:'Ajouter', exportMetrics:'Exporter', exportSummary:'Résumé',
+    lab:'Lab', viewer:'Voir', experimentAnalysis:'Analyse', addFiles:'Ajouter', loadDemo:'Demo', exportMetrics:'Exporter', exportSummary:'Résumé',
     loadedFiles:'Fichiers', subjects:'Sujets', cohorts:'Groupes', signals:'Signaux', metricCount:'Mesures', cohortSummary:'Résumé groupes', metricExplorer:'Mesures', rawMetrics:'Mesures brutes',
     cohort:'Groupe', mode:'Mode', signal:'Signal', side:'Œil', metric:'Mesure', value:'Valeur', meanSem:'Moy. ± SEM', noAnalysisData:'Aucune donnée', analysisHint:'Ajoutez des fichiers Excel OPTOPROBE pour les mesures, résumés et exports.'
   },
@@ -284,7 +284,7 @@ const I18N = {
     warningInvalid:'Bitte Standard-OPTOPROBE-Export wählen.', warningParse:(msg)=>`Excel-Fehler: ${msg}`, warningNeedA:'Zuerst a-Welle markieren.', warningOps:'Ops-Markierungen unvollständig.',
     apiUnavailable:'System-API nicht verfügbar.', readFail:(msg)=>`Lesen fehlgeschlagen: ${msg}`, saveFail:(msg)=>`Speichern fehlgeschlagen: ${msg}`, copyFail:(msg)=>`Kopieren fehlgeschlagen: ${msg}`, pdfFail:(msg)=>`PDF-Export fehlgeschlagen: ${msg}`,
     noSheet:'Kein lesbares Arbeitsblatt.',
-    lab:'Lab', viewer:'View', experimentAnalysis:'Analyse', addFiles:'Dateien', exportMetrics:'Export', exportSummary:'Summe',
+    lab:'Lab', viewer:'View', experimentAnalysis:'Analyse', addFiles:'Dateien', loadDemo:'Demo', exportMetrics:'Export', exportSummary:'Summe',
     loadedFiles:'Dateien', subjects:'Proben', cohorts:'Gruppen', signals:'Signale', metricCount:'Metriken', cohortSummary:'Gruppen', metricExplorer:'Metriken', rawMetrics:'Rohwerte',
     cohort:'Gruppe', mode:'Modus', signal:'Signal', side:'Auge', metric:'Metrik', value:'Wert', meanSem:'Mean ± SEM', noAnalysisData:'Keine Daten', analysisHint:'OPTOPROBE-Excel-Dateien hinzufügen, um Batch-Metriken und Exporte zu erstellen.'
   }
@@ -719,6 +719,112 @@ function summarizeExperimentMetrics(metrics){
     const sem = n > 1 ? sd / Math.sqrt(n) : 0
     return { ...row, n, mean, sd, sem }
   }).sort((a,b)=>`${a.mode} ${a.metric} ${a.cohort}`.localeCompare(`${b.mode} ${b.metric} ${b.cohort}`))
+}
+
+function demoWaveform(kind, scale, seed, n){
+  const vals = []
+  for(let i=0;i<n;i++){
+    const t = i/(n-1)
+    const noise = Math.sin((i+1)*(seed+3)*0.37) * 3
+    let y = noise
+    if(kind === 'dRod'){
+      y += scale * (-80*Math.exp(-Math.pow((t-.22)/.055,2)) + 380*Math.exp(-Math.pow((t-.36)/.09,2)) - 65*Math.exp(-Math.pow((t-.82)/.16,2)))
+    }else if(kind === 'dMax'){
+      y += scale * (-160*Math.exp(-Math.pow((t-.18)/.05,2)) + 760*Math.exp(-Math.pow((t-.30)/.08,2)) + 160*Math.exp(-Math.pow((t-.42)/.08,2)) - 90*Math.exp(-Math.pow((t-.78)/.18,2)))
+    }else if(kind === 'lCone'){
+      y += scale * (-60*Math.exp(-Math.pow((t-.20)/.045,2)) + 260*Math.exp(-Math.pow((t-.34)/.08,2)) - 45*Math.exp(-Math.pow((t-.75)/.16,2)))
+    }else if(kind === 'dOps'){
+      y += scale * (70*Math.sin(t*Math.PI*38)*Math.exp(-Math.pow((t-.26)/.12,2)) - 10)
+    }else if(kind === 'Flicker'){
+      y += scale * (60*Math.sin(t*Math.PI*8 + seed*.2) + 18*Math.sin(t*Math.PI*16))
+    }else{
+      y += scale * (-2*Math.exp(-Math.pow((t-.18)/.055,2)) + 7*Math.exp(-Math.pow((t-.30)/.08,2)) - 5*Math.exp(-Math.pow((t-.46)/.09,2)))
+    }
+    vals.push(Number(y.toFixed(2)))
+  }
+  return vals.join(',')
+}
+
+function demoRowsForSample({patient, cohort, item, date, scale, seed}){
+  const rows = [
+    {Item:item, Param:'[检查项目]', Value:item},
+    {Item:item, Param:'[医院_医院名字]', Value:'ERG Viewer Demo'},
+    {Item:item, Param:'[病人_姓名]', Value:patient},
+    {Item:item, Param:'[病人_性别]', Value:seed % 2 ? '女' : '男'},
+    {Item:item, Param:'[病人_年龄]', Value:'0岁'},
+    {Item:item, Param:'[检查_检查日期]', Value:date},
+    {Item:item, Param:'[检查_病人分组]', Value:cohort}
+  ]
+  const push = (idx, side, suffix, value)=>rows.push({Item:item, Param:`[${side}_${String(idx).padStart(2,'0')}_${suffix}]`, Value:String(value ?? '')})
+  if(item === 'FVEP'){
+    ;[1,2].forEach((idx)=>{
+      ;['R','L'].forEach((side, si)=>{
+        const sideScale = scale * (side === 'R' ? 1 : .96)
+        const n1t = 20 + seed % 3 + idx
+        const p1t = 28 + seed % 2 + idx
+        const n2t = 42 + seed % 4 + idx
+        const n1a = Number((-1.2 * sideScale - si*.2).toFixed(1))
+        const p1a = Number((7.0 * sideScale + idx*.4).toFixed(1))
+        const n2a = Number((-5.5 * sideScale - idx*.3).toFixed(1))
+        push(idx, side, '名字', `FVEP(${idx})_白光3.0标闪-暗室`)
+        push(idx, side, '分析时间', '120 ms')
+        push(idx, side, '数据长度', '300')
+        push(idx, side, '详细数据(uv)', demoWaveform('FVEP', sideScale, seed+idx+si, 300))
+        push(idx, side, '标记', `N1: ${n1t.toFixed(1)}ms ${n1a}uv P1: ${p1t.toFixed(1)}ms ${p1a}uv N2: ${n2t.toFixed(1)}ms ${n2a}uv`)
+      })
+    })
+    return rows
+  }
+  const modes = [
+    {name:'dRod', flash:'白色光: 0.01 cd·s/m²', time:'200 ms'},
+    {name:'dMax', flash:'白色光: 5.00 cd·s/m²', time:'200 ms'},
+    {name:'dOps', flash:'白色光: 5.00 cd·s/m²', time:'200 ms'},
+    {name:'lCone', flash:'白色光: 3.00 cd·s/m²', time:'200 ms'},
+    {name:'Flicker', flash:'白色光: 3.00 cd·s/m²', time:'500 ms'}
+  ]
+  modes.forEach((mode, i)=>{
+    const idx = i + 1
+    ;['R','L'].forEach((side, si)=>{
+      const sideScale = scale * (side === 'R' ? 1 : .94)
+      push(idx, side, '名字', `FERG(${idx})_${mode.name}`)
+      push(idx, side, '放大器', mode.name === 'Flicker' ? '1-300 Hz' : '1-75 Hz')
+      push(idx, side, '闪光', mode.flash)
+      push(idx, side, '闪光背景', mode.name === 'dRod' || mode.name === 'dMax' || mode.name === 'dOps' ? '无背景光' : '白色背景光')
+      push(idx, side, '采样', mode.name === 'Flicker' ? '刺激间隔: 50.0S' : '刺激间隔: 15.0S')
+      push(idx, side, '分析时间', mode.time)
+      push(idx, side, '数据长度', mode.name === 'Flicker' ? '500' : '500')
+      push(idx, side, '详细数据(uv)', demoWaveform(mode.name, sideScale, seed+idx+si, 500))
+      if(mode.name === 'dOps'){
+        push(idx, side, '标记', `${Number((95*sideScale + seed*2).toFixed(1))}uv`)
+      }else if(mode.name === 'Flicker'){
+        push(idx, side, '标记', `幅值: ${Number((58*sideScale).toFixed(1))}uv 相位: ${Number((32 + seed*1.5).toFixed(1))}°`)
+      }else{
+        const aT = 15 + i*2 + seed*.2
+        const bT = 34 + i*4 + seed*.2
+        const aA = -Math.abs((mode.name === 'dMax' ? 170 : mode.name === 'lCone' ? 60 : 85) * sideScale)
+        const bA = (mode.name === 'dMax' ? 760 : mode.name === 'lCone' ? 260 : 390) * sideScale
+        push(idx, side, '标记', `a: ${aT.toFixed(1)}ms ${aA.toFixed(1)}uv b: ${bT.toFixed(1)}ms ${bA.toFixed(1)}uv`)
+      }
+    })
+  })
+  return rows
+}
+
+function buildDemoExperimentRecords(){
+  const specs = []
+  ;['control','cko'].forEach((cohort, ci)=>{
+    for(let i=1;i<=3;i++){
+      const scale = cohort === 'control' ? (1 + i*.035) : (.58 + i*.035)
+      specs.push({patient:`demo-${cohort}-${i}`, cohort, item:'FERG', date:`2026/06/${10+i}`, scale, seed:ci*10+i})
+      specs.push({patient:`demo-${cohort}-${i}`, cohort, item:'FVEP', date:`2026/06/${10+i}`, scale:cohort === 'control' ? (1+i*.03) : (.52+i*.03), seed:ci*10+i+30})
+    }
+  })
+  return specs.map(spec=>{
+    const rows = demoRowsForSample(spec)
+    const ext = spec.item === 'FVEP' ? 'xls' : 'xlsx'
+    const path = `demo://${spec.patient}_${spec.item}.${ext}`
+    return buildExperimentRecord(path, rows)
+  }).filter(Boolean)
 }
 
 function formatMarkToXY(s){
@@ -1468,6 +1574,12 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
       if(!hasValid) await loadExcelFile(loaded[0].filePath)
     }
     if(failed.length) await window.electronAPI.showWarning(failed.join('\n'))
+  }
+
+  function loadDemoExperiment(){
+    const demo = buildDemoExperimentRecords()
+    setExperimentRecords(demo)
+    setViewMode('analysis')
   }
 
   useEffect(()=>{
@@ -2436,6 +2548,7 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
         ]),
         R.createElement('div',{className:'analysis-actions'},[
           R.createElement('button',{className:'btn btn-sm', onClick:openExperimentFiles}, t('addFiles')),
+          R.createElement('button',{className:'btn btn-sm', onClick:loadDemoExperiment}, t('loadDemo')),
           R.createElement('button',{className:'btn btn-sm', disabled:!metrics.length, onClick:()=>exportExperimentWorkbook('metrics', records, metrics, summary)}, t('exportMetrics')),
           R.createElement('button',{className:'btn btn-sm', disabled:!summary.length, onClick:()=>exportExperimentWorkbook('summary', records, metrics, summary)}, t('exportSummary'))
         ])

@@ -12,6 +12,8 @@ ERG Viewer 是面向 OPTOPROBE Excel 导出文件的视觉电生理桌面分析�
 - Ops 分析：支持 dOps 的 Op1-Op5 波峰/波谷标注与 sum O 计算。
 - Flicker 分析：读取机器幅值/相位，并基于波形重新计算傅里叶分量。
 - FVEP 分析：展示 N1/P1/N2/P2 机器识别结果，并支持手动复核标注。
+- Lab 实验分析：支持多文件导入、control/cko 等 cohort 自动推断、FERG/FVEP/dOps/Flicker 指标提取、分组均值/SEM 汇总和原始指标导出。
+- Demo 展示：内置匿名 synthetic demo 数据，并提供脚本生成 OPTOPROBE 风格 Excel 示例文件。
 - 导出共享：支持 PNG、SVG、PDF 图像导出，Excel 绘图数据导出，以及图像/数据复制到剪贴板。
 
 ## 目录结构
@@ -20,8 +22,8 @@ ERG Viewer 是面向 OPTOPROBE Excel 导出文件的视觉电生理桌面分析�
 ERG_Viewer/
 ├── assets/                  # 源图与非打包运行时素材
 ├── build/                   # electron-builder 资源：图标、Windows 附加文件
-├── docs/                    # 架构、发布和维护文档
-├── scripts/                 # 命令行工具：图标生成、Excel 解析冒烟测试
+├── docs/                    # 架构、发布、实验分析、评审和示例数据
+├── scripts/                 # 命令行工具：图标生成、Excel 解析冒烟测试、demo 数据生成
 ├── src/
 │   ├── main/                # Electron main process
 │   ├── preload/             # contextBridge / IPC API
@@ -48,9 +50,26 @@ cnpm run start
 ```bash
 cnpm run check
 cnpm run smoke -- /path/to/OPTOPROBE-export.xlsx
+cnpm run gen:demo
 ```
 
-`check` 进行 JavaScript 语法检查；`smoke` 只解析 Excel 并输出基本信息和分组摘要，不启动 Electron。
+`check` 进行 JavaScript 语法检查；`smoke` 只解析 Excel 并输出基本信息和分组摘要，不启动 Electron；`gen:demo` 生成匿名 synthetic Excel 示例到 `docs/examples/`。
+
+## 实验分析与 Demo
+
+顶部 `Lab` 入口用于实验级批量分析。进入 Lab 后可以：
+
+- 点击 `Demo` 直接加载内置匿名 control/cko 示例。
+- 点击 `Add files` 批量导入 OPTOPROBE Excel。
+- 导出 raw metrics 或 cohort summary Excel。
+
+示例数据可以通过以下命令重新生成：
+
+```bash
+cnpm run gen:demo
+```
+
+生成文件位于 `docs/examples/`，均为 synthetic 数据，不包含真实病人信息。
 
 ## 打包
 
@@ -81,3 +100,5 @@ OPTOPROBE 导出文件可能包含患者姓名、检查编号、医院、日期�
 
 - [架构说明](docs/ARCHITECTURE.md)
 - [发布清单](docs/RELEASE.md)
+- [实验分析设计](docs/EXPERIMENT_ANALYSIS.md)
+- [三角色评审门](docs/REVIEW_GATE.md)

@@ -1,6 +1,6 @@
 {
   "name": "erg-viewer",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "private": true,
   "description": "ERG Viewer for OPTOPROBE Excel exports; plotting, annotation and export.",
   "author": "KangLab",
@@ -9,8 +9,9 @@
   "scripts": {
     "start": "electron .",
     "postinstall": "electron-builder install-app-deps || true",
-    "check": "node --check src/main/main.js && node --check src/preload/preload.js && node --check src/renderer/renderer.js && node --check scripts/smoke_parse.js",
+    "check": "node --check src/main/main.js && node --check src/preload/preload.js && node --check src/renderer/renderer.js && node --check scripts/smoke_parse.js && node --check scripts/gen-demo-data.js",
     "smoke": "node scripts/smoke_parse.js",
+    "gen:demo": "node scripts/gen-demo-data.js",
     "build": "electron-builder",
     "build:mac": "electron-builder --mac dmg zip",
     "build:win": "electron-builder --win nsis --x64",

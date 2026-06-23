@@ -12,6 +12,8 @@ ERG Viewer is a desktop visual electrophysiology analysis tool for OPTOPROBE Exc
 - Ops analysis: annotate Op1-Op5 peaks/troughs for dOps and calculate sum O.
 - Flicker analysis: read machine-reported amplitude/phase and recompute Fourier-based components from the waveform.
 - FVEP analysis: display machine-recognized N1/P1/N2/P2 results and support manual review annotations.
+- Lab analysis: import multiple files, infer cohorts such as control/cko, extract FERG/FVEP/dOps/Flicker metrics, summarize cohorts with mean/SEM, and export raw metrics.
+- Demo mode: load anonymized synthetic demo data in-app and generate OPTOPROBE-style Excel examples from a script.
 - Export and sharing: export PNG, SVG, and PDF figures, export plotting data as Excel, and copy images/data to the clipboard.
 
 ## Project Structure
@@ -20,8 +22,8 @@ ERG Viewer is a desktop visual electrophysiology analysis tool for OPTOPROBE Exc
 ERG_Viewer/
 ├── assets/                  # Source images and non-runtime assets
 ├── build/                   # electron-builder resources: icons and Windows extra files
-├── docs/                    # Architecture, release, and maintenance notes
-├── scripts/                 # CLI tools: icon generation and Excel parser smoke test
+├── docs/                    # Architecture, release, experiment analysis, review, and examples
+├── scripts/                 # CLI tools: icon generation, smoke test, and demo data generation
 ├── src/
 │   ├── main/                # Electron main process
 │   ├── preload/             # contextBridge / IPC API
@@ -48,9 +50,26 @@ If the system default `node` is broken, first check whether `cnpm -v` reports a 
 ```bash
 cnpm run check
 cnpm run smoke -- /path/to/OPTOPROBE-export.xlsx
+cnpm run gen:demo
 ```
 
-`check` runs JavaScript syntax checks. `smoke` parses an Excel file and prints metadata plus group summaries without launching Electron.
+`check` runs JavaScript syntax checks. `smoke` parses an Excel file and prints metadata plus group summaries without launching Electron. `gen:demo` writes anonymized synthetic Excel examples to `docs/examples/`.
+
+## Experiment Analysis and Demo
+
+The top toolbar `Lab` entry opens experiment-level batch analysis. In Lab you can:
+
+- click `Demo` to load built-in anonymous control/cko examples,
+- click `Add files` to import multiple OPTOPROBE Excel files,
+- export raw metrics or cohort summary Excel workbooks.
+
+Example files can be regenerated with:
+
+```bash
+cnpm run gen:demo
+```
+
+Generated files are placed under `docs/examples/`; they are synthetic and contain no real patient information.
 
 ## Packaging
 
@@ -81,3 +100,5 @@ OPTOPROBE exports may include patient names, exam identifiers, hospital informat
 
 - [Architecture](docs/ARCHITECTURE.md)
 - [Release Checklist](docs/RELEASE.md)
+- [Experiment Analysis Design](docs/EXPERIMENT_ANALYSIS.md)
+- [Three-role Review Gate](docs/REVIEW_GATE.md)
