@@ -88,7 +88,20 @@ function parseY(str){
 
 function sanitizeText(v){
   if(!v) return ''
-  return String(v).replace(/\r?\n/g,' ').replace(/u/g,'μ').trim()
+  return String(v)
+    .replace(/\r?\n/g,' ')
+    .replace(/([0-9.])\s*u(?=v\b)/gi, '$1 μ')
+    .replace(/\buv\b/gi, 'μv')
+    .trim()
+}
+
+function normalizeParamKey(v){
+  return sanitizeText(v)
+    .replace(/^'+/, '')
+    .replace(/^\[/, '')
+    .replace(/\]$/, '')
+    .replace(/\(μv\)/gi, '(uv)')
+    .trim()
 }
 
 function sanitizeMark(v){
@@ -133,7 +146,7 @@ const I18N = {
     fileInfo:'文件信息', inputFile:'输入文件', examItem:'检查项目', hospital:'医院', patient:'病人', examDate:'检查日期',
     prevGroup:'上一组', nextGroup:'下一组', groupCount:(a,b)=>`第 ${a} / ${b} 组`,
     eyeParams:(eye)=>`${eye}检测参数`, machine:'机器识别结果', manual:'手动标注结果', recalculated:'从头计算结果',
-    plot:'绘图', reset:'重置', copyImage:'复制图像', copyData:'复制数据', exportPdf:'导出PDF', exportSvg:'导出SVG', exportData:'导出数据',
+    plot:'绘图', timeAxis:'时间 (ms)', amplitudeAxis:'振幅 (μv)', reset:'重置', copyImage:'复制图像', copyData:'复制数据', exportPdf:'导出PDF', exportSvg:'导出SVG', exportData:'导出数据',
     imageCopied:'当前图像已复制到剪贴板', dataCopied:'当前绘图数据已复制到剪贴板',
     annotateA:(eye)=>`标注${eye}a波`, annotateB:(eye)=>`标注${eye}b波`, annotatingA:'正在标注a波', annotatingB:'正在标注b波',
     annotatePoint:(point)=>`手动标注${point}`, annotatingPoint:(point)=>`正在标注${point}`,
@@ -155,7 +168,7 @@ const I18N = {
     fileInfo:'File', inputFile:'Input', examItem:'Exam', hospital:'Hospital', patient:'Patient', examDate:'Date',
     prevGroup:'Prev', nextGroup:'Next', groupCount:(a,b)=>`${a} / ${b}`,
     eyeParams:(eye)=>`${eye} parameters`, machine:'Machine', manual:'Manual', recalculated:'Recomputed',
-    plot:'Plot', reset:'Reset', copyImage:'Copy image', copyData:'Copy data', exportPdf:'PDF', exportSvg:'SVG', exportData:'Data',
+    plot:'Plot', timeAxis:'Time (ms)', amplitudeAxis:'Amplitude (μv)', reset:'Reset', copyImage:'Copy image', copyData:'Copy data', exportPdf:'PDF', exportSvg:'SVG', exportData:'Data',
     imageCopied:'Image copied', dataCopied:'Plot data copied',
     annotateA:(eye)=>`${eye} a-wave`, annotateB:(eye)=>`${eye} b-wave`, annotatingA:'Marking a-wave', annotatingB:'Marking b-wave',
     annotatePoint:(point)=>`Mark ${point}`, annotatingPoint:(point)=>`Marking ${point}`,
@@ -177,7 +190,7 @@ const I18N = {
     fileInfo:'Файл', inputFile:'Файл', examItem:'Тест', hospital:'Клиника', patient:'Пациент', examDate:'Дата',
     prevGroup:'Назад', nextGroup:'Далее', groupCount:(a,b)=>`${a} / ${b}`,
     eyeParams:(eye)=>`${eye}: параметры`, machine:'Авто', manual:'Вручную', recalculated:'Расчет',
-    plot:'График', reset:'Сброс', copyImage:'Коп. рис.', copyData:'Коп. дан.', exportPdf:'PDF', exportSvg:'SVG', exportData:'Данные',
+    plot:'График', timeAxis:'Время (ms)', amplitudeAxis:'Ампл. (μv)', reset:'Сброс', copyImage:'Коп. рис.', copyData:'Коп. дан.', exportPdf:'PDF', exportSvg:'SVG', exportData:'Данные',
     imageCopied:'Рисунок скопирован', dataCopied:'Данные скопированы',
     annotateA:(eye)=>`${eye} a`, annotateB:(eye)=>`${eye} b`, annotatingA:'Метка a', annotatingB:'Метка b',
     annotatePoint:(point)=>`Метка ${point}`, annotatingPoint:(point)=>`Метка ${point}`,
@@ -199,7 +212,7 @@ const I18N = {
     fileInfo:'Tabula', inputFile:'Fons', examItem:'Examen', hospital:'Nosoc.', patient:'Aeger', examDate:'Dies',
     prevGroup:'Prior', nextGroup:'Prox.', groupCount:(a,b)=>`${a} / ${b}`,
     eyeParams:(eye)=>`${eye} param.`, machine:'Machina', manual:'Manuale', recalculated:'Recalc.',
-    plot:'Graph.', reset:'Init.', copyImage:'Copia fig.', copyData:'Copia dat.', exportPdf:'PDF', exportSvg:'SVG', exportData:'Data',
+    plot:'Graph.', timeAxis:'Tempus (ms)', amplitudeAxis:'Ampl. (μv)', reset:'Init.', copyImage:'Copia fig.', copyData:'Copia dat.', exportPdf:'PDF', exportSvg:'SVG', exportData:'Data',
     imageCopied:'Figura copiata', dataCopied:'Data copiata',
     annotateA:(eye)=>`${eye} a`, annotateB:(eye)=>`${eye} b`, annotatingA:'Notatur a', annotatingB:'Notatur b',
     annotatePoint:(point)=>`Nota ${point}`, annotatingPoint:(point)=>`Notatur ${point}`,
@@ -221,7 +234,7 @@ const I18N = {
     fileInfo:'Fichier', inputFile:'Entrée', examItem:'Examen', hospital:'Hôpital', patient:'Patient', examDate:'Date',
     prevGroup:'Préc.', nextGroup:'Suiv.', groupCount:(a,b)=>`${a} / ${b}`,
     eyeParams:(eye)=>`${eye} paramètres`, machine:'Machine', manual:'Manuel', recalculated:'Recalculé',
-    plot:'Tracé', reset:'Reset', copyImage:'Copier fig.', copyData:'Copier data', exportPdf:'PDF', exportSvg:'SVG', exportData:'Données',
+    plot:'Tracé', timeAxis:'Temps (ms)', amplitudeAxis:'Amplitude (μv)', reset:'Reset', copyImage:'Copier fig.', copyData:'Copier data', exportPdf:'PDF', exportSvg:'SVG', exportData:'Données',
     imageCopied:'Image copiée', dataCopied:'Données copiées',
     annotateA:(eye)=>`${eye} a-wave`, annotateB:(eye)=>`${eye} b-wave`, annotatingA:'Annotation a', annotatingB:'Annotation b',
     annotatePoint:(point)=>`Annoter ${point}`, annotatingPoint:(point)=>`Annotation ${point}`,
@@ -243,7 +256,7 @@ const I18N = {
     fileInfo:'Datei', inputFile:'Eingabe', examItem:'Test', hospital:'Klinik', patient:'Patient', examDate:'Datum',
     prevGroup:'Zurück', nextGroup:'Weiter', groupCount:(a,b)=>`${a} / ${b}`,
     eyeParams:(eye)=>`${eye} Parameter`, machine:'Automat.', manual:'Manuell', recalculated:'Berechnet',
-    plot:'Kurve', reset:'Reset', copyImage:'Bild kop.', copyData:'Daten kop.', exportPdf:'PDF', exportSvg:'SVG', exportData:'Daten',
+    plot:'Kurve', timeAxis:'Zeit (ms)', amplitudeAxis:'Amplitude (μv)', reset:'Reset', copyImage:'Bild kop.', copyData:'Daten kop.', exportPdf:'PDF', exportSvg:'SVG', exportData:'Daten',
     imageCopied:'Bild kopiert', dataCopied:'Daten kopiert',
     annotateA:(eye)=>`${eye} a-Welle`, annotateB:(eye)=>`${eye} b-Welle`, annotatingA:'a-Welle', annotatingB:'b-Welle',
     annotatePoint:(point)=>`${point} markieren`, annotatingPoint:(point)=>`${point} aktiv`,
@@ -612,7 +625,7 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
       hoverdistance: spikesOn? 1 : 20,
       spikedistance: spikesOn? -1 : 20,
       xaxis:{
-        title:'Time (ms)',
+        title: ui?.timeAxis || 'Time (ms)',
         color: axisColor,
         gridcolor: gridColor,
         zeroline:false,
@@ -629,7 +642,7 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
         linewidth:1
       },
       yaxis:{
-        title:'Amplitude (μv)',
+        title: ui?.amplitudeAxis || 'Amplitude (μv)',
         color: axisColor,
         gridcolor: gridColor,
         zeroline:false,
@@ -644,7 +657,7 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
       hovermode:'closest',
       showlegend:false
     })
-  }, [group, ymax, ymin, activeAnnotate, marking])
+  }, [group, ymax, ymin, activeAnnotate, marking, ui?.timeAxis, ui?.amplitudeAxis])
 
   useEffect(()=>{ if(!suppressSpikes) lastHoverXRef.current = null }, [suppressSpikes, group?.idx])
 
@@ -1218,20 +1231,29 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
 
   function isValidERG(rows){
     if(!Array.isArray(rows) || rows.length===0) return false
-    const hasHospital = rows.some(r=> /\[医院_医院名字\]/.test(r.Param))
-    const hasData = rows.some(r=> /\[?[RL]_0?\d+_详细数据\(uv\)\]?/i.test(r.Param))
-    const hasGroup = rows.some(r=> /^\[?[RL]_0?\d+_.+\]?$/i.test(r.Param))
-    return Boolean(hasHospital && hasData && hasGroup)
+    const hasData = rows.some(r=> /^[RL]_0?\d+_详细数据\(uv\)$/i.test(normalizeParamKey(r.Param)))
+    const hasGroup = rows.some(r=> /^[RL]_0?\d+_.+$/i.test(normalizeParamKey(r.Param)))
+    return Boolean(hasData && hasGroup)
   }
 
   function extractBasic(rows){
-    const map = new Map(rows.map(r=>[r.Param, r.Value]))
-    const get = (k)=> sanitizeText(map.get(k)||'')
+    const map = new Map()
+    rows.forEach(r=>{
+      const key = normalizeParamKey(r.Param)
+      if(key && !map.has(key)) map.set(key, r.Value)
+    })
+    const get = (...keys)=>{
+      for(const k of keys){
+        const key = normalizeParamKey(k)
+        if(map.has(key)) return sanitizeText(map.get(key)||'')
+      }
+      return ''
+    }
     return {
-      检查项目: get('[检查项目]')||get('检查项目')||get('Item')||'',
-      医院: get('[医院_医院名字]')||'',
-      病人: get("'[病人_姓名]")|| get('[病人_姓名]') ||'',
-      检查日期: get('[检查_检查日期]')||''
+      检查项目: get('检查项目', 'Item', 'Exam item'),
+      医院: get('医院_医院名字', '医院', 'Hospital'),
+      病人: get('病人_姓名', '姓名', 'Patient', 'Patient name'),
+      检查日期: get('检查_检查日期', '检查日期', 'Date', 'Exam date')
     }
   }
 
@@ -1239,8 +1261,7 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
     const groupsFound = {}
     const re = /^([rl])_(0?\d+)_(.+)$/i
     rows.forEach(r=>{
-      const raw = r.Param || ''
-      const param = raw.trim().replace(/^\[|\]$/g,'')
+      const param = normalizeParamKey(r.Param)
       const m = re.exec(param)
       if(m){
         const side = m[1].toUpperCase()
@@ -2278,7 +2299,7 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
             marking: Boolean(opsMode.R.kind), suppressSpikes,
             onExportImage:exportImage, onExportData: exportData,
             disabled: annoting,
-            ui: { reset:t('reset'), copyImage:t('copyImage'), copyData:t('copyData'), exportPdf:t('exportPdf'), exportSvg:t('exportSvg'), exportData:t('exportData'), imageCopied:t('imageCopied'), dataCopied:t('dataCopied'), clickA:t('clickA'), clickB:t('clickB'), clickPoint:(p)=>t('clickPoint',p) }
+            ui: { timeAxis:t('timeAxis'), amplitudeAxis:t('amplitudeAxis'), reset:t('reset'), copyImage:t('copyImage'), copyData:t('copyData'), exportPdf:t('exportPdf'), exportSvg:t('exportSvg'), exportData:t('exportData'), imageCopied:t('imageCopied'), dataCopied:t('dataCopied'), clickA:t('clickA'), clickB:t('clickB'), clickPoint:(p)=>t('clickPoint',p) }
           }),
           showL && R.createElement(PlotPanel,{
             key:'L', title:'绘图', side:'L',
@@ -2291,7 +2312,7 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
             marking: Boolean(opsMode.L.kind), suppressSpikes,
             onExportImage:exportImage, onExportData: exportData,
             disabled: annoting,
-            ui: { reset:t('reset'), copyImage:t('copyImage'), copyData:t('copyData'), exportPdf:t('exportPdf'), exportSvg:t('exportSvg'), exportData:t('exportData'), imageCopied:t('imageCopied'), dataCopied:t('dataCopied'), clickA:t('clickA'), clickB:t('clickB'), clickPoint:(p)=>t('clickPoint',p) }
+            ui: { timeAxis:t('timeAxis'), amplitudeAxis:t('amplitudeAxis'), reset:t('reset'), copyImage:t('copyImage'), copyData:t('copyData'), exportPdf:t('exportPdf'), exportSvg:t('exportSvg'), exportData:t('exportData'), imageCopied:t('imageCopied'), dataCopied:t('dataCopied'), clickA:t('clickA'), clickB:t('clickB'), clickPoint:(p)=>t('clickPoint',p) }
           })
         ]),
         hasValid && (annotMode.R || annotMode.L || opsMode.R.kind || opsMode.L.kind) && R.createElement(Magnifier,{key:'magnifier'}),

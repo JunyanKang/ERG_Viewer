@@ -4,7 +4,19 @@ const XLSX = require('xlsx')
 
 function sanitizeText(v){
   if(!v) return ''
-  return String(v).replace(/\r?\n/g,' ').replace(/u/g,'μ').trim()
+  return String(v)
+    .replace(/\r?\n/g,' ')
+    .replace(/([0-9.])\s*u(?=v\b)/gi, '$1 μ')
+    .replace(/\buv\b/gi, 'μv')
+    .trim()
+}
+function normalizeParamKey(v){
+  return sanitizeText(v)
+    .replace(/^'+/, '')
+    .replace(/^\[/, '')
+    .replace(/\]$/, '')
+    .replace(/\(μv\)/gi, '(uv)')
+    .trim()
 }
 function sanitizeMark(v){
   const s = sanitizeText(v)
@@ -19,18 +31,29 @@ function parse(file){
   const json = XLSX.utils.sheet_to_json(sh, {header:1, raw:false})
   const rows = json.map(r=>({Item:r[0]||'', Param:(r[1]||'').toString(), Value:(r[2]||'').toString()})).filter(r=>r.Item||r.Param||r.Value)
 
-  const basicMap = new Map(rows.map(r=>[r.Param, r.Value]))
+  const basicMap = new Map()
+  rows.forEach(r=>{
+    const key = normalizeParamKey(r.Param)
+    if(key && !basicMap.has(key)) basicMap.set(key, r.Value)
+  })
+  const get = (...keys)=>{
+    for(const key of keys){
+      const normalized = normalizeParamKey(key)
+      if(basicMap.has(normalized)) return sanitizeText(basicMap.get(normalized)||'')
+    }
+    return ''
+  }
   const basic = {
-    item: sanitizeText(basicMap.get('检查项目')|| basicMap.get('Item') || ''),
-    hospital: sanitizeText(basicMap.get('[医院_医院名字]')||''),
-    patient: sanitizeText(basicMap.get("'[病人_姓名]") || basicMap.get('[病人_姓名]') || ''),
-    date: sanitizeText(basicMap.get('[检查_检查日期]')||'')
+    item: get('检查项目', 'Item', 'Exam item'),
+    hospital: get('医院_医院名字', '医院', 'Hospital'),
+    patient: get('病人_姓名', '姓名', 'Patient', 'Patient name'),
+    date: get('检查_检查日期', '检查日期', 'Date', 'Exam date')
   }
 
   const groups = {}
   const re = /^([rl])_(0?\d+)_(.+)$/i
   rows.forEach(r=>{
-    const param = (r.Param||'').replace(/^\[/,'').replace(/\]$/,'')
+    const param = normalizeParamKey(r.Param)
     const m = re.exec(param)
     if(m){
       const side = m[1]
