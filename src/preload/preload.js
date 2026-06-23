@@ -6,7 +6,7 @@ ipcRenderer.on('startup-file', (_event, filePath) => {
 })
 
 contextBridge.exposeInMainWorld('electronAPI', {
-  openFileDialog: () => ipcRenderer.invoke('show-open-dialog'),
+  openFileDialog: (options) => ipcRenderer.invoke('show-open-dialog', options && typeof options === 'object' ? options : {}),
   readFileBuffer: (filePath) => ipcRenderer.invoke('read-file-buffer', String(filePath || '')),
   saveDialog: (options) => ipcRenderer.invoke('show-save-dialog', options && typeof options === 'object' ? options : {}),
   writeFile: (filePath, data, encoding) => ipcRenderer.invoke('write-file', String(filePath || ''), data, encoding),

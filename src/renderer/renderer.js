@@ -158,7 +158,10 @@ const I18N = {
     leftEye:'左眼', rightEye:'右眼', close:'关闭', themeTitle:'你更喜欢',
     warningInvalid:'请选择标准的OPTOPROBE导出文件进行分析', warningParse:(msg)=>`Excel解析失败：${msg}`, warningNeedA:'请首先标注a波', warningOps:'Ops标注数据不完整，请标注完整后再尝试',
     apiUnavailable:'系统接口不可用，请重启应用', readFail:(msg)=>`读取文件失败: ${msg}`, saveFail:(msg)=>`保存失败: ${msg}`, copyFail:(msg)=>`复制失败: ${msg}`, pdfFail:(msg)=>`导出PDF失败: ${msg}`,
-    noSheet:'Excel 文件没有可读取的工作表'
+    noSheet:'Excel 文件没有可读取的工作表',
+    lab:'实验', viewer:'查看', experimentAnalysis:'实验分析', addFiles:'添加文件', exportMetrics:'导出指标', exportSummary:'导出汇总',
+    loadedFiles:'文件', subjects:'样本', cohorts:'分组', signals:'波形', metricCount:'指标', cohortSummary:'分组汇总', metricExplorer:'指标概览', rawMetrics:'原始指标',
+    cohort:'组别', mode:'模式', signal:'信号', side:'眼别', metric:'指标', value:'数值', meanSem:'均值±SEM', noAnalysisData:'暂无实验分析数据', analysisHint:'添加多个 OPTOPROBE Excel 文件，生成批量指标、分组汇总和导出表。'
   },
   en: {
     loadData:'Load', about:'About', theme:'Theme', exit:'Exit',
@@ -180,7 +183,10 @@ const I18N = {
     leftEye:'Left eye', rightEye:'Right eye', close:'Close', themeTitle:'Theme',
     warningInvalid:'Please choose a standard OPTOPROBE export file.', warningParse:(msg)=>`Excel parse failed: ${msg}`, warningNeedA:'Mark a-wave first.', warningOps:'Ops annotations are incomplete.',
     apiUnavailable:'System API unavailable. Restart the app.', readFail:(msg)=>`Read failed: ${msg}`, saveFail:(msg)=>`Save failed: ${msg}`, copyFail:(msg)=>`Copy failed: ${msg}`, pdfFail:(msg)=>`PDF export failed: ${msg}`,
-    noSheet:'No readable worksheet found.'
+    noSheet:'No readable worksheet found.',
+    lab:'Lab', viewer:'View', experimentAnalysis:'Experiment analysis', addFiles:'Add files', exportMetrics:'Export metrics', exportSummary:'Export summary',
+    loadedFiles:'Files', subjects:'Subjects', cohorts:'Cohorts', signals:'Signals', metricCount:'Metrics', cohortSummary:'Cohort summary', metricExplorer:'Metric overview', rawMetrics:'Raw metrics',
+    cohort:'Cohort', mode:'Mode', signal:'Signal', side:'Eye', metric:'Metric', value:'Value', meanSem:'Mean ± SEM', noAnalysisData:'No experiment data', analysisHint:'Add OPTOPROBE Excel files to build batch metrics, cohort summaries, and export tables.'
   },
   ru: {
     loadData:'Открыть', about:'О прог.', theme:'Тема', exit:'Выход',
@@ -202,7 +208,10 @@ const I18N = {
     leftEye:'Левый', rightEye:'Правый', close:'Закрыть', themeTitle:'Тема',
     warningInvalid:'Выберите стандартный экспорт OPTOPROBE.', warningParse:(msg)=>`Ошибка Excel: ${msg}`, warningNeedA:'Сначала отметьте a-wave.', warningOps:'Разметка Ops неполная.',
     apiUnavailable:'Системный API недоступен.', readFail:(msg)=>`Ошибка чтения: ${msg}`, saveFail:(msg)=>`Ошибка сохранения: ${msg}`, copyFail:(msg)=>`Ошибка копирования: ${msg}`, pdfFail:(msg)=>`Ошибка PDF: ${msg}`,
-    noSheet:'Нет читаемого листа.'
+    noSheet:'Нет читаемого листа.',
+    lab:'Lab', viewer:'View', experimentAnalysis:'Анализ', addFiles:'Файлы', exportMetrics:'Экспорт', exportSummary:'Сводка',
+    loadedFiles:'Файлы', subjects:'Образцы', cohorts:'Группы', signals:'Сигналы', metricCount:'Метрики', cohortSummary:'Сводка групп', metricExplorer:'Обзор метрик', rawMetrics:'Метрики',
+    cohort:'Группа', mode:'Режим', signal:'Сигнал', side:'Глаз', metric:'Метрика', value:'Знач.', meanSem:'Mean ± SEM', noAnalysisData:'Нет данных', analysisHint:'Добавьте Excel-файлы OPTOPROBE для пакетных метрик и экспорта.'
   },
   la: {
     loadData:'Aperi', about:'Info', theme:'Color', exit:'Exi',
@@ -224,7 +233,10 @@ const I18N = {
     leftEye:'Oculus L', rightEye:'Oculus R', close:'Claude', themeTitle:'Color',
     warningInvalid:'Elige exportum OPTOPROBE rectum.', warningParse:(msg)=>`Excel error: ${msg}`, warningNeedA:'Primum nota a-wave.', warningOps:'Notae Ops incompletae.',
     apiUnavailable:'API systematis deest.', readFail:(msg)=>`Lectio deficit: ${msg}`, saveFail:(msg)=>`Servare deficit: ${msg}`, copyFail:(msg)=>`Copia deficit: ${msg}`, pdfFail:(msg)=>`PDF deficit: ${msg}`,
-    noSheet:'Nulla pagina legibilis.'
+    noSheet:'Nulla pagina legibilis.',
+    lab:'Lab', viewer:'Vis.', experimentAnalysis:'Analysis', addFiles:'Addere', exportMetrics:'Export', exportSummary:'Summ.',
+    loadedFiles:'Tabulae', subjects:'Subj.', cohorts:'Cohortes', signals:'Signa', metricCount:'Metrics', cohortSummary:'Summarium', metricExplorer:'Metrics', rawMetrics:'Raw',
+    cohort:'Cohors', mode:'Modus', signal:'Signum', side:'Oculus', metric:'Metric', value:'Valor', meanSem:'Mean ± SEM', noAnalysisData:'Nulla data', analysisHint:'Adde tabulas OPTOPROBE Excel ad metricas et exportum.'
   },
   fr: {
     loadData:'Ouvrir', about:'Infos', theme:'Thème', exit:'Quitter',
@@ -246,7 +258,10 @@ const I18N = {
     leftEye:'Œil G', rightEye:'Œil D', close:'Fermer', themeTitle:'Thème',
     warningInvalid:'Choisissez un export OPTOPROBE standard.', warningParse:(msg)=>`Erreur Excel : ${msg}`, warningNeedA:'Annotez d’abord a-wave.', warningOps:'Annotations Ops incomplètes.',
     apiUnavailable:'API système indisponible.', readFail:(msg)=>`Lecture échouée : ${msg}`, saveFail:(msg)=>`Enregistrement échoué : ${msg}`, copyFail:(msg)=>`Copie échouée : ${msg}`, pdfFail:(msg)=>`Export PDF échoué : ${msg}`,
-    noSheet:'Aucune feuille lisible.'
+    noSheet:'Aucune feuille lisible.',
+    lab:'Lab', viewer:'Voir', experimentAnalysis:'Analyse', addFiles:'Ajouter', exportMetrics:'Exporter', exportSummary:'Résumé',
+    loadedFiles:'Fichiers', subjects:'Sujets', cohorts:'Groupes', signals:'Signaux', metricCount:'Mesures', cohortSummary:'Résumé groupes', metricExplorer:'Mesures', rawMetrics:'Mesures brutes',
+    cohort:'Groupe', mode:'Mode', signal:'Signal', side:'Œil', metric:'Mesure', value:'Valeur', meanSem:'Moy. ± SEM', noAnalysisData:'Aucune donnée', analysisHint:'Ajoutez des fichiers Excel OPTOPROBE pour les mesures, résumés et exports.'
   },
   de: {
     loadData:'Öffnen', about:'Info', theme:'Design', exit:'Ende',
@@ -268,7 +283,10 @@ const I18N = {
     leftEye:'Links', rightEye:'Rechts', close:'Schließen', themeTitle:'Design',
     warningInvalid:'Bitte Standard-OPTOPROBE-Export wählen.', warningParse:(msg)=>`Excel-Fehler: ${msg}`, warningNeedA:'Zuerst a-Welle markieren.', warningOps:'Ops-Markierungen unvollständig.',
     apiUnavailable:'System-API nicht verfügbar.', readFail:(msg)=>`Lesen fehlgeschlagen: ${msg}`, saveFail:(msg)=>`Speichern fehlgeschlagen: ${msg}`, copyFail:(msg)=>`Kopieren fehlgeschlagen: ${msg}`, pdfFail:(msg)=>`PDF-Export fehlgeschlagen: ${msg}`,
-    noSheet:'Kein lesbares Arbeitsblatt.'
+    noSheet:'Kein lesbares Arbeitsblatt.',
+    lab:'Lab', viewer:'View', experimentAnalysis:'Analyse', addFiles:'Dateien', exportMetrics:'Export', exportSummary:'Summe',
+    loadedFiles:'Dateien', subjects:'Proben', cohorts:'Gruppen', signals:'Signale', metricCount:'Metriken', cohortSummary:'Gruppen', metricExplorer:'Metriken', rawMetrics:'Rohwerte',
+    cohort:'Gruppe', mode:'Modus', signal:'Signal', side:'Auge', metric:'Metrik', value:'Wert', meanSem:'Mean ± SEM', noAnalysisData:'Keine Daten', analysisHint:'OPTOPROBE-Excel-Dateien hinzufügen, um Batch-Metriken und Exporte zu erstellen.'
   }
 }
 
@@ -516,6 +534,191 @@ function buildFriendlyName(side, group){
   const mode = extractModeFromName(nameStr)
   const dispSide = displaySideLetter(side)
   return [base, mode, dispSide, flashVal].filter(Boolean).join('_')
+}
+
+function baseNameFromPath(filePath){
+  return String(filePath || '').split(/[\\\/]/).pop() || ''
+}
+
+function extractBasicInfoFromRows(rows){
+  const map = new Map()
+  ;(rows || []).forEach(r=>{
+    const key = normalizeParamKey(r.Param)
+    if(key && !map.has(key)) map.set(key, r.Value)
+  })
+  const get = (...keys)=>{
+    for(const k of keys){
+      const key = normalizeParamKey(k)
+      if(map.has(key)) return sanitizeText(map.get(key)||'')
+    }
+    return ''
+  }
+  return {
+    检查项目: get('检查项目', 'Item', 'Exam item'),
+    医院: get('医院_医院名字', '医院', 'Hospital'),
+    病人: get('病人_姓名', '姓名', 'Patient', 'Patient name'),
+    检查日期: get('检查_检查日期', '检查日期', 'Date', 'Exam date')
+  }
+}
+
+function parseGroupsFromRows(rows){
+  const groupsFound = {}
+  const re = /^([rl])_(0?\d+)_(.+)$/i
+  ;(rows || []).forEach(r=>{
+    const param = normalizeParamKey(r.Param)
+    const m = re.exec(param)
+    if(!m) return
+    const side = m[1].toUpperCase()
+    const idx = m[2]
+    const suffix = m[3]
+    if(!groupsFound[idx]) groupsFound[idx] = { idx: Number(idx), R:{}, L:{} }
+    const val = suffix==='标记' ? sanitizeMark(r.Value) : sanitizeText(r.Value)
+    groupsFound[idx][side][suffix] = val
+  })
+  return Object.values(groupsFound).sort((a,b)=>a.idx-b.idx)
+}
+
+function inferCohortFromRecord(filePath, basic){
+  const text = `${baseNameFromPath(filePath)} ${basic?.病人 || ''}`.toLowerCase()
+  if(/\b(ctrl|control|wt|wildtype|wild-type)\b/.test(text) || /ctrl/.test(text)) return 'control'
+  if(/\b(cko|ko|knockout|mutant|mut)\b/.test(text) || /cko/.test(text)) return 'cko'
+  const patient = sanitizeText(basic?.病人 || '')
+  return patient ? patient.replace(/[_\-\s]?\d+$/,'') : 'unassigned'
+}
+
+function detectExperimentMode(group, side, basic){
+  const meta = group?.[side] || {}
+  const name = meta['名字'] || ''
+  if(/FVEP/i.test(name) || /FVEP/i.test(basic?.检查项目 || '')) return 'FVEP'
+  if(/dOps/i.test(name)) return 'dOps'
+  if(/flicker/i.test(name)) return 'Flicker'
+  if(/dRod/i.test(name)) return 'dRod'
+  if(/dMax/i.test(name)) return 'dMax'
+  if(/lCone/i.test(name)) return 'lCone'
+  return extractModeFromName(name) || sanitizeText(basic?.检查项目 || 'ERG')
+}
+
+function finiteOrNull(v){
+  const n = Number(v)
+  return Number.isFinite(n) ? n : null
+}
+
+function makeMetric(record, group, side, mode, metric, value, unit, source){
+  const n = finiteOrNull(value)
+  if(n == null) return null
+  const meta = group?.[side] || {}
+  return {
+    file: record.fileName,
+    path: record.filePath,
+    patient: record.patient,
+    cohort: record.cohort,
+    date: record.date,
+    item: record.item,
+    group: group.idx,
+    signal: buildFriendlyName(side, group) || meta['名字'] || `${mode}_${side}_${group.idx}`,
+    mode,
+    side: displaySideLetter(side),
+    metric,
+    value: n,
+    unit: unit || '',
+    source: source || 'machine'
+  }
+}
+
+function extractExperimentMetrics(record){
+  const rows = []
+  ;(record.groups || []).forEach(group=>{
+    ;['R','L'].forEach(side=>{
+      const meta = group?.[side] || {}
+      if(!meta['名字'] && !meta['详细数据(uv)'] && !meta['标记']) return
+      const mode = detectExperimentMode(group, side, record.basic)
+      const mark = meta['标记'] || ''
+      if(mode === 'FVEP'){
+        const parsed = parseFVEPMark(mark)
+        ;['N1','P1','N2','P2'].forEach(label=>{
+          const p = parsed[label]
+          if(!p) return
+          rows.push(makeMetric(record, group, side, mode, `${label} latency`, p.t, 'ms'))
+          rows.push(makeMetric(record, group, side, mode, `${label} amplitude`, p.a, 'μv'))
+        })
+        if(parsed.N1 && parsed.P1) rows.push(makeMetric(record, group, side, mode, 'P1-N1 amplitude', parsed.P1.a - parsed.N1.a, 'μv'))
+        if(parsed.P1 && parsed.N2) rows.push(makeMetric(record, group, side, mode, 'P1-N2 amplitude', parsed.P1.a - parsed.N2.a, 'μv'))
+        if(parsed.N2 && parsed.P2) rows.push(makeMetric(record, group, side, mode, 'P2-N2 amplitude', parsed.P2.a - parsed.N2.a, 'μv'))
+        return
+      }
+      if(mode === 'Flicker'){
+        const fHz = guessFlickerHz(meta)
+        const y = parseY(meta['详细数据(uv)'])
+        const timeMs = Number((meta['分析时间']||'').toString().replace(/[^\d.]/g,'')) || 0
+        const machine = parseFlickerAmpPhase(mark)
+        const calc = computeFlickerAmpPhaseFromWave(y, timeMs, fHz)
+        rows.push(makeMetric(record, group, side, mode, 'flicker amplitude', machine.amp, 'μv'))
+        rows.push(makeMetric(record, group, side, mode, 'flicker phase', machine.phase, '°'))
+        if(calc){
+          rows.push(makeMetric(record, group, side, mode, 'flicker amplitude recomputed', calc.ampPP, 'μv', 'recomputed'))
+          rows.push(makeMetric(record, group, side, mode, 'flicker phase recomputed', calc.phaseDeg, '°', 'recomputed'))
+        }
+        return
+      }
+      if(mode === 'dOps'){
+        const nums = numbers2(mark)
+        rows.push(makeMetric(record, group, side, mode, 'sum OP amplitude', nums[0], 'μv'))
+        return
+      }
+      const ab = splitAB(meta['名字'], mark)
+      if(ab){
+        const aNums = numbers2(ab.a)
+        const bNums = numbers2(ab.b)
+        const aT = aNums.length >= 2 ? aNums[0] : null
+        const aA = aNums.length >= 2 ? aNums[1] : null
+        const bT = bNums.length >= 2 ? bNums[0] : null
+        const bA = bNums.length >= 2 ? bNums[1] : null
+        rows.push(makeMetric(record, group, side, mode, 'a-wave latency', aT, 'ms'))
+        rows.push(makeMetric(record, group, side, mode, 'a-wave amplitude', aA, 'μv'))
+        rows.push(makeMetric(record, group, side, mode, 'b-wave latency', bT, 'ms'))
+        rows.push(makeMetric(record, group, side, mode, 'b-wave amplitude', bA, 'μv'))
+        if(aA != null && bA != null) rows.push(makeMetric(record, group, side, mode, 'b/a amplitude ratio', Math.abs(bA / (aA || NaN)), 'ratio'))
+      }
+    })
+  })
+  return rows.filter(Boolean)
+}
+
+function buildExperimentRecord(filePath, rows){
+  const basic = extractBasicInfoFromRows(rows)
+  const groups = parseGroupsFromRows(rows)
+  if(!groups.length) return null
+  const record = {
+    id: filePath || `${basic.病人 || 'sample'}-${Date.now()}`,
+    filePath,
+    fileName: baseNameFromPath(filePath),
+    patient: basic.病人 || baseNameFromPath(filePath),
+    item: basic.检查项目 || '',
+    date: basic.检查日期 || '',
+    cohort: inferCohortFromRecord(filePath, basic),
+    basic,
+    groups
+  }
+  record.metrics = extractExperimentMetrics(record)
+  return record
+}
+
+function summarizeExperimentMetrics(metrics){
+  const buckets = new Map()
+  ;(metrics || []).forEach(m=>{
+    if(!Number.isFinite(m.value)) return
+    const key = [m.cohort, m.mode, m.metric, m.unit].join('||')
+    if(!buckets.has(key)) buckets.set(key, { cohort:m.cohort, mode:m.mode, metric:m.metric, unit:m.unit, values:[] })
+    buckets.get(key).values.push(m.value)
+  })
+  return Array.from(buckets.values()).map(row=>{
+    const n = row.values.length
+    const mean = row.values.reduce((a,b)=>a+b,0) / Math.max(1,n)
+    const variance = n > 1 ? row.values.reduce((a,b)=>a + Math.pow(b-mean,2),0) / (n-1) : 0
+    const sd = Math.sqrt(variance)
+    const sem = n > 1 ? sd / Math.sqrt(n) : 0
+    return { ...row, n, mean, sd, sem }
+  }).sort((a,b)=>`${a.mode} ${a.metric} ${a.cohort}`.localeCompare(`${b.mode} ${b.metric} ${b.cohort}`))
 }
 
 function formatMarkToXY(s){
@@ -1025,6 +1228,8 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
   const [filePath, setFilePath] = useState(null)
   const [rawRows, setRawRows] = useState([])
   const [groups, setGroups] = useState([])
+  const [viewMode, setViewMode] = useState('viewer')
+  const [experimentRecords, setExperimentRecords] = useState([])
   const [current, setCurrent] = useState(0)
   const [basicInfo, setBasicInfo] = useState({})
   const [annotMode, setAnnotMode] = useState({R:null,L:null})
@@ -1178,20 +1383,34 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
     setGroups([])
   }
 
-  async function loadExcelFile(fp){
+  function upsertExperimentRecords(records){
+    const list = Array.isArray(records) ? records.filter(Boolean) : [records].filter(Boolean)
+    if(!list.length) return
+    setExperimentRecords(prev=>{
+      const map = new Map((prev || []).map(r=>[r.id, r]))
+      list.forEach(r=>map.set(r.id, r))
+      return Array.from(map.values()).sort((a,b)=>`${a.cohort} ${a.patient} ${a.fileName}`.localeCompare(`${b.cohort} ${b.patient} ${b.fileName}`))
+    })
+  }
+
+  async function readExcelRows(fp){
     if(!window.electronAPI){ alert(t('apiUnavailable')); return }
     if(!fp) return
+    const rf = await window.electronAPI.readFileBuffer(fp)
+    if(!rf.ok) throw new Error(t('readFail', rf.error))
+    const workbook = XLS.read(rf.data, {type:'buffer'})
+    const sheetName = workbook.SheetNames && workbook.SheetNames[0]
+    if(!sheetName) throw new Error(t('noSheet'))
+    const sheet = workbook.Sheets[sheetName]
+    const json = XLS.utils.sheet_to_json(sheet, {header:1, raw:false})
+    const rows = json.map(r=>({Item: r[0]||'', Param: (r[1]||'').toString(), Value: (r[2]||'').toString()}))
+    return rows.filter(r=>r.Item||r.Param||r.Value)
+  }
+
+  async function loadExcelFile(fp){
     let cleaned = []
     try{
-      const rf = await window.electronAPI.readFileBuffer(fp)
-      if(!rf.ok){ alert(t('readFail', rf.error)); return }
-      const workbook = XLS.read(rf.data, {type:'buffer'})
-      const sheetName = workbook.SheetNames && workbook.SheetNames[0]
-      if(!sheetName) throw new Error(t('noSheet'))
-      const sheet = workbook.Sheets[sheetName]
-      const json = XLS.utils.sheet_to_json(sheet, {header:1, raw:false})
-      const rows = json.map(r=>({Item: r[0]||'', Param: (r[1]||'').toString(), Value: (r[2]||'').toString()}))
-      cleaned = rows.filter(r=>r.Item||r.Param||r.Value)
+      cleaned = await readExcelRows(fp)
     }catch(e){
       resetLoadedState()
       await window.electronAPI.showWarning(t('warningParse', e && e.message ? e.message : t('warningInvalid')))
@@ -1209,6 +1428,8 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
     const basic = extractBasic(cleaned)
     setBasicInfo(basic)
     parseGroups(cleaned)
+    const record = buildExperimentRecord(fp, cleaned)
+    if(record) upsertExperimentRecords(record)
     setCurrent(0)
     setAnnotations({})
     setFvepAnnotations({})
@@ -1223,6 +1444,30 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
     const res = await window.electronAPI.openFileDialog()
     if (res.canceled || res.filePaths.length===0) return
     await loadExcelFile(res.filePaths[0])
+  }
+
+  async function openExperimentFiles(){
+    if(!window.electronAPI){ alert(t('apiUnavailable')); return }
+    const res = await window.electronAPI.openFileDialog({ multiSelections:true })
+    if(res.canceled || !res.filePaths || res.filePaths.length===0) return
+    const loaded = []
+    const failed = []
+    for(const fp of res.filePaths){
+      try{
+        const rows = await readExcelRows(fp)
+        if(!isValidERG(rows)) throw new Error(t('warningInvalid'))
+        const record = buildExperimentRecord(fp, rows)
+        if(record) loaded.push(record)
+      }catch(e){
+        failed.push(`${baseNameFromPath(fp)}: ${e && e.message ? e.message : t('warningInvalid')}`)
+      }
+    }
+    if(loaded.length){
+      upsertExperimentRecords(loaded)
+      setViewMode('analysis')
+      if(!hasValid) await loadExcelFile(loaded[0].filePath)
+    }
+    if(failed.length) await window.electronAPI.showWarning(failed.join('\n'))
   }
 
   useEffect(()=>{
@@ -1241,44 +1486,11 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
   }
 
   function extractBasic(rows){
-    const map = new Map()
-    rows.forEach(r=>{
-      const key = normalizeParamKey(r.Param)
-      if(key && !map.has(key)) map.set(key, r.Value)
-    })
-    const get = (...keys)=>{
-      for(const k of keys){
-        const key = normalizeParamKey(k)
-        if(map.has(key)) return sanitizeText(map.get(key)||'')
-      }
-      return ''
-    }
-    return {
-      检查项目: get('检查项目', 'Item', 'Exam item'),
-      医院: get('医院_医院名字', '医院', 'Hospital'),
-      病人: get('病人_姓名', '姓名', 'Patient', 'Patient name'),
-      检查日期: get('检查_检查日期', '检查日期', 'Date', 'Exam date')
-    }
+    return extractBasicInfoFromRows(rows)
   }
 
   function parseGroups(rows){
-    const groupsFound = {}
-    const re = /^([rl])_(0?\d+)_(.+)$/i
-    rows.forEach(r=>{
-      const param = normalizeParamKey(r.Param)
-      const m = re.exec(param)
-      if(m){
-        const side = m[1].toUpperCase()
-        const idx = m[2]
-        const suffix = m[3]
-        const key = idx
-        if(!groupsFound[key]) groupsFound[key] = { idx: Number(idx), R:{}, L:{} }
-        const val = suffix==='标记' ? sanitizeMark(r.Value) : sanitizeText(r.Value)
-        groupsFound[key][side][suffix] = val
-      }
-    })
-    const arr = Object.values(groupsFound).sort((a,b)=>a.idx-b.idx)
-    setGroups(arr)
+    setGroups(parseGroupsFromRows(rows))
   }
 
   const currentGroup = groups[current]
@@ -2170,6 +2382,118 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
     ])
   }
 
+  function formatMetricValue(v, unit){
+    if(!Number.isFinite(Number(v))) return '—'
+    const n = Number(v)
+    const digits = Math.abs(n) >= 100 ? 1 : 2
+    return `${n.toFixed(digits)}${unit ? ` ${unit}` : ''}`
+  }
+
+  function exportExperimentWorkbook(kind, records, metrics, summary){
+    const wb = XLS.utils.book_new()
+    if(kind === 'summary'){
+      const aoa = [[t('cohort'), t('mode'), t('metric'), 'n', 'mean', 'SEM', 'SD', 'unit']]
+      summary.forEach(r=>aoa.push([r.cohort, r.mode, r.metric, r.n, r.mean, r.sem, r.sd, r.unit]))
+      XLS.utils.book_append_sheet(wb, XLS.utils.aoa_to_sheet(aoa), 'summary')
+    }else{
+      const aoa = [['file','patient','cohort','date','item','group','signal','mode','eye','metric','value','unit','source']]
+      metrics.forEach(m=>aoa.push([m.file,m.patient,m.cohort,m.date,m.item,m.group,m.signal,m.mode,m.side,m.metric,m.value,m.unit,m.source]))
+      XLS.utils.book_append_sheet(wb, XLS.utils.aoa_to_sheet(aoa), 'metrics')
+    }
+    const files = [['file','patient','cohort','item','date','groups','metrics']]
+    records.forEach(r=>files.push([r.fileName,r.patient,r.cohort,r.item,r.date,r.groups.length,r.metrics.length]))
+    XLS.utils.book_append_sheet(wb, XLS.utils.aoa_to_sheet(files), 'files')
+    const out = XLS.write(wb, {type:'array', bookType:'xlsx'})
+    const defaultName = kind === 'summary' ? 'ERG_experiment_summary.xlsx' : 'ERG_experiment_metrics.xlsx'
+    return window.electronAPI.saveDialog({ title: kind === 'summary' ? t('exportSummary') : t('exportMetrics'), defaultPath: defaultName, filters:[{name:'Excel', extensions:['xlsx']}] })
+      .then(res=>{
+        if(res.canceled || !res.filePath) return null
+        return window.electronAPI.writeFile(res.filePath, out)
+      }).then(ok=>{
+        if(ok && !ok.ok) alert(t('saveFail', ok.error || ''))
+      })
+  }
+
+  function ExperimentAnalysisPage(){
+    const liveRecord = (hasValid && filePath) ? buildExperimentRecord(filePath, rawRows) : null
+    const records = experimentRecords.length ? experimentRecords : (liveRecord ? [liveRecord] : [])
+    const metrics = records.flatMap(r=>r.metrics || [])
+    const summary = summarizeExperimentMetrics(metrics)
+    const cohorts = Array.from(new Set(records.map(r=>r.cohort))).filter(Boolean)
+    const modes = Array.from(new Set(metrics.map(m=>m.mode))).filter(Boolean)
+    const subjects = Array.from(new Set(records.map(r=>r.patient))).filter(Boolean)
+    const signals = Array.from(new Set(metrics.map(m=>m.signal))).filter(Boolean)
+    const prominent = summary
+      .filter(r=>r.n>0)
+      .sort((a,b)=>Math.abs(b.mean)-Math.abs(a.mean))
+      .slice(0,10)
+    const maxAbs = Math.max(1, ...prominent.map(r=>Math.abs(r.mean)))
+    return R.createElement('div',{className:'analysis-page'},[
+      R.createElement('div',{className:'card analysis-head'},[
+        R.createElement('div',null,[
+          R.createElement('h3',{style:{margin:'0 0 6px'}}, t('experimentAnalysis')),
+          R.createElement('div',{className:'muted'}, t('analysisHint'))
+        ]),
+        R.createElement('div',{className:'analysis-actions'},[
+          R.createElement('button',{className:'btn btn-sm', onClick:openExperimentFiles}, t('addFiles')),
+          R.createElement('button',{className:'btn btn-sm', disabled:!metrics.length, onClick:()=>exportExperimentWorkbook('metrics', records, metrics, summary)}, t('exportMetrics')),
+          R.createElement('button',{className:'btn btn-sm', disabled:!summary.length, onClick:()=>exportExperimentWorkbook('summary', records, metrics, summary)}, t('exportSummary'))
+        ])
+      ]),
+      R.createElement('div',{className:'summary-grid'},[
+        [t('loadedFiles'), records.length],
+        [t('subjects'), subjects.length],
+        [t('cohorts'), cohorts.length],
+        [t('signals'), signals.length],
+        [t('metricCount'), metrics.length]
+      ].map(([label,num])=>R.createElement('div',{className:'card summary-card', key:label},[
+        R.createElement('div',{className:'muted'}, label),
+        R.createElement('div',{className:'num'}, String(num))
+      ]))),
+      records.length ? R.createElement('div',{className:'card'},[
+        R.createElement('h3',null,t('loadedFiles')),
+        R.createElement('div',{className:'pill-row'}, records.map(r=>R.createElement('span',{className:'pill', key:r.id, title:r.fileName}, `${r.cohort} · ${r.patient} · ${r.item || 'ERG'}`)))
+      ]) : R.createElement('div',{className:'card muted'}, t('noAnalysisData')),
+      Boolean(prominent.length) && R.createElement('div',{className:'card'},[
+        R.createElement('h3',null,t('metricExplorer')),
+        R.createElement('div',{className:'bar-list'}, prominent.map((r,i)=>{
+          const pct = Math.max(4, Math.min(100, Math.abs(r.mean) / maxAbs * 100))
+          return R.createElement('div',{className:'bar-row', key:`bar-${i}`},[
+            R.createElement('div',{title:`${r.mode} ${r.metric}`}, `${r.mode} · ${r.metric}`),
+            R.createElement('div',{className:'bar-track'}, R.createElement('div',{className:'bar-fill', style:{width:`${pct}%`}})),
+            R.createElement('div',{className:'num'}, formatMetricValue(r.mean, r.unit))
+          ])
+        }))
+      ]),
+      Boolean(summary.length) && R.createElement('div',{className:'card'},[
+        R.createElement('h3',null,t('cohortSummary')),
+        R.createElement('table',{className:'analysis-table'},[
+          R.createElement('thead',null,R.createElement('tr',null,[t('cohort'),t('mode'),t('metric'),'n',t('meanSem')].map(h=>R.createElement('th',{key:h},h)))),
+          R.createElement('tbody',null, summary.slice(0,80).map((r,i)=>R.createElement('tr',{key:`s-${i}`},[
+            R.createElement('td',null,r.cohort),
+            R.createElement('td',null,r.mode),
+            R.createElement('td',{title:r.metric},r.metric),
+            R.createElement('td',{className:'num'},r.n),
+            R.createElement('td',{className:'num'},`${formatMetricValue(r.mean,r.unit)} ± ${r.sem.toFixed(2)}`)
+          ])))
+        ])
+      ]),
+      Boolean(metrics.length) && R.createElement('div',{className:'card'},[
+        R.createElement('h3',null,t('rawMetrics')),
+        R.createElement('table',{className:'analysis-table'},[
+          R.createElement('thead',null,R.createElement('tr',null,[t('cohort'),t('signal'),t('side'),t('metric'),t('value')].map(h=>R.createElement('th',{key:h},h)))),
+          R.createElement('tbody',null, metrics.slice(0,120).map((m,i)=>R.createElement('tr',{key:`m-${i}`},[
+            R.createElement('td',null,m.cohort),
+            R.createElement('td',{title:m.signal},m.signal),
+            R.createElement('td',null,m.side),
+            R.createElement('td',{title:m.metric},m.metric),
+            R.createElement('td',{className:'num'},formatMetricValue(m.value,m.unit))
+          ])))
+        ])
+      ])
+    ])
+  }
+
   function BasicCard(){
     const baseName = filePath? filePath.split(/[\\\/]/).pop() : '-'
     return R.createElement('div',{className:'card'},[
@@ -2202,6 +2526,7 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
             title:'Language',
             onChange:e=>changeLang(e.target.value)
           }, LANGS.map(item=> R.createElement('option',{key:item.code, value:item.code}, item.short))),
+          R.createElement('button',{className:viewMode==='analysis'?'primary':'', onClick:()=>setViewMode(v=>v==='analysis'?'viewer':'analysis')}, viewMode==='analysis'?t('viewer'):t('lab')),
           R.createElement('button',{className:'primary', onClick:()=>openFile()}, t('loadData')),
           R.createElement('button',{onClick:()=>{
             const rs = getComputedStyle(document.documentElement)
@@ -2221,7 +2546,7 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
     ),
     // fixed-height sizing; no temporary mask overlay needed
     R.createElement('main',{key:'m'},[
-      hasValid && R.createElement('div',{className:'left', key:'left'},[
+      hasValid && viewMode!=='analysis' && R.createElement('div',{className:'left', key:'left'},[
         R.createElement(BasicCard,{key:'basic'}),
         R.createElement('div',{className:'card',key:'nav'},[
           (()=>{
@@ -2271,6 +2596,7 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
         hasValid && R.createElement(GroupInfo,{g: currentGroup, key:'ginfo'})
       ]),
       R.createElement('div',{className:'center', key:'center'},[
+        viewMode==='analysis' ? R.createElement(ExperimentAnalysisPage,{key:'analysis'}) : [
         !hasValid && R.createElement('div',{key:'welcome-wrap', style:{flex:1, display:'flex', alignItems:'center', justifyContent:'center', minHeight:'100%'}},
           R.createElement('div',{style:{transform:'translateY(-6%)'}},
             R.createElement('div',{className:'card', key:'welcome', style:{textAlign:'center', minWidth:360}},[
@@ -2326,6 +2652,7 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
         hasValid && isDops && R.createElement(DopsOpsRows,{key:'dops-ops'}),
         hasValid && isFVEP && R.createElement(FVEPAnnotateControls,{key:'fvep-annot'}),
         hasValid && !isDops && !isFVEP && enableAnnotate && R.createElement(AnnotateControls,{key:'annot-controls'})
+        ]
       ])
     ]),
     R.createElement(ThemeModal,{key:'theme'})

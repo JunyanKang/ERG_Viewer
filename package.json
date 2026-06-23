@@ -1,6 +1,6 @@
 {
   "name": "erg-viewer",
-  "version": "2.1.2",
+  "version": "2.2.0",
   "private": true,
   "description": "ERG Viewer for OPTOPROBE Excel exports; plotting, annotation and export.",
   "author": "KangLab",

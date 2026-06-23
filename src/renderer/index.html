@@ -116,6 +116,22 @@
       .row input{width:80px;padding:4px 6px;border-radius:8px;border:1px solid var(--border);background:var(--select-bg);color:var(--fg)}
       .annot-ctrls{display:grid;grid-template-columns:1fr 1fr;gap:12px}
       .plot-toast{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:var(--toast-bg);color:var(--toast-fg);padding:10px 14px;border-radius:10px;font-size:16px;z-index:10;pointer-events:none;white-space:nowrap;border:1px solid var(--toast-border)}
+      .analysis-page{display:flex;flex-direction:column;gap:12px;min-height:0}
+      .analysis-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+      .analysis-actions{display:flex;align-items:center;gap:8px;white-space:nowrap}
+      .summary-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+      .summary-card{min-height:74px;display:flex;flex-direction:column;justify-content:center;gap:5px}
+      .summary-card .num{font-size:22px;font-weight:750}
+      .analysis-table{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed}
+      .analysis-table th,.analysis-table td{border-bottom:1px solid var(--border);padding:7px 8px;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+      .analysis-table th{font-weight:700;color:var(--muted)}
+      .analysis-table td.num{text-align:right;font-variant-numeric:tabular-nums}
+      .bar-list{display:flex;flex-direction:column;gap:8px}
+      .bar-row{display:grid;grid-template-columns:150px 1fr 104px;gap:8px;align-items:center;font-size:12px}
+      .bar-track{height:9px;border-radius:999px;background:var(--chip-bg);overflow:hidden;border:1px solid var(--border)}
+      .bar-fill{height:100%;background:var(--primary)}
+      .pill-row{display:flex;flex-wrap:wrap;gap:6px}
+      .pill{height:24px;display:inline-flex;align-items:center;padding:0 8px;border-radius:8px;border:1px solid var(--border);background:var(--chip-bg);font-size:12px}
 
       /* Theme chooser modal */
       .modal-mask{position:fixed;inset:0;background:rgba(0,0,0,.2);display:flex;align-items:center;justify-content:center;z-index:80}

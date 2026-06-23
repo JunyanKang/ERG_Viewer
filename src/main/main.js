@@ -110,9 +110,12 @@ app.on('window-all-closed', function () {
   if (process.platform !== 'darwin') app.quit()
 })
 
-ipcMain.handle('show-open-dialog', async (event) => {
+ipcMain.handle('show-open-dialog', async (event, options) => {
+  const opts = options && typeof options === 'object' ? options : {}
+  const properties = ['openFile']
+  if (opts.multiSelections) properties.push('multiSelections')
   const result = await dialog.showOpenDialog({
-    properties: ['openFile'],
+    properties,
     filters: [
       { name: 'Excel', extensions: ['xlsx', 'xls'] },
       { name: 'All Files', extensions: ['*'] }
