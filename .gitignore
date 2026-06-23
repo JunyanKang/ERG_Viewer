@@ -1,0 +1,37 @@
+.DS_Store
+Thumbs.db
+
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+out/
+release/
+*.blockmap
+*.dmg
+*.exe
+*.AppImage
+*.deb
+*.rpm
+*.zip
+
+# Logs and local state
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.env
+.env.*
+
+# OPTOPROBE exports and analysis data may contain patient or study identifiers.
+*.xlsx
+*.xls
+!docs/examples/*.xlsx
+!docs/examples/*.xls
+
+# Editor/runtime caches
+.vscode/
+.idea/
+.cache/

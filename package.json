@@ -1,0 +1,104 @@
+{
+  "name": "erg-viewer",
+  "version": "2.1.0",
+  "private": true,
+  "description": "ERG Viewer for OPTOPROBE Excel exports; plotting, annotation and export.",
+  "author": "KangLab",
+  "license": "UNLICENSED",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "postinstall": "electron-builder install-app-deps || true",
+    "check": "node --check main.js && node --check preload.js && node --check renderer.js && node --check smoke_parse.js",
+    "smoke": "node smoke_parse.js",
+    "build": "electron-builder",
+    "build:mac": "electron-builder --mac dmg zip",
+    "build:win": "electron-builder --win nsis --x64",
+    "build:linux": "electron-builder --linux AppImage deb --x64",
+    "pack": "electron-builder --mac dmg zip",
+    "pack:mac": "electron-builder --mac dmg zip",
+    "pack:mac:x64": "electron-builder --mac dmg zip --x64",
+    "pack:mac:arm64": "electron-builder --mac dmg zip --arm64",
+    "pack:win": "electron-builder --win nsis",
+    "pack:all": "electron-builder -mwl",
+    "gen:icons": "node gen-icons.js ./app.png ./build/icons"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "xlsx": "^0.18.5",
+    "plotly.js-dist-min": "^2.24.1"
+  },
+  "devDependencies": {
+    "electron": "^26.0.0",
+    "electron-builder": "^24.6.4",
+    "electron-icon-builder": "^2.0.1",
+    "png2icons": "^2.0.1"
+  },
+  "build": {
+    "appId": "com.kanglab.ergviewer",
+    "productName": "ERG Viewer",
+    "asar": true,
+    "files": [
+      "main.js",
+      "preload.js",
+      "renderer.js",
+      "index.html",
+      "package.json",
+      "README.md",
+      "!node_modules/.cache/**",
+      "!dist/**",
+      "!*.xlsx",
+      "!*.xls",
+      "!**/*.map"
+    ],
+    "directories": {
+      "buildResources": "build"
+    },
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "category": "public.app-category.medical",
+      "artifactName": "${productName}-${version}-mac-${arch}.${ext}",
+      "icon": "build/icons/icon.icns"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icons/icon.ico",
+      "artifactName": "${productName}-${version}-win-${arch}.${ext}",
+      "extraFiles": [
+        {
+          "from": "build/win/ffmpeg.dll",
+          "to": "ffmpeg.dll"
+        }
+      ]
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Science",
+      "artifactName": "${productName}-${version}-linux-${arch}.${ext}"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": false,
+      "deleteAppDataOnUninstall": false,
+      "shortcutName": "ERG Viewer"
+    }
+  }
+}
