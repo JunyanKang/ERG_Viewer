@@ -6,11 +6,11 @@ ERG Viewer is a focused desktop workstation for reviewing OPTOPROBE visual elect
 
 ## Runtime shape
 
-- `main.js`: Electron main process. Owns native dialogs, file read/write, clipboard image bridge, PDF printing, window sizing, and the About window.
-- `preload.js`: Narrow bridge exposed as `window.electronAPI`, plus renderer libraries exposed as `window.libs` to reduce file URL loading issues in packaged builds.
-- `index.html`: Static renderer shell, CSS tokens, React/Plotly/XLSX script loading, and CSP.
-- `renderer.js`: React UI, OPTOPROBE parsing, Plotly drawing, annotation state, export composition, and theme handling.
-- `smoke_parse.js`: Headless parser smoke test for checking an Excel export without launching Electron.
+- `src/main/main.js`: Electron main process. Owns native dialogs, file read/write, clipboard image bridge, PDF printing, window sizing, and the About window.
+- `src/preload/preload.js`: Narrow bridge exposed as `window.electronAPI`, plus renderer libraries exposed as `window.libs` to reduce file URL loading issues in packaged builds.
+- `src/renderer/index.html`: Static renderer shell, CSS tokens, React/Plotly/XLSX script loading, and CSP.
+- `src/renderer/renderer.js`: React UI, OPTOPROBE parsing, Plotly drawing, annotation state, export composition, and theme handling.
+- `scripts/smoke_parse.js`: Headless parser smoke test for checking an Excel export without launching Electron.
 
 ## Data flow
 

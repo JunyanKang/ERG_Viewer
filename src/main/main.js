@@ -64,7 +64,7 @@ function createWindow () {
     show: false,
     backgroundColor: '#0b1220',
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
+      preload: path.join(__dirname, '..', 'preload', 'preload.js'),
       contextIsolation: true,
       nodeIntegration: false,
       webSecurity: true
@@ -74,7 +74,7 @@ function createWindow () {
   // Hide menu bar completely on Windows
   try { win.setMenuBarVisibility(false) } catch (_e) {}
 
-  win.loadFile('index.html')
+  win.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'))
   win.once('ready-to-show', () => {
     try { win.show() } catch (_e) {}
   })

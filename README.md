@@ -1,55 +1,81 @@
 # ERG Viewer
 
-ERG Viewer 是一个面向 OPTOPROBE Excel 导出文件的视觉电生理桌面分析工具。它把 ERG/FVEP 数据加载、波形查看、机器识别结果复核、手动标注、导出和复制整合在一个 Electron 应用里，适合实验室和临床科研场景下快速复核和整理记录。
+ERG Viewer 是面向 OPTOPROBE Excel 导出文件的视觉电生理桌面分析工具。它把 ERG/FVEP 数据加载、左右眼波形复核、机器识别结果比较、手动标注、图像导出和数据导出整合在一个 Electron 应用中，服务于眼科电生理实验、临床科研质控和文章图表整理。
 
-## 核心能力
+## 功能概览
 
-- 读取 OPTOPROBE 导出的 `.xlsx` / `.xls` 文件，并自动解析基本信息、左右眼分组和检测参数。
-- 绘制左右眼波形，支持坐标范围调整、重置、单眼/双眼布局和主题切换。
-- 支持 dRod、dMax、lCone 的 a/b 波手动标注，并与机器识别结果并排比较。
-- 支持 dOps 的 Op1-Op5 波峰/波谷标注与 sum O 计算。
-- 支持 lFlicker 的机器幅值/相位读取，以及基于波形的傅里叶分量重新计算。
-- 支持 FVEP 的 N1/P1/N2/P2 机器结果展示和手动标注。
-- 支持 PNG、SVG、PDF 图像导出，Excel 绘图数据导出，以及图像/数据复制到剪贴板。
+- 数据读取：导入 OPTOPROBE `.xlsx` / `.xls`，自动识别检查信息、左右眼分组和检测参数。
+- 波形查看：左右眼并排或单眼显示，支持坐标范围调整、重置、主题切换。
+- a/b 波复核：支持 dRod、dMax、lCone 的 a-wave / b-wave 手动标注，并与机器识别结果并排比较。
+- Ops 分析：支持 dOps 的 Op1-Op5 波峰/波谷标注与 sum O 计算。
+- Flicker 分析：读取机器幅值/相位，并基于波形重新计算傅里叶分量。
+- FVEP 分析：展示 N1/P1/N2/P2 机器识别结果，并支持手动复核标注。
+- 导出共享：支持 PNG、SVG、PDF 图像导出，Excel 绘图数据导出，以及图像/数据复制到剪贴板。
 
-## 开发运行
+## 目录结构
 
-建议使用 `cnpm` 或其他可访问 npm 镜像的包管理器安装依赖。
+```text
+ERG_Viewer/
+├── assets/                  # 源图与非打包运行时素材
+├── build/                   # electron-builder 资源：图标、Windows 附加文件
+├── docs/                    # 架构、发布和维护文档
+├── scripts/                 # 命令行工具：图标生成、Excel 解析冒烟测试
+├── src/
+│   ├── main/                # Electron main process
+│   ├── preload/             # contextBridge / IPC API
+│   └── renderer/            # React + Plotly renderer
+├── package.json             # 依赖、脚本和 electron-builder 配置
+└── README.md
+```
+
+仓库不会提交 `node_modules/`、`dist/` 或原始 Excel 检查文件。
+
+## 开发环境
+
+建议使用 `cnpm`，可以绕开部分 npm 网络问题：
 
 ```bash
 cnpm install
 cnpm run start
 ```
 
-如果本机 `node` 环境异常，也可以先确认 `cnpm -v` 使用的是可运行的 Node。
+如果本机默认 `node` 损坏，可以先确认 `cnpm -v` 输出中的 Node 路径是否可用。
 
-## 质量检查
+## 检查与冒烟测试
 
 ```bash
 cnpm run check
 cnpm run smoke -- /path/to/OPTOPROBE-export.xlsx
 ```
 
-`smoke_parse.js` 只做命令行解析冒烟检查，不会启动 Electron。
+`check` 进行 JavaScript 语法检查；`smoke` 只解析 Excel 并输出基本信息和分组摘要，不启动 Electron。
 
 ## 打包
 
 ```bash
-cnpm run build:mac
-cnpm run build:win
-cnpm run build:linux
+cnpm run build:mac      # macOS dmg + zip
+cnpm run build:win      # Windows NSIS exe
+cnpm run build:linux    # Linux AppImage
+cnpm run build:linux:deb # Optional Debian package
 ```
 
-推荐发布策略：
+说明：
 
-- GitHub 仓库只提交源码、配置、图标资源和文档。
-- macOS `.dmg/.zip`、Windows `.exe`、Linux `.AppImage/.deb` 放到 GitHub Releases。
-- Linux 包目前建议标注为实验支持，经过 Linux 真机验证后再作为正式稳定版本发布。
+- macOS 正式分发需要 Apple Developer ID 签名和公证。
+- Windows 正式分发建议配置代码签名证书。
+- Linux AppImage 已配置为默认 Linux 产物；deb 包为可选补充，建议在 Linux 环境验证后发布。
+
+## 发布策略
+
+- GitHub 仓库：只放源码、配置、文档和必要构建资源。
+- GitHub Releases：放 `.dmg`、`.zip`、`.exe`、`.AppImage` 等二进制安装包；`.deb` 可在 Linux 环境验证后补充。
+- 版本标签采用 `vX.Y.Z`，与 `package.json` 的 `version` 保持一致。
 
 ## 数据与隐私
 
-OPTOPROBE 导出文件可能包含患者姓名、日期、医院、检查编号等敏感信息。仓库默认忽略 `.xlsx/.xls`，不要把原始检查文件提交到 GitHub。若需要示例数据，请只放置彻底匿名化文件到 `docs/examples/`。
+OPTOPROBE 导出文件可能包含患者姓名、检查编号、医院、日期等敏感信息。仓库默认忽略 `.xlsx/.xls`，不要提交原始检查文件。若需要示例数据，只能放彻底匿名化文件到 `docs/examples/`。
 
-## 架构说明
+## 技术文档
 
-见 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)。
+- [架构说明](docs/ARCHITECTURE.md)
+- [发布清单](docs/RELEASE.md)

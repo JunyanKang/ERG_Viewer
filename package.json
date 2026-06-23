@@ -5,23 +5,24 @@
   "description": "ERG Viewer for OPTOPROBE Excel exports; plotting, annotation and export.",
   "author": "KangLab",
   "license": "UNLICENSED",
-  "main": "main.js",
+  "main": "src/main/main.js",
   "scripts": {
     "start": "electron .",
     "postinstall": "electron-builder install-app-deps || true",
-    "check": "node --check main.js && node --check preload.js && node --check renderer.js && node --check smoke_parse.js",
-    "smoke": "node smoke_parse.js",
+    "check": "node --check src/main/main.js && node --check src/preload/preload.js && node --check src/renderer/renderer.js && node --check scripts/smoke_parse.js",
+    "smoke": "node scripts/smoke_parse.js",
     "build": "electron-builder",
     "build:mac": "electron-builder --mac dmg zip",
     "build:win": "electron-builder --win nsis --x64",
-    "build:linux": "electron-builder --linux AppImage deb --x64",
+    "build:linux": "electron-builder --linux AppImage --x64",
+    "build:linux:deb": "electron-builder --linux deb --x64",
     "pack": "electron-builder --mac dmg zip",
     "pack:mac": "electron-builder --mac dmg zip",
     "pack:mac:x64": "electron-builder --mac dmg zip --x64",
     "pack:mac:arm64": "electron-builder --mac dmg zip --arm64",
     "pack:win": "electron-builder --win nsis",
     "pack:all": "electron-builder -mwl",
-    "gen:icons": "node gen-icons.js ./app.png ./build/icons"
+    "gen:icons": "node scripts/gen-icons.js ./assets/app.png ./build/icons"
   },
   "engines": {
     "node": ">=18"
@@ -43,12 +44,12 @@
     "productName": "ERG Viewer",
     "asar": true,
     "files": [
-      "main.js",
-      "preload.js",
-      "renderer.js",
-      "index.html",
+      "src/**/*",
+      "scripts/**/*",
+      "docs/**/*",
       "package.json",
       "README.md",
+      ".editorconfig",
       "!node_modules/.cache/**",
       "!dist/**",
       "!*.xlsx",
@@ -87,10 +88,10 @@
     },
     "linux": {
       "target": [
-        "AppImage",
-        "deb"
+        "AppImage"
       ],
       "category": "Science",
+      "maintainer": "JunyanKang <JunyanKang@users.noreply.github.com>",
       "artifactName": "${productName}-${version}-linux-${arch}.${ext}"
     },
     "nsis": {
