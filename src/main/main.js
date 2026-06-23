@@ -8,6 +8,14 @@ const ALLOWED_WRITE_PATHS = new Set()
 const EXCEL_EXTENSIONS = new Set(['.xlsx', '.xls'])
 const MAX_EXPORT_HTML_BYTES = 8 * 1024 * 1024
 
+function findStartupExcelPath() {
+  const candidate = process.argv.slice(1).find((arg) => {
+    const normalized = normalizeFilePath(arg)
+    return normalized && hasExtension(normalized, EXCEL_EXTENSIONS) && fs.existsSync(normalized)
+  })
+  return candidate ? addAllowedPath(ALLOWED_READ_PATHS, candidate) : null
+}
+
 function normalizeFilePath(filePath) {
   if (typeof filePath !== 'string' || !filePath.trim()) return null
   return path.resolve(filePath)
@@ -53,6 +61,7 @@ const UI_SIZES = {
 
 
 function createWindow () {
+  const startupFilePath = findStartupExcelPath()
   const win = new BrowserWindow({
     width: UI_SIZES.main.compact.width,
     height: UI_SIZES.main.compact.height,
@@ -75,6 +84,11 @@ function createWindow () {
   try { win.setMenuBarVisibility(false) } catch (_e) {}
 
   win.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'))
+  win.webContents.once('did-finish-load', () => {
+    if (startupFilePath) {
+      try { win.webContents.send('startup-file', startupFilePath) } catch (_e) {}
+    }
+  })
   win.once('ready-to-show', () => {
     try { win.show() } catch (_e) {}
   })
@@ -221,7 +235,7 @@ ipcMain.handle('open-about', (_event, themeVars) => {
     .brand{display:flex;align-items:center;justify-content:center;margin-bottom:12px}
     .title{font-size:16px;font-weight:600}
     .version{display:none}
-    .card{background:var(--card);border:1px solid #E8E1D9;border-radius:14px;padding:14px;margin-top:10px}
+    .card{background:var(--card);border:1px solid #E8E1D9;border-radius:8px;padding:14px;margin-top:10px;box-shadow:0 8px 20px rgba(40,52,70,.08)}
     h2{font-size:13px;margin:0 0 6px;opacity:.9}
     p{margin:6px 0;opacity:.92;line-height:1.5}
     ul{margin:6px 0 0 18px;opacity:.92;line-height:1.6}

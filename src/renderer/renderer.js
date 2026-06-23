@@ -14,7 +14,6 @@ if(!R || !RD || !XLS || !PL){
 const { useState, useEffect, useRef } = R
 
 // UI helpers: swap Left/Right labels as requested
-function cnEye(side){ return side==='R' ? '左眼' : '右眼' } // swap display labels
 function displaySideLetter(side){ return side==='R' ? 'L' : 'R' } // swap L/R in labels/titles
 
 // Normalize number–unit spacing like 200ms -> 200 ms, 10μv -> 10 μv, 20Hz -> 20 Hz
@@ -115,6 +114,151 @@ function emptyOpsDataFrame(){
     L: { peak: new Array(5).fill('NA'), trough: new Array(5).fill('NA') }
   }
 }
+
+const LANGS = [
+  { code:'zh', short:'中' },
+  { code:'en', short:'EN' },
+  { code:'ru', short:'RU' },
+  { code:'la', short:'LA' },
+  { code:'fr', short:'FR' },
+  { code:'de', short:'DE' }
+]
+
+const I18N = {
+  zh: {
+    loadData:'加载数据', about:'关于', theme:'配色', exit:'退出',
+    welcomeTitle:'欢迎使用ERG Viewer',
+    welcomeText:'请点击“加载数据”选择 OPTOPROBE 导出的 Excel 文件以开始分析。',
+    welcomeTip:'小提示：加载成功后，可在绘图区进行坐标调整与标注；图像与数据均可导出。',
+    fileInfo:'文件信息', inputFile:'输入文件', examItem:'检查项目', hospital:'医院', patient:'病人', examDate:'检查日期',
+    prevGroup:'上一组', nextGroup:'下一组', groupCount:(a,b)=>`第 ${a} / ${b} 组`,
+    eyeParams:(eye)=>`${eye}检测参数`, machine:'机器识别结果', manual:'手动标注结果', recalculated:'从头计算结果',
+    plot:'绘图', reset:'重置', copyImage:'复制图像', copyData:'复制数据', exportPdf:'导出PDF', exportSvg:'导出SVG', exportData:'导出数据',
+    imageCopied:'当前图像已复制到剪贴板', dataCopied:'当前绘图数据已复制到剪贴板',
+    annotateA:(eye)=>`标注${eye}a波`, annotateB:(eye)=>`标注${eye}b波`, annotatingA:'正在标注a波', annotatingB:'正在标注b波',
+    annotatePoint:(point)=>`手动标注${point}`, annotatingPoint:(point)=>`正在标注${point}`,
+    clickA:'点击选择a波位置', clickB:'点击选择b波位置', clickPoint:(point)=>`点击选择${point}位置`,
+    startMarkEye:(eye, kind, op)=>`开始标注${eye}${kind}${op ? ` ${op}` : ''}`, peak:'波峰', valley:'波谷',
+    compute:'计算', clear:'清空', reannotate:'重标', mark:'标注',
+    awave:'a-wave', bwave:'b-wave', amplitude:'幅值', phase:'相位', sumO:'∑O',
+    name:'名字', amplifier:'放大器', flash:'闪光', flashBg:'闪光背景', sampling:'采样', analysisTime:'分析时间',
+    leftEye:'左眼', rightEye:'右眼', close:'关闭', themeTitle:'你更喜欢',
+    warningInvalid:'请选择标准的OPTOPROBE导出文件进行分析', warningParse:(msg)=>`Excel解析失败：${msg}`, warningNeedA:'请首先标注a波', warningOps:'Ops标注数据不完整，请标注完整后再尝试',
+    apiUnavailable:'系统接口不可用，请重启应用', readFail:(msg)=>`读取文件失败: ${msg}`, saveFail:(msg)=>`保存失败: ${msg}`, copyFail:(msg)=>`复制失败: ${msg}`, pdfFail:(msg)=>`导出PDF失败: ${msg}`,
+    noSheet:'Excel 文件没有可读取的工作表'
+  },
+  en: {
+    loadData:'Load', about:'About', theme:'Theme', exit:'Exit',
+    welcomeTitle:'Welcome to ERG Viewer',
+    welcomeText:'Click “Load” to choose an OPTOPROBE Excel export and start analysis.',
+    welcomeTip:'After loading, adjust axes, annotate traces, and export figures or data.',
+    fileInfo:'File', inputFile:'Input', examItem:'Exam', hospital:'Hospital', patient:'Patient', examDate:'Date',
+    prevGroup:'Prev', nextGroup:'Next', groupCount:(a,b)=>`${a} / ${b}`,
+    eyeParams:(eye)=>`${eye} parameters`, machine:'Machine', manual:'Manual', recalculated:'Recomputed',
+    plot:'Plot', reset:'Reset', copyImage:'Copy image', copyData:'Copy data', exportPdf:'PDF', exportSvg:'SVG', exportData:'Data',
+    imageCopied:'Image copied', dataCopied:'Plot data copied',
+    annotateA:(eye)=>`${eye} a-wave`, annotateB:(eye)=>`${eye} b-wave`, annotatingA:'Marking a-wave', annotatingB:'Marking b-wave',
+    annotatePoint:(point)=>`Mark ${point}`, annotatingPoint:(point)=>`Marking ${point}`,
+    clickA:'Click a-wave point', clickB:'Click b-wave point', clickPoint:(point)=>`Click ${point}`,
+    startMarkEye:(eye, kind, op)=>`Mark ${eye} ${kind}${op ? ` ${op}` : ''}`, peak:'peak', valley:'trough',
+    compute:'Calc', clear:'Clear', reannotate:'Redo', mark:'Mark',
+    awave:'a-wave', bwave:'b-wave', amplitude:'Amp.', phase:'Phase', sumO:'∑O',
+    name:'Name', amplifier:'Amplifier', flash:'Flash', flashBg:'Background', sampling:'Sampling', analysisTime:'Analysis',
+    leftEye:'Left eye', rightEye:'Right eye', close:'Close', themeTitle:'Theme',
+    warningInvalid:'Please choose a standard OPTOPROBE export file.', warningParse:(msg)=>`Excel parse failed: ${msg}`, warningNeedA:'Mark a-wave first.', warningOps:'Ops annotations are incomplete.',
+    apiUnavailable:'System API unavailable. Restart the app.', readFail:(msg)=>`Read failed: ${msg}`, saveFail:(msg)=>`Save failed: ${msg}`, copyFail:(msg)=>`Copy failed: ${msg}`, pdfFail:(msg)=>`PDF export failed: ${msg}`,
+    noSheet:'No readable worksheet found.'
+  },
+  ru: {
+    loadData:'Открыть', about:'О прог.', theme:'Тема', exit:'Выход',
+    welcomeTitle:'ERG Viewer',
+    welcomeText:'Выберите Excel-файл OPTOPROBE, чтобы начать анализ.',
+    welcomeTip:'После загрузки можно менять оси, размечать волны и экспортировать данные.',
+    fileInfo:'Файл', inputFile:'Файл', examItem:'Тест', hospital:'Клиника', patient:'Пациент', examDate:'Дата',
+    prevGroup:'Назад', nextGroup:'Далее', groupCount:(a,b)=>`${a} / ${b}`,
+    eyeParams:(eye)=>`${eye}: параметры`, machine:'Авто', manual:'Вручную', recalculated:'Расчет',
+    plot:'График', reset:'Сброс', copyImage:'Коп. рис.', copyData:'Коп. дан.', exportPdf:'PDF', exportSvg:'SVG', exportData:'Данные',
+    imageCopied:'Рисунок скопирован', dataCopied:'Данные скопированы',
+    annotateA:(eye)=>`${eye} a`, annotateB:(eye)=>`${eye} b`, annotatingA:'Метка a', annotatingB:'Метка b',
+    annotatePoint:(point)=>`Метка ${point}`, annotatingPoint:(point)=>`Метка ${point}`,
+    clickA:'Выберите a-wave', clickB:'Выберите b-wave', clickPoint:(point)=>`Выберите ${point}`,
+    startMarkEye:(eye, kind, op)=>`${eye}: ${kind}${op ? ` ${op}` : ''}`, peak:'пик', valley:'впад.',
+    compute:'Счет', clear:'Очист.', reannotate:'Заново', mark:'Метка',
+    awave:'a-wave', bwave:'b-wave', amplitude:'Ампл.', phase:'Фаза', sumO:'∑O',
+    name:'Имя', amplifier:'Усил.', flash:'Вспышка', flashBg:'Фон', sampling:'Частота', analysisTime:'Время',
+    leftEye:'Левый', rightEye:'Правый', close:'Закрыть', themeTitle:'Тема',
+    warningInvalid:'Выберите стандартный экспорт OPTOPROBE.', warningParse:(msg)=>`Ошибка Excel: ${msg}`, warningNeedA:'Сначала отметьте a-wave.', warningOps:'Разметка Ops неполная.',
+    apiUnavailable:'Системный API недоступен.', readFail:(msg)=>`Ошибка чтения: ${msg}`, saveFail:(msg)=>`Ошибка сохранения: ${msg}`, copyFail:(msg)=>`Ошибка копирования: ${msg}`, pdfFail:(msg)=>`Ошибка PDF: ${msg}`,
+    noSheet:'Нет читаемого листа.'
+  },
+  la: {
+    loadData:'Aperi', about:'Info', theme:'Color', exit:'Exi',
+    welcomeTitle:'ERG Viewer',
+    welcomeText:'Elige tabulam OPTOPROBE Excel ut analysis incipiat.',
+    welcomeTip:'Post onus axes mutare, notas addere, figuras dataque exportare potes.',
+    fileInfo:'Tabula', inputFile:'Fons', examItem:'Examen', hospital:'Nosoc.', patient:'Aeger', examDate:'Dies',
+    prevGroup:'Prior', nextGroup:'Prox.', groupCount:(a,b)=>`${a} / ${b}`,
+    eyeParams:(eye)=>`${eye} param.`, machine:'Machina', manual:'Manuale', recalculated:'Recalc.',
+    plot:'Graph.', reset:'Init.', copyImage:'Copia fig.', copyData:'Copia dat.', exportPdf:'PDF', exportSvg:'SVG', exportData:'Data',
+    imageCopied:'Figura copiata', dataCopied:'Data copiata',
+    annotateA:(eye)=>`${eye} a`, annotateB:(eye)=>`${eye} b`, annotatingA:'Notatur a', annotatingB:'Notatur b',
+    annotatePoint:(point)=>`Nota ${point}`, annotatingPoint:(point)=>`Notatur ${point}`,
+    clickA:'Elige punctum a', clickB:'Elige punctum b', clickPoint:(point)=>`Elige ${point}`,
+    startMarkEye:(eye, kind, op)=>`${eye} ${kind}${op ? ` ${op}` : ''}`, peak:'culmen', valley:'vallis',
+    compute:'Calc.', clear:'Munda', reannotate:'Itera', mark:'Nota',
+    awave:'a-wave', bwave:'b-wave', amplitude:'Ampl.', phase:'Phasis', sumO:'∑O',
+    name:'Nomen', amplifier:'Amplif.', flash:'Lux', flashBg:'Fundus', sampling:'Sample', analysisTime:'Tempus',
+    leftEye:'Oculus L', rightEye:'Oculus R', close:'Claude', themeTitle:'Color',
+    warningInvalid:'Elige exportum OPTOPROBE rectum.', warningParse:(msg)=>`Excel error: ${msg}`, warningNeedA:'Primum nota a-wave.', warningOps:'Notae Ops incompletae.',
+    apiUnavailable:'API systematis deest.', readFail:(msg)=>`Lectio deficit: ${msg}`, saveFail:(msg)=>`Servare deficit: ${msg}`, copyFail:(msg)=>`Copia deficit: ${msg}`, pdfFail:(msg)=>`PDF deficit: ${msg}`,
+    noSheet:'Nulla pagina legibilis.'
+  },
+  fr: {
+    loadData:'Ouvrir', about:'Infos', theme:'Thème', exit:'Quitter',
+    welcomeTitle:'Bienvenue dans ERG Viewer',
+    welcomeText:'Choisissez un export Excel OPTOPROBE pour démarrer l’analyse.',
+    welcomeTip:'Après chargement, ajustez les axes, annotez les tracés et exportez figures ou données.',
+    fileInfo:'Fichier', inputFile:'Entrée', examItem:'Examen', hospital:'Hôpital', patient:'Patient', examDate:'Date',
+    prevGroup:'Préc.', nextGroup:'Suiv.', groupCount:(a,b)=>`${a} / ${b}`,
+    eyeParams:(eye)=>`${eye} paramètres`, machine:'Machine', manual:'Manuel', recalculated:'Recalculé',
+    plot:'Tracé', reset:'Reset', copyImage:'Copier fig.', copyData:'Copier data', exportPdf:'PDF', exportSvg:'SVG', exportData:'Données',
+    imageCopied:'Image copiée', dataCopied:'Données copiées',
+    annotateA:(eye)=>`${eye} a-wave`, annotateB:(eye)=>`${eye} b-wave`, annotatingA:'Annotation a', annotatingB:'Annotation b',
+    annotatePoint:(point)=>`Annoter ${point}`, annotatingPoint:(point)=>`Annotation ${point}`,
+    clickA:'Cliquez a-wave', clickB:'Cliquez b-wave', clickPoint:(point)=>`Cliquez ${point}`,
+    startMarkEye:(eye, kind, op)=>`${eye} ${kind}${op ? ` ${op}` : ''}`, peak:'pic', valley:'creux',
+    compute:'Calc.', clear:'Effacer', reannotate:'Refaire', mark:'Annoter',
+    awave:'a-wave', bwave:'b-wave', amplitude:'Ampl.', phase:'Phase', sumO:'∑O',
+    name:'Nom', amplifier:'Amplif.', flash:'Flash', flashBg:'Fond', sampling:'Échant.', analysisTime:'Analyse',
+    leftEye:'Œil G', rightEye:'Œil D', close:'Fermer', themeTitle:'Thème',
+    warningInvalid:'Choisissez un export OPTOPROBE standard.', warningParse:(msg)=>`Erreur Excel : ${msg}`, warningNeedA:'Annotez d’abord a-wave.', warningOps:'Annotations Ops incomplètes.',
+    apiUnavailable:'API système indisponible.', readFail:(msg)=>`Lecture échouée : ${msg}`, saveFail:(msg)=>`Enregistrement échoué : ${msg}`, copyFail:(msg)=>`Copie échouée : ${msg}`, pdfFail:(msg)=>`Export PDF échoué : ${msg}`,
+    noSheet:'Aucune feuille lisible.'
+  },
+  de: {
+    loadData:'Öffnen', about:'Info', theme:'Design', exit:'Ende',
+    welcomeTitle:'Willkommen bei ERG Viewer',
+    welcomeText:'Wählen Sie einen OPTOPROBE-Excel-Export, um die Analyse zu starten.',
+    welcomeTip:'Nach dem Laden können Sie Achsen anpassen, Kurven markieren und Daten exportieren.',
+    fileInfo:'Datei', inputFile:'Eingabe', examItem:'Test', hospital:'Klinik', patient:'Patient', examDate:'Datum',
+    prevGroup:'Zurück', nextGroup:'Weiter', groupCount:(a,b)=>`${a} / ${b}`,
+    eyeParams:(eye)=>`${eye} Parameter`, machine:'Automat.', manual:'Manuell', recalculated:'Berechnet',
+    plot:'Kurve', reset:'Reset', copyImage:'Bild kop.', copyData:'Daten kop.', exportPdf:'PDF', exportSvg:'SVG', exportData:'Daten',
+    imageCopied:'Bild kopiert', dataCopied:'Daten kopiert',
+    annotateA:(eye)=>`${eye} a-Welle`, annotateB:(eye)=>`${eye} b-Welle`, annotatingA:'a-Welle', annotatingB:'b-Welle',
+    annotatePoint:(point)=>`${point} markieren`, annotatingPoint:(point)=>`${point} aktiv`,
+    clickA:'a-Welle wählen', clickB:'b-Welle wählen', clickPoint:(point)=>`${point} wählen`,
+    startMarkEye:(eye, kind, op)=>`${eye} ${kind}${op ? ` ${op}` : ''}`, peak:'Peak', valley:'Tal',
+    compute:'Rechn.', clear:'Löschen', reannotate:'Neu', mark:'Mark.',
+    awave:'a-wave', bwave:'b-wave', amplitude:'Ampl.', phase:'Phase', sumO:'∑O',
+    name:'Name', amplifier:'Verst.', flash:'Blitz', flashBg:'Hintergr.', sampling:'Abtast.', analysisTime:'Analyse',
+    leftEye:'Links', rightEye:'Rechts', close:'Schließen', themeTitle:'Design',
+    warningInvalid:'Bitte Standard-OPTOPROBE-Export wählen.', warningParse:(msg)=>`Excel-Fehler: ${msg}`, warningNeedA:'Zuerst a-Welle markieren.', warningOps:'Ops-Markierungen unvollständig.',
+    apiUnavailable:'System-API nicht verfügbar.', readFail:(msg)=>`Lesen fehlgeschlagen: ${msg}`, saveFail:(msg)=>`Speichern fehlgeschlagen: ${msg}`, copyFail:(msg)=>`Kopieren fehlgeschlagen: ${msg}`, pdfFail:(msg)=>`PDF-Export fehlgeschlagen: ${msg}`,
+    noSheet:'Kein lesbares Arbeitsblatt.'
+  }
+}
+
 
   function splitAB(name, mark){
     const target = ['dRod','dMax','lCone']
@@ -380,7 +524,7 @@ function InfoKV({rows}){
   ]))
 }
 
-function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnotate, onAnnotateClick, activeAnnotate, onPointPicked, onRangePersist, onHoverPoint, onHoverEnd, overlayText, marking, disabled, suppressSpikes}){
+function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnotate, onAnnotateClick, activeAnnotate, onPointPicked, onRangePersist, onHoverPoint, onHoverEnd, overlayText, marking, disabled, suppressSpikes, ui}){
   const plot = usePlot()
   const [ymax,setYmax] = useState(null)
   const [ymin,setYmin] = useState(null)
@@ -807,9 +951,9 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
     R.createElement('div',{key:'plotw', className:'plot-wrap'},[
       R.createElement('div',{key:'plot', className:'plot', ref:plot.ref}),
       (overlayText || activeAnnotate) && R.createElement('div',{key:'annotov', className:'annot-overlay'}, overlayText || (()=>{
-        if(activeAnnotate==='a') return '点击选择a波位置'
-        if(activeAnnotate==='b') return '点击选择b波位置'
-        if(activeAnnotate) return `点击选择${activeAnnotate}位置`
+        if(activeAnnotate==='a') return ui?.clickA || '点击选择a波位置'
+        if(activeAnnotate==='b') return ui?.clickB || '点击选择b波位置'
+        if(activeAnnotate) return ui?.clickPoint ? ui.clickPoint(activeAnnotate) : `点击选择${activeAnnotate}位置`
         return ''
       })()),
       toastMsg && R.createElement('div',{key:'copytoast', className:'plot-toast'}, toastMsg)
@@ -846,14 +990,14 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
     ]),
     R.createElement('div',{key:'ctrl2', className:'controls'},[
       // row 2: reset to initial x/y, and exports (smaller buttons)
-      (function(){ const resetDisabled = Boolean(disabled && !(activeAnnotate || marking)); return R.createElement('button',{className:'btn btn-sm', disabled: resetDisabled, onClick:()=>{ if(resetDisabled) return; resetAxes() }}, '重置') })(),
+      (function(){ const resetDisabled = Boolean(disabled && !(activeAnnotate || marking)); return R.createElement('button',{className:'btn btn-sm', disabled: resetDisabled, onClick:()=>{ if(resetDisabled) return; resetAxes() }}, ui?.reset || '重置') })(),
       R.createElement('span',{style:{flex:1}}),
       R.createElement('span',{className:'export'},[
-        R.createElement('button',{className:'btn btn-sm', disabled, onClick: async ()=>{ if(disabled) return; if(onExportImage){ const r = await onExportImage(side,'copy', plot.getDiv()); if(r && r.ok){ showToast('当前图像已复制到剪贴板') } } }}, '复制图像'),
-        R.createElement('button',{className:'btn btn-sm', disabled, onClick:()=>{ if(disabled) return; copyAllData().then(()=>showToast('当前绘图数据已复制到剪贴板')) }}, '复制数据'),
-        R.createElement('button',{className:'btn btn-sm', disabled, onClick:()=>!disabled&&onExportImage && onExportImage(side,'pdf', plot.getDiv())}, '导出PDF'),
-        R.createElement('button',{className:'btn btn-sm', disabled, onClick:()=>!disabled&&onExportImage && onExportImage(side,'svg', plot.getDiv())}, '导出SVG'),
-        R.createElement('button',{className:'btn btn-sm', disabled, onClick:()=>!disabled&&onExportData && onExportData(side)}, '导出数据')
+        R.createElement('button',{className:'btn btn-sm', disabled, onClick: async ()=>{ if(disabled) return; if(onExportImage){ const r = await onExportImage(side,'copy', plot.getDiv()); if(r && r.ok){ showToast(ui?.imageCopied || '当前图像已复制到剪贴板') } } }}, ui?.copyImage || '复制图像'),
+        R.createElement('button',{className:'btn btn-sm', disabled, onClick:()=>{ if(disabled) return; copyAllData().then(()=>showToast(ui?.dataCopied || '当前绘图数据已复制到剪贴板')) }}, ui?.copyData || '复制数据'),
+        R.createElement('button',{className:'btn btn-sm', disabled, onClick:()=>!disabled&&onExportImage && onExportImage(side,'pdf', plot.getDiv())}, ui?.exportPdf || '导出PDF'),
+        R.createElement('button',{className:'btn btn-sm', disabled, onClick:()=>!disabled&&onExportImage && onExportImage(side,'svg', plot.getDiv())}, ui?.exportSvg || '导出SVG'),
+        R.createElement('button',{className:'btn btn-sm', disabled, onClick:()=>!disabled&&onExportData && onExportData(side)}, ui?.exportData || '导出数据')
       ])
     ]),
     null
@@ -876,13 +1020,33 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
   const [suppressSpikes, setSuppressSpikes] = useState(false)
   const [opsMarks, setOpsMarks] = useState({}) // { gid: { R:[{peak, valley}], L:[...] } }
   const [opsMode, setOpsMode] = useState({R:{op:null, kind:null}, L:{op:null, kind:null}})
-  // Ops active toggle removed; we arm per-cell directly
-  const [opsActive, setOpsActive] = useState({R:false, L:false})
   const [opsManualSum, setOpsManualSum] = useState({}) // { gid: {R:value, L:value} }
   // Per-eye dataframes for Ops manual annotations: rows peak/trough, cols Op1-5, initial NA
   const [opsDataFrames, setOpsDataFrames] = useState({}) // { gid: { R:{peak:[NA..], trough:[NA..]}, L:{peak:[NA..], trough:[NA..]} } }
   const [themeOpen, setThemeOpen] = useState(false)
   const [themeIdx, setThemeIdx] = useState(0)
+  const [lang, setLang] = useState(()=>{
+    try{ return localStorage.getItem('ergViewer.lang') || 'zh' }catch(_e){ return 'zh' }
+  })
+  const dict = I18N[lang] || I18N.zh
+  const t = (key, ...args)=>{
+    const value = dict[key] ?? I18N.zh[key] ?? key
+    return typeof value === 'function' ? value(...args) : value
+  }
+  const eyeLabel = (side)=> side === 'R' ? t('leftEye') : t('rightEye')
+  const paramLabel = (key)=> ({
+    '名字': t('name'),
+    '放大器': t('amplifier'),
+    '闪光': t('flash'),
+    '闪光背景': t('flashBg'),
+    '采样': t('sampling'),
+    '分析时间': t('analysisTime')
+  }[key] || key)
+
+  function changeLang(nextLang){
+    setLang(nextLang)
+    try{ localStorage.setItem('ergViewer.lang', nextLang) }catch(_e){}
+  }
 
   const THEMES = [
     { name:'温润米白', swatch:'#FFF6EA', vars:{
@@ -983,35 +1147,37 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
     Object.entries(th.vars).forEach(([k,v])=> root.style.setProperty(k, v))
   }
 
-  async function openFile(){
-    if(!window.electronAPI){ alert('系统接口不可用，请重启应用'); return }
-    const res = await window.electronAPI.openFileDialog()
-    if (res.canceled || res.filePaths.length===0) return
-    const fp = res.filePaths[0]
+  function resetLoadedState(){
+    setFilePath(null)
+    setRawRows([])
+    setBasicInfo({})
+    setCurrent(0)
+    setAnnotations({})
+    setFvepAnnotations({})
+    setOpsMarks({})
+    setOpsManualSum({})
+    setOpsDataFrames({})
+    setOpsMode({R:{op:null, kind:null}, L:{op:null, kind:null}})
+    setGroups([])
+  }
+
+  async function loadExcelFile(fp){
+    if(!window.electronAPI){ alert(t('apiUnavailable')); return }
+    if(!fp) return
     let cleaned = []
     try{
       const rf = await window.electronAPI.readFileBuffer(fp)
-      if(!rf.ok){ alert('读取文件失败: '+rf.error); return }
+      if(!rf.ok){ alert(t('readFail', rf.error)); return }
       const workbook = XLS.read(rf.data, {type:'buffer'})
       const sheetName = workbook.SheetNames && workbook.SheetNames[0]
-      if(!sheetName) throw new Error('Excel 文件没有可读取的工作表')
+      if(!sheetName) throw new Error(t('noSheet'))
       const sheet = workbook.Sheets[sheetName]
       const json = XLS.utils.sheet_to_json(sheet, {header:1, raw:false})
       const rows = json.map(r=>({Item: r[0]||'', Param: (r[1]||'').toString(), Value: (r[2]||'').toString()}))
       cleaned = rows.filter(r=>r.Item||r.Param||r.Value)
     }catch(e){
-      setFilePath(null)
-      setRawRows([])
-      setBasicInfo({})
-      setCurrent(0)
-      setAnnotations({})
-      setFvepAnnotations({})
-      setOpsMarks({})
-      setOpsManualSum({})
-      setOpsDataFrames({})
-      setOpsMode({R:{op:null, kind:null}, L:{op:null, kind:null}})
-      setGroups([])
-      await window.electronAPI.showWarning('Excel解析失败：' + (e && e.message ? e.message : '请确认文件未损坏且为OPTOPROBE导出格式'))
+      resetLoadedState()
+      await window.electronAPI.showWarning(t('warningParse', e && e.message ? e.message : t('warningInvalid')))
       return
     }
     setFilePath(fp)
@@ -1019,17 +1185,8 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
     const valid = isValidERG(cleaned)
     if(!valid){
       // reset view and warn
-      setFilePath(null)
-      setBasicInfo({})
-      setCurrent(0)
-      setAnnotations({})
-      setFvepAnnotations({})
-      setOpsMarks({})
-      setOpsManualSum({})
-      setOpsDataFrames({})
-      setOpsMode({R:{op:null, kind:null}, L:{op:null, kind:null}})
-      setGroups([])
-      await window.electronAPI.showWarning('请选择标准的OPTOPROBE导出文件进行分析')
+      resetLoadedState()
+      await window.electronAPI.showWarning(t('warningInvalid'))
       return
     }
     const basic = extractBasic(cleaned)
@@ -1043,6 +1200,21 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
     setOpsDataFrames({})
     setOpsMode({R:{op:null, kind:null}, L:{op:null, kind:null}})
   }
+
+  async function openFile(){
+    if(!window.electronAPI){ alert(t('apiUnavailable')); return }
+    const res = await window.electronAPI.openFileDialog()
+    if (res.canceled || res.filePaths.length===0) return
+    await loadExcelFile(res.filePaths[0])
+  }
+
+  useEffect(()=>{
+    if(!window.electronAPI) return
+    const pending = window.electronAPI.getStartupFile && window.electronAPI.getStartupFile()
+    if(pending) loadExcelFile(pending)
+    const off = window.electronAPI.onStartupFile ? window.electronAPI.onStartupFile((fp)=>{ if(fp) loadExcelFile(fp) }) : null
+    return ()=>{ if(typeof off === 'function') off() }
+  }, [])
 
   function isValidERG(rows){
     if(!Array.isArray(rows) || rows.length===0) return false
@@ -1095,10 +1267,6 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
     return Array.isArray(s) ? s.length>0 : (s? String(s).trim().length>0 : false)
   })()
   const [uiSizes, setUiSizes] = useState(null)
-  const lastColsMode = useRef(null)
-  // 固定高度（OPS），仅按列布局调整宽度
-  const fixedAppliedRef = useRef(false)
-  const fixedHeightRef = useRef(null)
   // Mode flags computed early for resize effect
   const enableAnnotate = (()=>{
     const nameR = currentGroup?.R?.['名字']||''
@@ -1129,38 +1297,26 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
     }
   })() },[])
 
-  // 一次性：设置窗口高度为 OPS 高度并居中；不再按模式动态调整高度
-  useEffect(()=>{
-    if(!uiSizes || !window.electronAPI?.resizeWindow) return
-    if(fixedAppliedRef.current) return
-    const w = (uiSizes.main && (uiSizes.main.expanded?.width || uiSizes.main.single?.width || uiSizes.main.compact?.width)) || 1200
-    const h = (uiSizes.modes && uiSizes.modes.dOps) || (uiSizes.main && (uiSizes.main.expanded?.height || uiSizes.main.single?.height || uiSizes.main.compact?.height)) || 755
-    try{ window.electronAPI.resizeWindow(w, h) }catch(_e){}
-    try{ window.electronAPI.centerWindow && window.electronAPI.centerWindow() }catch(_e){}
-    fixedAppliedRef.current = true
-    fixedHeightRef.current = h
-    // initialize last dims
-    try{ lastDimsRef.current = { w, h } }catch(_e){}
-  }, [uiSizes])
-
   const lastDimsRef = useRef({ w: null, h: null })
 
-  // Width-only adjustment: when only单眼显示时，减小窗口宽度；双眼/紧凑时恢复相应宽度。高度固定为OPS高度。
+  // Resize by both column count and current analysis mode so short pages do not leave a dead band at the bottom.
   useEffect(()=>{
     if(!uiSizes || !window.electronAPI?.resizeWindow) return
-    if(!fixedAppliedRef.current) return
     const colsMode = !hasValid ? 'compact' : ((showR && showL) ? 'both' : 'single')
     const base = colsMode==='compact' ? uiSizes.main.compact : (colsMode==='single' ? (uiSizes.main.single||uiSizes.main.expanded) : uiSizes.main.expanded)
     const desiredW = (base && base.width) || (colsMode==='single'? 880 : 1250)
-    const desiredH = fixedHeightRef.current || (uiSizes.modes?.dOps || 755)
+    const desiredH = !hasValid
+      ? (uiSizes.main?.compact?.height || 500)
+      : (isDops ? (uiSizes.modes?.dOps || 755)
+        : (isFlicker ? (uiSizes.modes?.lFlicker || 675)
+          : (isFVEP ? (uiSizes.modes?.FVEP || 705)
+            : (enableAnnotate ? (uiSizes.modes?.dRod_dMax_lCone || 705) : (uiSizes.main?.expanded?.height || 705)))))
     const prev = lastDimsRef.current
-    const prevCols = lastColsMode.current
-    if(prev && prev.w === desiredW && prev.h === desiredH && prevCols === colsMode) return
+    if(prev && prev.w === desiredW && prev.h === desiredH) return
     try{ window.electronAPI.resizeWindow(desiredW, desiredH) }catch(_e){}
     lastDimsRef.current = { w: desiredW, h: desiredH }
-    lastColsMode.current = colsMode
-    if(prevCols && prevCols !== colsMode){ try{ window.electronAPI.centerWindow && window.electronAPI.centerWindow() }catch(_e){} }
-  }, [uiSizes, hasValid, showR, showL])
+    if(prev && (prev.w !== null || prev.h !== null)){ try{ window.electronAPI.centerWindow && window.electronAPI.centerWindow() }catch(_e){} }
+  }, [uiSizes, hasValid, showR, showL, isDops, isFlicker, isFVEP, enableAnnotate])
   const annoting = Boolean(annotMode.R || annotMode.L || (opsMode.R && opsMode.R.kind) || (opsMode.L && opsMode.L.kind))
 
   // removed peer usage sync
@@ -1330,7 +1486,7 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
         magnifyTimerRef.current = setTimeout(()=>{ setMagnify(null); magnifyTimerRef.current = null }, 500)
       }},[
       R.createElement('div',{className:'magnifier-header'},[
-        R.createElement('div',null, cnEye(magnify.side)),
+        R.createElement('div',null, eyeLabel(magnify.side)),
         R.createElement('div',null, `${Number(magnify.x).toFixed(2)} ms, ${Number(magnify.y).toFixed(2)} μv`)
       ]),
       R.createElement('div',{className:'magnifier-body'},
@@ -1362,11 +1518,11 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
     }
     if(!idiv){ return }
     const P = PL
-    if(!P){ alert('图形库未加载'); return }
+    if(!P){ alert('Plotly unavailable'); return }
     // Footer rows builder: construct rows like [['', '机器识别结果', '手动标注结果'], ['a-wave', '...', '...'], ...]
     function buildFooterRowsForSide(){
-      const headerAB = ['', '机器识别结果', '手动标注结果']
-      const headerCalc = ['', '机器识别结果', '从头计算结果']
+      const headerAB = ['', t('machine'), t('manual')]
+      const headerCalc = ['', t('machine'), t('recalculated')]
       if(enableAnnotate && !isFlicker && !isFVEP && !isDops){
         const gid = currentGroup?.idx
         const vals = (gid && annotations[gid]) || {R:{},L:{}}
@@ -1381,8 +1537,8 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
         return {
           header: headerAB,
           rows: [
-            ['a-wave', marks? formatMarkToXY(marks.a) : '—', a? `${Number(a.x).toFixed(2)} ms, ${Number(a.y).toFixed(2)} μv` : '—'],
-            ['b-wave', marks? formatMarkToXY(marks.b) : '—', bText]
+            [t('awave'), marks? formatMarkToXY(marks.a) : '—', a? `${Number(a.x).toFixed(2)} ms, ${Number(a.y).toFixed(2)} μv` : '—'],
+            [t('bwave'), marks? formatMarkToXY(marks.b) : '—', bText]
           ]
         }
       }
@@ -1398,7 +1554,7 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
         const phaseText = (phase!=null) ? `${Number(phase).toFixed(1)}°` : '—'
         const cAmpText = (calc && Number.isFinite(calc.ampPP)) ? `${calc.ampPP.toFixed(1)} μv` : '—'
         const cPhaseText = (calc && Number.isFinite(calc.phaseDeg)) ? `${Math.abs(calc.phaseDeg).toFixed(1)}°` : '—'
-        return { header: headerCalc, rows: [ ['幅值', ampText, cAmpText], ['相位', phaseText, cPhaseText] ] }
+        return { header: headerCalc, rows: [ [t('amplitude'), ampText, cAmpText], [t('phase'), phaseText, cPhaseText] ] }
       }
       if(isFVEP){
         const labels = ['N1','P1','N2','P2']
@@ -1413,13 +1569,13 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
           const uTxt = (p && p.x!=null && p.y!=null) ? `${Number(p.x).toFixed(1)} ms, ${Number(p.y).toFixed(1)} μv` : '—'
           return [lbl, mTxt, uTxt]
         })
-        return { header: ['', '机器识别结果', '手动标注结果'], rows }
+        return { header: ['', t('machine'), t('manual')], rows }
       }
       if(isDops){
         const gid = currentGroup?.idx
         const machine = (()=>{ const mark = currentGroup?.[side]?.['标记']||''; const nums = numbers2(mark); return nums.length>0 ? `${nums[0].toFixed(1)} μv` : '—' })()
         const manual = (gid && opsManualSum[gid] && opsManualSum[gid][side]!=null) ? `${Number(opsManualSum[gid][side]).toFixed(1)} μv` : '—'
-        return { header: ['', '机器识别结果', '手动标注结果'], rows: [['∑O', machine, manual]] }
+        return { header: ['', t('machine'), t('manual')], rows: [[t('sumO'), machine, manual]] }
       }
       return null
     }
@@ -1516,7 +1672,7 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
       const baseUrl = await P.toImage(idiv, {format:'png', height:600, width:900, scale:2})
       const url = await composePngWithFooter(baseUrl)
       const r = await window.electronAPI.clipboardWriteImageDataURL(url)
-      if(!r?.ok){ alert('复制失败: '+(r?.error||'')); return { ok:false, error: r?.error||'clipboard failed' } }
+      if(!r?.ok){ alert(t('copyFail', r?.error||'')); return { ok:false, error: r?.error||'clipboard failed' } }
       return { ok:true }
     }
     if(fmt==='png'){
@@ -1527,7 +1683,7 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
       if(res.canceled || !res.filePath) return
       const base64 = url.split(',')[1]
       const ok = await window.electronAPI.writeFile(res.filePath, {type:'base64', data: base64})
-      if(!ok?.ok) alert('保存失败: '+(ok?.error||''))
+      if(!ok?.ok) alert(t('saveFail', ok?.error||''))
       return
     }
     if(fmt==='svg'){
@@ -1539,7 +1695,7 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
       const res = await window.electronAPI.saveDialog({ title: '保存图像', defaultPath: `${def}.svg`, filters:[{name:'SVG', extensions:['svg']}] })
       if(res.canceled || !res.filePath) return
       const ok = await window.electronAPI.writeFile(res.filePath, svgText, 'utf8')
-      if(!ok?.ok) alert('保存失败: '+(ok?.error||''))
+      if(!ok?.ok) alert(t('saveFail', ok?.error||''))
       return
     }
     if(fmt==='pdf'){
@@ -1571,7 +1727,7 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
       const res = await window.electronAPI.saveDialog({ title: '导出 PDF（矢量）', defaultPath: `${def}.pdf`, filters:[{name:'PDF', extensions:['pdf']} ]})
       if(res.canceled || !res.filePath) return
       const r = await window.electronAPI.exportPdfFromHtml(html, res.filePath)
-      if(!r.ok) alert('导出PDF失败: '+r.error)
+      if(!r.ok) alert(t('pdfFail', r.error))
       return
     }
   }
@@ -1586,7 +1742,7 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
     return R.createElement('div',{className:'modal-mask', onClick:(e)=>{ if(e.target===e.currentTarget) setThemeOpen(false) }},
       R.createElement('div',{className:'modal', style: modalStyle},[
         R.createElement('div',{className:'modal-header'},
-          R.createElement('div',{className:'modal-title'},'你更喜欢')
+          R.createElement('div',{className:'modal-title'}, t('themeTitle'))
         ),
         R.createElement('div',{className:'modal-body'},[
           R.createElement('div',{className:'theme-grid'},
@@ -1598,7 +1754,7 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
           )
         ]),
         R.createElement('div',{className:'modal-footer'},[
-          R.createElement('button',{className:'btn btn-sm', onClick:()=>setThemeOpen(false)}, '关闭')
+          R.createElement('button',{className:'btn btn-sm', onClick:()=>setThemeOpen(false)}, t('close'))
         ])
       ])
     )
@@ -1619,29 +1775,29 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
     const res = await window.electronAPI.saveDialog({ title:'导出绘图数据', defaultPath:`${def}.xlsx`, filters:[{name:'Excel', extensions:['xlsx']}] })
     if(res.canceled || !res.filePath) return
     const ok = await window.electronAPI.writeFile(res.filePath, out)
-    if(!ok?.ok) alert('保存失败: '+(ok?.error||''))
+    if(!ok?.ok) alert(t('saveFail', ok?.error||''))
   }
 
   function GroupInfo({g}){
     if(!g) return R.createElement('div',{className:'muted'},'未选择组')
     const keys = ['名字','放大器','闪光','闪光背景','采样','分析时间']
     const Rrows = keys.map(k=>({
-      k,
+      k: paramLabel(k),
       v: (k==='闪光'||k==='闪光背景') ? formatFlashToEnergyText(k, g.R?.[k]||'')
         : (k==='采样' ? formatSamplingField(g.R?.[k]||'') : (g.R?.[k]||''))
     }))
     const Lrows = keys.map(k=>({
-      k,
+      k: paramLabel(k),
       v: (k==='闪光'||k==='闪光背景') ? formatFlashToEnergyText(k, g.L?.[k]||'')
         : (k==='采样' ? formatSamplingField(g.L?.[k]||'') : (g.L?.[k]||''))
     }))
     return R.createElement(R.Fragment,null,[
       showR && R.createElement('div',{className:'card'},[
-        R.createElement('h3',{style:{textAlign:'center'}}, cnEye('R')+'检测参数'),
+        R.createElement('h3',{style:{textAlign:'center'}}, t('eyeParams', eyeLabel('R'))),
         R.createElement(InfoKV,{rows:Rrows})
       ]),
       showL && R.createElement('div',{className:'card'},[
-        R.createElement('h3',{style:{textAlign:'center'}}, cnEye('L')+'检测参数'),
+        R.createElement('h3',{style:{textAlign:'center'}}, t('eyeParams', eyeLabel('L'))),
         R.createElement(InfoKV,{rows:Lrows})
       ])
     ])
@@ -1652,11 +1808,11 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
     const markR = abMarksFor('R')
     const markL = abMarksFor('L')
     const card = (side, marks)=> R.createElement('div',{className:'card'},[
-      R.createElement('h3',null,`${cnEye(side)} 机器识别结果`),
+      R.createElement('h3',null,`${eyeLabel(side)} ${t('machine')}`),
       marks ? R.createElement('div',{className:'marks'},[
-        R.createElement('div',null, 'a-wave'),
+        R.createElement('div',null, t('awave')),
         R.createElement('div',null, formatMarkToXY(marks.a)),
-        R.createElement('div',null, 'b-wave'),
+        R.createElement('div',null, t('bwave')),
         R.createElement('div',null, formatMarkToXY(marks.b))
       ]) : R.createElement('div',{className:'marks muted'}, g?.[side]?.['标记'] || '-')
     ])
@@ -1671,19 +1827,19 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
     const vals = (gid && annotations[gid]) || {R:{},L:{}}
     const makeCard = (side)=>{
       const marks = abMarksFor(side)
-      const sideLabel = cnEye(side)
+      const sideLabel = eyeLabel(side)
       return R.createElement('div',{className:'card'},[
         R.createElement('div',{className:'grid3'},[
           // row 1
           R.createElement('div',{className:'head'}, sideLabel),
-          R.createElement('div',{className:'head'}, '机器识别结果'),
-          R.createElement('div',{className:'head'}, '手动标注结果'),
+          R.createElement('div',{className:'head'}, t('machine')),
+          R.createElement('div',{className:'head'}, t('manual')),
           // row 2
-          R.createElement('div',null, 'a-wave'),
+          R.createElement('div',null, t('awave')),
           R.createElement('div',null, marks?formatMarkToXY(marks.a):'—'),
           R.createElement('div',null, vals[side]?.a?`${vals[side].a.x.toFixed(2)} ms, ${vals[side].a.y.toFixed(2)} μv`:'—'),
           // row 3
-          R.createElement('div',null, 'b-wave'),
+          R.createElement('div',null, t('bwave')),
           R.createElement('div',null, marks?formatMarkToXY(marks.b):'—'),
           R.createElement('div',null, (()=>{
             const a = vals[side]?.a, b = vals[side]?.b
@@ -1712,10 +1868,10 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
     const manual = opsManualSum[gid] || {}
     const makeRow = (side)=> R.createElement('div',{className:'card'},[
       R.createElement('div',{className:'grid3'},[
-        R.createElement('div',{className:'head'}, cnEye(side)),
-        R.createElement('div',{className:'head'}, '机器识别结果'),
-        R.createElement('div',{className:'head'}, '手动标注结果'),
-        R.createElement('div',null, '∑O'),
+        R.createElement('div',{className:'head'}, eyeLabel(side)),
+        R.createElement('div',{className:'head'}, t('machine')),
+        R.createElement('div',{className:'head'}, t('manual')),
+        R.createElement('div',null, t('sumO')),
         R.createElement('div',null, opsMachineValue(side)),
         R.createElement('div',null, (manual && manual[side]!=null)? `${Number(manual[side]).toFixed(1)} μv` : '—')
       ])
@@ -1731,7 +1887,7 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
   // 第三行：相位（文件中：数字 + ‘°’；手动：— 占位）
   function FlickerCombinedRows(){
     const makeCard = (side)=>{
-      const sideLabel = cnEye(side)
+      const sideLabel = eyeLabel(side)
       const mark = currentGroup?.[side]?.['标记'] || ''
       const meta = currentGroup?.[side] || {}
       const y = parseY(meta['详细数据(uv)'])
@@ -1747,14 +1903,14 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
         R.createElement('div',{className:'grid3'},[
           // header row
           R.createElement('div',{className:'head'}, sideLabel),
-          R.createElement('div',{className:'head'}, '机器识别结果'),
-          R.createElement('div',{className:'head'}, '从头计算结果'),
+          R.createElement('div',{className:'head'}, t('machine')),
+          R.createElement('div',{className:'head'}, t('recalculated')),
           // row: 幅值
-          R.createElement('div',null, '幅值'),
+          R.createElement('div',null, t('amplitude')),
           R.createElement('div',null, ampText),
           R.createElement('div',null, cAmpText),
           // row: 相位
-          R.createElement('div',null, '相位'),
+          R.createElement('div',null, t('phase')),
           R.createElement('div',null, phaseText),
           R.createElement('div',null, cPhaseText)
         ])
@@ -1819,9 +1975,9 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
     // toggleOpsActive removed: buttons are always clickable; left chip shows side label
     function toggleKind(side, kind){ let op = opsMode[side].op; if(op==null){ op = 0 } setOpsMode(prev=>({...prev, [side]: { op, kind }})) }
     async function computeSide(side){
-      for(let i=0;i<4;i++){ if(!isColComplete(side,i)){ await window.electronAPI.showWarning('Ops标注数据不完整，请标注完整后再尝试'); return } }
+      for(let i=0;i<4;i++){ if(!isColComplete(side,i)){ await window.electronAPI.showWarning(t('warningOps')); return } }
       const c5 = g[side]?.[4]||{}
-      if((c5.peak && !c5.valley) || (!c5.peak && c5.valley)){ await window.electronAPI.showWarning('Ops标注数据不完整，请标注完整后再尝试'); return }
+      if((c5.peak && !c5.valley) || (!c5.peak && c5.valley)){ await window.electronAPI.showWarning(t('warningOps')); return }
       let sp=0, sv=0
       for(let i=0;i<5;i++){ const c=g[side]?.[i]||{}; if(c.peak && c.valley){ sp += Number(c.peak.y)||0; sv += Number(c.valley.y)||0 } }
       const val = sp - sv
@@ -1837,13 +1993,13 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
         R.createElement('div',{className:'ops-row'},[
           R.createElement('div',{className:'ops-grid'},[
             // Side label: frameless, same style as below labels
-            R.createElement('div',{className:'label-sm'}, cnEye(side)),
+            R.createElement('div',{className:'label-sm'}, eyeLabel(side)),
             ...[0,1,2,3,4].map(i=> R.createElement('div',{key:side+'oplbl'+i, className:'label-sm'}, 'Op'+(i+1))),
             R.createElement('div',{className:'label-sm'}, '波峰'),
             ...[0,1,2,3,4].map(i=> {
               const val = (g[side]?.[i]||{}).peak?.y
               const armed = (activeKind==='peak' && activeOp===i)
-              const text = armed? '标注' : ((val!=null)? fmtYNo(val) : '标注')
+              const text = armed? t('mark') : ((val!=null)? fmtYNo(val) : t('mark'))
               const showOverlay = (!armed && val!=null && hoverCell && hoverCell.side===side && hoverCell.kind==='peak' && hoverCell.idx===i)
               return R.createElement('div',{
                 key: side+'pwrap'+i,
@@ -1864,8 +2020,8 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
                   onClick:()=>armCell(side,'peak', i),
                 }, text),
                 showOverlay && R.createElement('div',{key:side+'po'+i, className:'ops-hover', onMouseEnter:()=>cancelHideTimer(), onMouseLeave:()=>startHideTimer()},[
-                  R.createElement('button',{key:'clr', className:'btn-mini', onClick:()=>clearCell(side,'peak',i)}, '清空'),
-                  R.createElement('button',{key:'re', className:'btn-mini', onClick:()=>reannotateCell(side,'peak',i)}, '重标')
+                  R.createElement('button',{key:'clr', className:'btn-mini', onClick:()=>clearCell(side,'peak',i)}, t('clear')),
+                  R.createElement('button',{key:'re', className:'btn-mini', onClick:()=>reannotateCell(side,'peak',i)}, t('reannotate'))
                 ])
               ])
             }),
@@ -1873,7 +2029,7 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
             ...[0,1,2,3,4].map(i=> {
               const val = (g[side]?.[i]||{}).valley?.y
               const armed = (activeKind==='valley' && activeOp===i)
-              const text = armed? '标注' : ((val!=null)? fmtYNo(val) : '标注')
+              const text = armed? t('mark') : ((val!=null)? fmtYNo(val) : t('mark'))
               const showOverlay = (!armed && val!=null && hoverCell && hoverCell.side===side && hoverCell.kind==='valley' && hoverCell.idx===i)
               return R.createElement('div',{
                 key: side+'vwrap'+i,
@@ -1894,15 +2050,15 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
                   onClick:()=>armCell(side,'valley', i),
                 }, text),
                 showOverlay && R.createElement('div',{key:side+'vo'+i, className:'ops-hover', onMouseEnter:()=>cancelHideTimer(), onMouseLeave:()=>startHideTimer()},[
-                  R.createElement('button',{key:'clr', className:'btn-mini', onClick:()=>clearCell(side,'valley',i)}, '清空'),
-                  R.createElement('button',{key:'re', className:'btn-mini', onClick:()=>reannotateCell(side,'valley',i)}, '重标')
+                  R.createElement('button',{key:'clr', className:'btn-mini', onClick:()=>clearCell(side,'valley',i)}, t('clear')),
+                  R.createElement('button',{key:'re', className:'btn-mini', onClick:()=>reannotateCell(side,'valley',i)}, t('reannotate'))
                 ])
               ])
             })
           ]),
           R.createElement('div',{style:{display:'flex',flexDirection:'column',gap:8}},[
-            R.createElement('button',{className:'btn btn-sm ops-compute', disabled:false, onClick:()=>computeSide(side)}, '计算'),
-            R.createElement('button',{className:'btn btn-sm ops-compute', disabled:false, onClick:()=>clearSide(side)}, '清空')
+            R.createElement('button',{className:'btn btn-sm ops-compute', disabled:false, onClick:()=>computeSide(side)}, t('compute')),
+            R.createElement('button',{className:'btn btn-sm ops-compute', disabled:false, onClick:()=>clearSide(side)}, t('clear'))
           ])
         ])
       ])
@@ -1917,7 +2073,7 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
   function FVEPCombinedRows(){
     const labels = ['N1','P1','N2','P2']
     const makeCard = (side)=>{
-      const sideLabel = cnEye(side)
+      const sideLabel = eyeLabel(side)
       const mark = currentGroup?.[side]?.['标记'] || ''
       const parsed = parseFVEPMark(mark)
       const gridStyle = { display:'grid', gridTemplateColumns: `90px repeat(${labels.length}, 1fr)`, gap:6, fontSize:12, justifyItems:'center', textAlign:'center' }
@@ -1929,14 +2085,14 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
           R.createElement('div',{className:'head'}, sideLabel),
           ...labels.map(lbl=> R.createElement('div',{key:side+'h'+lbl, className:'head'}, lbl)),
           // row: machine results
-          R.createElement('div',null,'机器识别结果'),
+          R.createElement('div',null,t('machine')),
           ...labels.map(lbl=>{
             const v = parsed[lbl]
             const txt = (v && v.t!=null && v.a!=null) ? `${v.t.toFixed(1)} ms, ${v.a.toFixed(1)} μv` : '—'
             return R.createElement('div',{key:side+'m'+lbl}, txt)
           }),
           // row: manual results placeholder
-          R.createElement('div',null,'手动标注结果'),
+          R.createElement('div',null,t('manual')),
           ...labels.map(lbl=>{
             const p = manual[lbl]
             const txt = (p && p.x!=null && p.y!=null) ? `${Number(p.x).toFixed(1)} ms, ${Number(p.y).toFixed(1)} μv` : '—'
@@ -1957,13 +2113,13 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
     const vals = (gid && annotations[gid]) || {R:{},L:{}}
     function startB(side){
       const hasA = Boolean(vals[side]?.a)
-      if(!hasA){ window.electronAPI?.showWarning && window.electronAPI.showWarning('请首先标注a波'); return }
+      if(!hasA){ window.electronAPI?.showWarning && window.electronAPI.showWarning(t('warningNeedA')); return }
       onAnnotateClick && onAnnotateClick(side,'b')
     }
     const makeCard = (side)=> R.createElement('div',{className:'card'},
       R.createElement('div',{className:'row', style:{justifyContent:'space-between'}},[
-        R.createElement('button',{className:'btn', onClick:()=>onAnnotateClick && onAnnotateClick(side,'a')}, annotMode[side]==='a'?'正在标注a波':('标注'+cnEye(side)+'a波')),
-        R.createElement('button',{className:'btn', onClick:()=>startB(side)}, annotMode[side]==='b'?'正在标注b波':('标注'+cnEye(side)+'b波'))
+        R.createElement('button',{className:'btn', onClick:()=>onAnnotateClick && onAnnotateClick(side,'a')}, annotMode[side]==='a'?t('annotatingA'):t('annotateA', eyeLabel(side))),
+        R.createElement('button',{className:'btn', onClick:()=>startB(side)}, annotMode[side]==='b'?t('annotatingB'):t('annotateB', eyeLabel(side)))
       ])
     )
     const items = []
@@ -1977,19 +2133,19 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
     return R.createElement('div',{className:'card'},[
       R.createElement('div',{className:'annot-ctrls', style:{gridTemplateColumns: (showR && showL) ? '1fr 1fr' : '1fr'}},[
         showR && R.createElement('div',null,
-          R.createElement('div',{className:'row', style:{justifyContent:'space-between', flexWrap:'nowrap'}},[
-            R.createElement('button',{className:'btn', onClick:()=>onAnnotateClick && onAnnotateClick('R','N1')}, annotMode.R==='N1'?'正在标注N1':'手动标注N1'),
-            R.createElement('button',{className:'btn', onClick:()=>onAnnotateClick && onAnnotateClick('R','P1')}, annotMode.R==='P1'?'正在标注P1':'手动标注P1'),
-            R.createElement('button',{className:'btn', onClick:()=>onAnnotateClick && onAnnotateClick('R','N2')}, annotMode.R==='N2'?'正在标注N2':'手动标注N2'),
-            R.createElement('button',{className:'btn', onClick:()=>onAnnotateClick && onAnnotateClick('R','P2')}, annotMode.R==='P2'?'正在标注P2':'手动标注P2')
+          R.createElement('div',{className:'row', style:{justifyContent:'space-between', flexWrap:'wrap'}},[
+            R.createElement('button',{className:'btn', onClick:()=>onAnnotateClick && onAnnotateClick('R','N1')}, annotMode.R==='N1'?t('annotatingPoint','N1'):t('annotatePoint','N1')),
+            R.createElement('button',{className:'btn', onClick:()=>onAnnotateClick && onAnnotateClick('R','P1')}, annotMode.R==='P1'?t('annotatingPoint','P1'):t('annotatePoint','P1')),
+            R.createElement('button',{className:'btn', onClick:()=>onAnnotateClick && onAnnotateClick('R','N2')}, annotMode.R==='N2'?t('annotatingPoint','N2'):t('annotatePoint','N2')),
+            R.createElement('button',{className:'btn', onClick:()=>onAnnotateClick && onAnnotateClick('R','P2')}, annotMode.R==='P2'?t('annotatingPoint','P2'):t('annotatePoint','P2'))
           ])
         ),
         showL && R.createElement('div',null,
-          R.createElement('div',{className:'row', style:{justifyContent:'space-between', flexWrap:'nowrap'}},[
-            R.createElement('button',{className:'btn', onClick:()=>onAnnotateClick && onAnnotateClick('L','N1')}, annotMode.L==='N1'?'正在标注N1':'手动标注N1'),
-            R.createElement('button',{className:'btn', onClick:()=>onAnnotateClick && onAnnotateClick('L','P1')}, annotMode.L==='P1'?'正在标注P1':'手动标注P1'),
-            R.createElement('button',{className:'btn', onClick:()=>onAnnotateClick && onAnnotateClick('L','N2')}, annotMode.L==='N2'?'开始标注N2':'手动标注N2'),
-            R.createElement('button',{className:'btn', onClick:()=>onAnnotateClick && onAnnotateClick('L','P2')}, annotMode.L==='P2'?'开始标注P2':'手动标注P2')
+          R.createElement('div',{className:'row', style:{justifyContent:'space-between', flexWrap:'wrap'}},[
+            R.createElement('button',{className:'btn', onClick:()=>onAnnotateClick && onAnnotateClick('L','N1')}, annotMode.L==='N1'?t('annotatingPoint','N1'):t('annotatePoint','N1')),
+            R.createElement('button',{className:'btn', onClick:()=>onAnnotateClick && onAnnotateClick('L','P1')}, annotMode.L==='P1'?t('annotatingPoint','P1'):t('annotatePoint','P1')),
+            R.createElement('button',{className:'btn', onClick:()=>onAnnotateClick && onAnnotateClick('L','N2')}, annotMode.L==='N2'?t('annotatingPoint','N2'):t('annotatePoint','N2')),
+            R.createElement('button',{className:'btn', onClick:()=>onAnnotateClick && onAnnotateClick('L','P2')}, annotMode.L==='P2'?t('annotatingPoint','P2'):t('annotatePoint','P2'))
           ])
         )
       ])
@@ -1999,13 +2155,13 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
   function BasicCard(){
     const baseName = filePath? filePath.split(/[\\\/]/).pop() : '-'
     return R.createElement('div',{className:'card'},[
-      R.createElement('h3',{style:{textAlign:'center'}},'文件信息'),
+      R.createElement('h3',{style:{textAlign:'center'}}, t('fileInfo')),
       R.createElement(InfoKV,{rows:[
-        ...(hasValid? [{k:'输入文件', v: baseName}] : []),
-        {k:'检查项目', v: basicInfo.检查项目||'-'},
-        {k:'医院', v: basicInfo.医院||'-'},
-        {k:'病人', v: basicInfo.病人||'-'},
-        {k:'检查日期', v: basicInfo.检查日期||'-'}
+        ...(hasValid? [{k:t('inputFile'), v: baseName}] : []),
+        {k:t('examItem'), v: basicInfo.检查项目||'-'},
+        {k:t('hospital'), v: basicInfo.医院||'-'},
+        {k:t('patient'), v: basicInfo.病人||'-'},
+        {k:t('examDate'), v: basicInfo.检查日期||'-'}
       ]})
     ])
   }
@@ -2022,7 +2178,13 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
           )
         ]),
         R.createElement('div',{className:'actions'},[
-          R.createElement('button',{className:'primary', onClick:()=>openFile()}, '加载数据'),
+          R.createElement('select',{
+            className:'lang-select',
+            value:lang,
+            title:'Language',
+            onChange:e=>changeLang(e.target.value)
+          }, LANGS.map(item=> R.createElement('option',{key:item.code, value:item.code}, item.short))),
+          R.createElement('button',{className:'primary', onClick:()=>openFile()}, t('loadData')),
           R.createElement('button',{onClick:()=>{
             const rs = getComputedStyle(document.documentElement)
             const themeVars = {
@@ -2033,9 +2195,9 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
               accent: rs.getPropertyValue('--primary').trim()
             }
             window.electronAPI.openAbout(themeVars)
-          }}, '关于'),
-          R.createElement('button',{onClick:()=>setThemeOpen(true)}, '配色'),
-          R.createElement('button',{onClick:()=>window.electronAPI.quitApp()}, '退出')
+          }}, t('about')),
+          R.createElement('button',{onClick:()=>setThemeOpen(true)}, t('theme')),
+          R.createElement('button',{onClick:()=>window.electronAPI.quitApp()}, t('exit'))
         ])
       ])
     ),
@@ -2065,10 +2227,10 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
               R.createElement('button',{ style:{alignSelf:'stretch'}, onClick:()=>{
                 if(opsMode.R.kind||opsMode.L.kind){ setOpsMode(prev=>({ R:{ op: prev.R.op, kind:null }, L:{ op: prev.L.op, kind:null } })) }
                 setCurrent(c=> (groups.length? ( (c-1+groups.length)%groups.length ) : 0))
-              }}, '上一组'),
+              }}, t('prevGroup')),
               // 中：标签 + 下拉（垂直排列，宽度一致）
               R.createElement('div',{style:{flex:1, display:'flex', flexDirection:'column', gap:6}},[
-                R.createElement('span',{className:'chip', style:{width:'100%', textAlign:'center'}}, groups.length?`第 ${current+1} / ${groups.length} 组`:'—'),
+                R.createElement('span',{className:'chip', style:{width:'100%', textAlign:'center'}}, groups.length?t('groupCount', current+1, groups.length):'—'),
                 R.createElement('select',{
                   className:'select',
                   value: String(current),
@@ -2084,7 +2246,7 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
               R.createElement('button',{ style:{alignSelf:'stretch'}, onClick:()=>{
                 if(opsMode.R.kind||opsMode.L.kind){ setOpsMode(prev=>({ R:{ op: prev.R.op, kind:null }, L:{ op: prev.L.op, kind:null } })) }
                 setCurrent(c=> (groups.length? ( (c+1)%groups.length ) : 0))
-              }}, '下一组')
+              }}, t('nextGroup'))
             ])
           })()
         ]),
@@ -2094,12 +2256,12 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
         !hasValid && R.createElement('div',{key:'welcome-wrap', style:{flex:1, display:'flex', alignItems:'center', justifyContent:'center', minHeight:'100%'}},
           R.createElement('div',{style:{transform:'translateY(-6%)'}},
             R.createElement('div',{className:'card', key:'welcome', style:{textAlign:'center', minWidth:360}},[
-              R.createElement('h3',{style:{margin:'0 0 10px', fontSize:20}},'欢迎使用ERG Viewer'),
+              R.createElement('h3',{style:{margin:'0 0 10px', fontSize:20}}, t('welcomeTitle')),
               R.createElement('div',{className:'muted', style:{fontSize:14, lineHeight:1.7}},
-                '请点击“加载数据”选择 OPTOPROBE 导出的 Excel 文件以开始分析。\n',
+                t('welcomeText'),
               ),
               R.createElement('div',{className:'muted', style:{fontSize:12, marginTop:6}},
-                '小提示：加载成功后，可在绘图区进行坐标调整与标注；图像与数据均可导出。'
+                t('welcomeTip')
               )
             ])
           )
@@ -2111,11 +2273,12 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
             onRangePersist: (range)=>{ setYRanges(prev=>{ const byMode = prev[modeKey] || {}; const gid = currentGroup?.idx; const byGroup = byMode[gid] || {}; const prevR = byGroup.R || {}; const has = (k)=> Object.prototype.hasOwnProperty.call(range||{}, k); const nextR = { ...prevR, ymin: has('ymin') ? range.ymin : (prevR.ymin ?? null), ymax: has('ymax') ? range.ymax : (prevR.ymax ?? null), xmin: has('xmin') ? range.xmin : (prevR.xmin ?? null), xmax: has('xmax') ? range.xmax : (prevR.xmax ?? null) }; const nextGroup = { ...byGroup, R: nextR }; return { ...prev, [modeKey]: { ...byMode, [gid]: nextGroup } } }) },
             enableAnnotate,
             activeAnnotate: (annotMode.R || (opsMode.R.kind? (opsMode.R.kind==='peak'?'opP':'opV') : null)),
-            overlayText: (opsMode.R.kind ? (`开始标注${cnEye('R')}` + (opsMode.R.kind==='peak'?' 波峰':' 波谷') + (opsMode.R.op!=null? ` Op${opsMode.R.op+1}`:'')) : ''),
+            overlayText: (opsMode.R.kind ? t('startMarkEye', eyeLabel('R'), opsMode.R.kind==='peak'?t('peak'):t('valley'), opsMode.R.op!=null? `Op${opsMode.R.op+1}`:'') : ''),
             onAnnotateClick:onAnnotateClick, onPointPicked:onPointPicked, onHoverPoint:onHoverPoint, onHoverEnd:onHoverEnd,
             marking: Boolean(opsMode.R.kind), suppressSpikes,
             onExportImage:exportImage, onExportData: exportData,
-            disabled: annoting
+            disabled: annoting,
+            ui: { reset:t('reset'), copyImage:t('copyImage'), copyData:t('copyData'), exportPdf:t('exportPdf'), exportSvg:t('exportSvg'), exportData:t('exportData'), imageCopied:t('imageCopied'), dataCopied:t('dataCopied'), clickA:t('clickA'), clickB:t('clickB'), clickPoint:(p)=>t('clickPoint',p) }
           }),
           showL && R.createElement(PlotPanel,{
             key:'L', title:'绘图', side:'L',
@@ -2123,11 +2286,12 @@ function PlotPanel({title, side, group, onExportImage, onExportData, enableAnnot
             onRangePersist: (range)=>{ setYRanges(prev=>{ const byMode = prev[modeKey] || {}; const gid = currentGroup?.idx; const byGroup = byMode[gid] || {}; const prevL = byGroup.L || {}; const has = (k)=> Object.prototype.hasOwnProperty.call(range||{}, k); const nextL = { ...prevL, ymin: has('ymin') ? range.ymin : (prevL.ymin ?? null), ymax: has('ymax') ? range.ymax : (prevL.ymax ?? null), xmin: has('xmin') ? range.xmin : (prevL.xmin ?? null), xmax: has('xmax') ? range.xmax : (prevL.xmax ?? null) }; const nextGroup = { ...byGroup, L: nextL }; return { ...prev, [modeKey]: { ...byMode, [gid]: nextGroup } } }) },
             enableAnnotate,
             activeAnnotate: (annotMode.L || (opsMode.L.kind? (opsMode.L.kind==='peak'?'opP':'opV') : null)),
-            overlayText: (opsMode.L.kind ? (`开始标注${cnEye('L')}` + (opsMode.L.kind==='peak'?' 波峰':' 波谷') + (opsMode.L.op!=null? ` Op${opsMode.L.op+1}`:'')) : ''),
+            overlayText: (opsMode.L.kind ? t('startMarkEye', eyeLabel('L'), opsMode.L.kind==='peak'?t('peak'):t('valley'), opsMode.L.op!=null? `Op${opsMode.L.op+1}`:'') : ''),
             onAnnotateClick:onAnnotateClick, onPointPicked:onPointPicked, onHoverPoint:onHoverPoint, onHoverEnd:onHoverEnd,
             marking: Boolean(opsMode.L.kind), suppressSpikes,
             onExportImage:exportImage, onExportData: exportData,
-            disabled: annoting
+            disabled: annoting,
+            ui: { reset:t('reset'), copyImage:t('copyImage'), copyData:t('copyData'), exportPdf:t('exportPdf'), exportSvg:t('exportSvg'), exportData:t('exportData'), imageCopied:t('imageCopied'), dataCopied:t('dataCopied'), clickA:t('clickA'), clickB:t('clickB'), clickPoint:(p)=>t('clickPoint',p) }
           })
         ]),
         hasValid && (annotMode.R || annotMode.L || opsMode.R.kind || opsMode.L.kind) && R.createElement(Magnifier,{key:'magnifier'}),

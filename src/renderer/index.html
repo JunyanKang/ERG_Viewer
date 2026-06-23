@@ -21,63 +21,76 @@
         --axis:#6B5F57;--grid:#E8E1D9;--spike:#6B5F57;--hoverlabel-bg:#FFF7EC;--hoverlabel-fg:#2F2A26;
         --line-right:#D97C5A;--line-left:#5B8FB9;
       }
+      *{box-sizing:border-box}
       html,body,#root{height:100%;margin:0}
-      body{font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;background:var(--bg);color:var(--fg)}
+      body{
+        font-family:system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+        background:
+          linear-gradient(135deg, rgba(139,185,241,.12), rgba(107,212,168,.07) 38%, rgba(244,167,160,.08) 72%, rgba(242,193,78,.08)),
+          var(--bg);
+        color:var(--fg);
+        font-size:13px;
+        letter-spacing:0;
+      }
       .app{display:flex;flex-direction:column;height:100%}
-      header{position:sticky;top:0;backdrop-filter:saturate(180%) blur(10px);background:var(--header-bg);border-bottom:1px solid var(--border)}
-      .hx{display:flex;align-items:center;justify-content:space-between;padding:12px 16px}
+      header{position:sticky;top:0;z-index:20;backdrop-filter:saturate(180%) blur(14px);background:var(--header-bg);border-bottom:1px solid var(--border)}
+      .hx{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:10px 14px;min-height:52px}
       .title{font-size:18px;font-weight:700;letter-spacing:.5px;display:flex;align-items:center;gap:8px}
       .ecg{width:60px;height:16px;display:inline-block}
       .ecg path{fill:none;stroke:var(--primary);stroke-width:2;stroke-linejoin:round;stroke-linecap:round;stroke-dasharray:120;animation:ecg-dash 1.8s linear infinite}
       @keyframes ecg-dash{from{stroke-dashoffset:120}to{stroke-dashoffset:0}}
-      .actions button{margin-left:8px;padding:8px 12px;border-radius:10px;border:1px solid var(--border);background:var(--btn-bg);color:var(--btn-fg);cursor:pointer;transition:transform .15s ease,background .2s}
-      .actions button:hover{transform:translateY(-1px);background:var(--btn-bg-hover)}
+      .actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;min-width:0}
+      .actions button{height:30px;padding:0 10px;border-radius:8px;border:1px solid var(--border);background:var(--btn-bg);color:var(--btn-fg);cursor:pointer;transition:transform .15s ease,background .2s,border-color .2s;white-space:nowrap;font-size:12px}
+      .actions button:hover{transform:translateY(-1px);background:var(--btn-bg-hover);border-color:var(--primary)}
       .primary{background:var(--primary);border-color:var(--primary);color:var(--primary-fg)}
       .primary:hover{background:var(--primary-hover)}
-      main{flex:1;display:flex;gap:12px;padding:12px;overflow:auto}
+      .lang-select{width:66px;height:30px;padding:0 22px 0 9px;border:1px solid var(--border);border-radius:8px;background:var(--select-bg);color:var(--fg);font-size:12px;font-weight:650;text-align:center;text-align-last:center;cursor:pointer}
+      .lang-select:focus{outline:none;border-color:var(--primary)}
+      main{flex:1;display:flex;align-items:flex-start;gap:12px;padding:12px;overflow:auto}
       .left{width:300px;min-width:280px;display:flex;flex-direction:column;gap:12px;overflow:visible}
-      .card{background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:12px;box-shadow:0 6px 24px rgba(149,128,104,.15)}
-      .card h3{margin:0 0 6px;font-size:14px;opacity:.9}
+      .card{background:var(--card-bg);border:1px solid var(--border);border-radius:8px;padding:12px;box-shadow:0 8px 20px rgba(40,52,70,.08)}
+      .card h3{margin:0 0 8px;font-size:13px;font-weight:700;opacity:.92}
       .kv{display:grid;grid-template-columns:90px 1fr;gap:6px;font-size:12px}
-      .kv div{opacity:.9}
-      .center{flex:1;display:flex;flex-direction:column;gap:12px;overflow:visible}
+      .kv div{opacity:.9;min-width:0;overflow-wrap:anywhere}
+      .center{flex:1;min-width:0;display:flex;flex-direction:column;gap:12px;overflow:visible}
       .group-nav{display:flex;align-items:center;gap:8px}
-      .group-nav button{padding:6px 10px;border-radius:10px;border:1px solid var(--border);background:var(--btn-bg);color:var(--btn-fg);cursor:pointer}
+      .group-nav button{padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--btn-bg);color:var(--btn-fg);cursor:pointer;white-space:nowrap}
       /* Ensure group label and dropdown align in width and typography */
       .group-nav .chip{display:block;box-sizing:border-box;padding:6px 16px}
       .group-nav .select{box-sizing:border-box}
       .plots{display:grid;grid-template-columns:1fr 1fr;gap:12px}
       .two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-      .grid3{display:grid;grid-template-columns:80px 1fr 1fr;gap:6px;font-size:12px;justify-items:center;text-align:center}
+      .grid3{display:grid;grid-template-columns:86px minmax(0,1fr) minmax(0,1fr);gap:6px;font-size:12px;justify-items:center;text-align:center}
+      .grid3 > div{min-width:0;overflow-wrap:anywhere}
       .grid3 .head{font-weight:600;opacity:.9;font-size:14px}
-      .ops-grid{display:grid;grid-template-columns:max-content repeat(5,1fr);gap:6px;align-items:center;font-size:12px}
+      .ops-grid{display:grid;grid-template-columns:max-content repeat(5,minmax(0,1fr));gap:6px;align-items:center;font-size:12px}
       .ops-grid .head{font-weight:600;opacity:.9}
       .ops-row{display:grid;grid-template-columns:1fr 40px;gap:8px;align-items:stretch;margin-top:8px}
       .ops-compute{width:40px;height:100%;padding:4px 6px;font-size:12px}
       /* Ops cell hover overlay for 清空/重标 */
       .ops-cell{position:relative;display:flex;align-items:center;justify-content:center}
-      .ops-hover{position:absolute;left:50%;top:0;transform:translate(-50%, -110%);display:flex;gap:6px;background:var(--overlay-bg);border:1px solid var(--overlay-border);border-radius:8px;padding:4px 6px;z-index:10;box-shadow:0 6px 16px rgba(149,128,104,.25)}
+      .ops-hover{position:absolute;left:50%;top:0;transform:translate(-50%, -110%);display:flex;gap:6px;background:var(--overlay-bg);border:1px solid var(--overlay-border);border-radius:8px;padding:4px 6px;z-index:10;box-shadow:0 8px 18px rgba(40,52,70,.16)}
       .btn-mini{padding:4px 8px;border-radius:8px;border:1px solid var(--border);background:var(--btn-bg);color:var(--btn-fg);cursor:pointer;font-size:12px;white-space:nowrap;min-width:44px;display:inline-flex;align-items:center;justify-content:center}
       .btn-mini:hover{background:var(--btn-bg-hover)}
       .plot-card{display:flex;flex-direction:column;gap:8px}
       .titlebar{display:flex;justify-content:center;align-items:center;gap:8px}
       .plot-wrap{position:relative}
-      .plot{height:320px;border-radius:12px;overflow:hidden;background:var(--plot-bg);border:1px solid var(--border)}
-      .annot-overlay{position:absolute;right:8px;top:8px;background:var(--overlay-bg);border:1px solid var(--overlay-border);border-radius:10px;padding:4px 8px;font-size:12px;color:var(--overlay-fg);pointer-events:none}
-      .magnifier{position:fixed;left:16px;top:100px;width:280px;background:var(--magnifier-bg);border:1px solid var(--magnifier-border);border-radius:12px;box-shadow:0 10px 30px rgba(149,128,104,.25);z-index:50}
+      .plot{height:320px;border-radius:8px;overflow:hidden;background:var(--plot-bg);border:1px solid var(--border)}
+      .annot-overlay{position:absolute;right:8px;top:8px;background:var(--overlay-bg);border:1px solid var(--overlay-border);border-radius:8px;padding:4px 8px;font-size:12px;color:var(--overlay-fg);pointer-events:none}
+      .magnifier{position:fixed;left:16px;top:100px;width:280px;background:var(--magnifier-bg);border:1px solid var(--magnifier-border);border-radius:8px;box-shadow:0 12px 28px rgba(40,52,70,.18);z-index:50}
       .magnifier-header{display:flex;justify-content:space-between;align-items:center;padding:6px 10px;font-size:12px;color:var(--magnifier-fg);border-bottom:1px solid var(--magnifier-border)}
       .magnifier-body{padding:6px}
       .magnifier-plot{height:160px;border-radius:8px;overflow:hidden;background:var(--plot-bg);border:1px solid var(--border)}
       .controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
       .controls .export{display:inline-flex;gap:8px;white-space:nowrap}
-      .select{appearance:none;-webkit-appearance:none;background:var(--select-bg);border:1px solid var(--border);color:var(--fg);border-radius:10px;padding:6px 16px;position:relative;text-align:center;text-align-last:center;font-size:12px}
+      .select{appearance:none;-webkit-appearance:none;background:var(--select-bg);border:1px solid var(--border);color:var(--fg);border-radius:8px;padding:6px 16px;position:relative;text-align:center;text-align-last:center;font-size:12px}
       .select option{text-align:center}
       .select:focus{outline:none;border-color:var(--primary)}
       .select::-ms-expand{display:none}
       .marks{font-size:12px;text-align:center;justify-items:center}
-      .chip{padding:4px 8px;border-radius:10px;background:var(--chip-bg);border:1px solid var(--border);font-size:12px}
-      .btn{padding:6px 10px;border-radius:10px;border:1px solid var(--border);background:var(--btn-bg);color:var(--btn-fg);cursor:pointer}
-      .btn:hover{background:var(--btn-bg-hover)}
+      .chip{padding:4px 8px;border-radius:8px;background:var(--chip-bg);border:1px solid var(--border);font-size:12px}
+      .btn{min-height:28px;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--btn-bg);color:var(--btn-fg);cursor:pointer;white-space:nowrap}
+      .btn:hover{background:var(--btn-bg-hover);border-color:var(--primary)}
       .btn-sm{padding:4px 8px;font-size:12px}
       .label-sm{font-size:12px;display:flex;align-items:center;justify-content:center;width:100%;text-align:center}
       .ops-grid .label-sm{width:auto}
@@ -92,7 +105,7 @@
 
       /* Theme chooser modal */
       .modal-mask{position:fixed;inset:0;background:rgba(0,0,0,.2);display:flex;align-items:center;justify-content:center;z-index:80}
-      .modal{width:280px;max-width:90vw;background:var(--card-bg);border:1px solid var(--border);border-radius:14px;box-shadow:0 12px 36px rgba(0,0,0,.2);font-size:12px}
+      .modal{width:280px;max-width:90vw;background:var(--card-bg);border:1px solid var(--border);border-radius:8px;box-shadow:0 18px 40px rgba(0,0,0,.18);font-size:12px}
       .modal-header{display:flex;align-items:center;justify-content:center;padding:8px 10px;border-bottom:1px solid var(--border)}
       .modal-title{font-size:14px;font-weight:600}
       .modal-body{padding:10px 12px}

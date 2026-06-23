@@ -1,5 +1,10 @@
 const { contextBridge, ipcRenderer } = require('electron')
 
+let pendingStartupFile = ''
+ipcRenderer.on('startup-file', (_event, filePath) => {
+  pendingStartupFile = String(filePath || '')
+})
+
 contextBridge.exposeInMainWorld('electronAPI', {
   openFileDialog: () => ipcRenderer.invoke('show-open-dialog'),
   readFileBuffer: (filePath) => ipcRenderer.invoke('read-file-buffer', String(filePath || '')),
@@ -10,6 +15,20 @@ contextBridge.exposeInMainWorld('electronAPI', {
   quitApp: () => ipcRenderer.invoke('quit-app'),
   openAbout: (themeVars) => ipcRenderer.invoke('open-about', themeVars || {}),
   exportPdfFromHtml: (html, outPath) => ipcRenderer.invoke('export-pdf-from-html', String(html || ''), String(outPath || '')),
+  getStartupFile: () => {
+    const filePath = pendingStartupFile
+    pendingStartupFile = ''
+    return filePath
+  },
+  onStartupFile: (callback) => {
+    if (typeof callback !== 'function') return () => {}
+    const handler = (_event, filePath) => {
+      pendingStartupFile = ''
+      callback(String(filePath || ''))
+    }
+    ipcRenderer.on('startup-file', handler)
+    return () => ipcRenderer.removeListener('startup-file', handler)
+  },
   // basic window sizing (no auto height/limits)
   resizeWindow: (w,h) => ipcRenderer.invoke('resize-window', w, h),
   getUiSizes: () => ipcRenderer.invoke('get-ui-sizes'),
