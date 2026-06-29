@@ -25,7 +25,7 @@ ERG Viewer 是面向 OPTOPROBE Excel 导出文件的视觉电生理桌面分析�
 ERG_Viewer/
 ├── assets/                  # 源图与非打包运行时素材
 ├── build/                   # electron-builder 资源：图标、Windows 附加文件
-├── docs/                    # 架构、发布、实验分析、评审和示例数据
+├── docs/                    # 架构、发布和实验分析文档
 ├── scripts/                 # 命令行工具：图标生成、Excel 解析冒烟测试、demo 数据生成
 ├── src-v2/
 │   ├── main/                # Electron main process
@@ -50,7 +50,7 @@ cnpm run start
 
 仓库根目录的 `.npmrc` 已经把 `registry` 指向 `https://registry.npmmirror.com`，所以直接 `npm install` / `pnpm install` 也会走镜像；`cnpm` 行为不变。
 
-> **注意 lockfile 一致性**：`cnpm` 与 `npm` 生成的 `package-lock.json` 格式不互通，混用会导致冲突。请团队统一只用 `cnpm install`（CI 也已经统一走 cnpm），避免 PR 互相覆盖 lockfile。
+> **注意 lockfile 一致性**：`cnpm` 与 `npm` 生成的 `package-lock.json` 格式不互通，混用会导致冲突。本地开发请团队统一一种安装方式；GitHub Actions 使用 `npm ci` 和已提交 lockfile，避免 PR 互相覆盖 lockfile。
 
 ## 检查与冒烟测试
 
@@ -60,7 +60,7 @@ cnpm run smoke -- /path/to/OPTOPROBE-export.xlsx
 cnpm run gen:demo
 ```
 
-`check` 进行 JavaScript 语法检查；`smoke` 只解析 Excel 并输出基本信息和分组摘要，不启动 Electron；`gen:demo` 生成匿名 synthetic Excel 示例到 `docs/examples/`。
+`check` 进行 JavaScript 语法检查；`smoke` 只解析 Excel 并输出基本信息和分组摘要，不启动 Electron；`gen:demo` 生成匿名 synthetic Excel 示例到 `test-fixtures/opto/`。
 
 ## 实验分析与 Demo
 
@@ -78,7 +78,7 @@ v2 顶部工作流用于实验级分析。进入工作站后可以：
 cnpm run gen:demo
 ```
 
-生成文件位于 `docs/examples/`，均为 synthetic 数据，不包含真实病人信息。
+生成文件位于 `test-fixtures/opto/`，均为 synthetic 数据，不包含真实病人信息。
 
 ## 打包
 
@@ -103,11 +103,10 @@ cnpm run build:linux:deb # Optional Debian package
 
 ## 数据与隐私
 
-OPTOPROBE 导出文件可能包含患者姓名、检查编号、医院、日期等敏感信息。仓库默认忽略 `.xlsx/.xls`，不要提交原始检查文件。若需要示例数据，只能放彻底匿名化文件到 `docs/examples/`。
+OPTOPROBE 导出文件可能包含患者姓名、检查编号、医院、日期等敏感信息。仓库默认忽略 `.xlsx/.xls`，不要提交原始检查文件。若需要示例数据，只能放彻底匿名化文件到 `test-fixtures/opto/`。
 
 ## 技术文档
 
 - [架构说明](docs/ARCHITECTURE.md)
 - [发布清单](docs/RELEASE.md)
 - [实验分析设计](docs/EXPERIMENT_ANALYSIS.md)
-- [三角色评审门](docs/REVIEW_GATE.md)

@@ -19,7 +19,7 @@ module.exports = defineConfig({
       'node_modules/**',
       'dist/**',
       'build/**',
-      'docs/examples/**',
+      'test-fixtures/opto/**',
     ],
     coverage: {
       provider: 'v8',

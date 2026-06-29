@@ -12,7 +12,7 @@ const reportCore = require('../src-v2/renderer/core/report')
 function main() {
   const repoRoot = path.join(__dirname, '..')
   const filePath =
-    process.argv[2] || path.join(repoRoot, 'docs', 'examples', 'demo-control-1_FERG.xlsx')
+    process.argv[2] || path.join(repoRoot, 'test-fixtures', 'opto', 'demo-control-1_FERG.xlsx')
   assert(fs.existsSync(filePath), `Missing input file ${filePath}`)
 
   const samples = projectCore.parseWorkbookToSamples(XLSX.readFile(filePath), filePath)

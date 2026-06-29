@@ -15,7 +15,7 @@ module.exports = [
       'node_modules/**',
       'dist/**',
       'build/**',
-      'docs/examples/**',
+      'test-fixtures/opto/**',
       'release/**',
       'coverage/**',
       '**/*.min.js',

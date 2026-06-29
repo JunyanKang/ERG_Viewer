@@ -8,7 +8,7 @@ const electron = require('electron')
 
 async function main() {
   const repoRoot = path.join(__dirname, '..')
-  const examplesDir = path.join(repoRoot, 'docs', 'examples')
+  const examplesDir = path.join(repoRoot, 'test-fixtures', 'opto')
   const files =
     process.argv.length > 2
       ? process.argv.slice(2).map((filePath) => path.resolve(filePath))

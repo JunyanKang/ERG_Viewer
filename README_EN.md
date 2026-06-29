@@ -25,7 +25,7 @@ ERG Viewer is a desktop visual electrophysiology workstation for OPTOPROBE Excel
 ERG_Viewer/
 ├── assets/                  # Source images and non-runtime assets
 ├── build/                   # electron-builder resources: icons and Windows extra files
-├── docs/                    # Architecture, release, experiment analysis, review, and examples
+├── docs/                    # Architecture, release, and experiment analysis documentation
 ├── scripts/                 # CLI tools: icon generation, smoke test, and demo data generation
 ├── src-v2/
 │   ├── main/                # Electron main process
@@ -50,7 +50,7 @@ If the system default `node` is broken, first check whether `cnpm -v` reports a 
 
 The repo-root `.npmrc` already pins `registry` to `https://registry.npmmirror.com`, so plain `npm install` / `pnpm install` also routes through the mirror. `cnpm` behavior is unchanged.
 
-> **Lockfile consistency**: `cnpm` and `npm` produce incompatible `package-lock.json` formats; mixing them causes conflicts. Please standardize on `cnpm install` across the team (CI is already on cnpm) to avoid lockfile thrash in PRs.
+> **Lockfile consistency**: `cnpm` and `npm` produce incompatible `package-lock.json` formats; mixing them causes conflicts. Use one install path consistently for local development; GitHub Actions uses `npm ci` with the committed lockfile to avoid lockfile thrash in PRs.
 
 ## Checks and Smoke Test
 
@@ -60,7 +60,7 @@ cnpm run smoke -- /path/to/OPTOPROBE-export.xlsx
 cnpm run gen:demo
 ```
 
-`check` runs JavaScript syntax checks. `smoke` parses an Excel file and prints metadata plus group summaries without launching Electron. `gen:demo` writes anonymized synthetic Excel examples to `docs/examples/`.
+`check` runs JavaScript syntax checks. `smoke` parses an Excel file and prints metadata plus group summaries without launching Electron. `gen:demo` writes anonymized synthetic Excel examples to `test-fixtures/opto/`.
 
 ## Experiment Analysis and Demo
 
@@ -78,7 +78,7 @@ Example files can be regenerated with:
 cnpm run gen:demo
 ```
 
-Generated files are placed under `docs/examples/`; they are synthetic and contain no real patient information.
+Generated files are placed under `test-fixtures/opto/`; they are synthetic and contain no real patient information.
 
 ## Packaging
 
@@ -103,11 +103,10 @@ Notes:
 
 ## Data and Privacy
 
-OPTOPROBE exports may include patient names, exam identifiers, hospital information, and exam dates. The repository ignores `.xlsx/.xls` files by default. Do not commit raw exam files. If example data is needed, place only fully anonymized files under `docs/examples/`.
+OPTOPROBE exports may include patient names, exam identifiers, hospital information, and exam dates. The repository ignores `.xlsx/.xls` files by default. Do not commit raw exam files. If example data is needed, place only fully anonymized files under `test-fixtures/opto/`.
 
 ## Technical Documentation
 
 - [Architecture](docs/ARCHITECTURE.md)
 - [Release Checklist](docs/RELEASE.md)
 - [Experiment Analysis Design](docs/EXPERIMENT_ANALYSIS.md)
-- [Three-role Review Gate](docs/REVIEW_GATE.md)

@@ -32,11 +32,10 @@ jobs:
           node-version: '24'
           cache: 'npm'
 
-      - name: Install cnpm
-        run: npm install -g cnpm --registry=https://registry.npmmirror.com
-
       - name: Install dependencies
-        run: cnpm install
+        run: npm ci
+        env:
+          ELECTRON_MIRROR: https://npmmirror.com/mirrors/electron/
 
       - name: Syntax check
         run: npm run check:syntax

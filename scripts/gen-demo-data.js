@@ -285,7 +285,7 @@ function rowsForSample({ patient, cohort, item, date, scale, seed }) {
 }
 
 function main() {
-  const outDir = path.resolve(process.argv[2] || path.join(__dirname, '..', 'docs', 'examples'))
+  const outDir = path.resolve(process.argv[2] || path.join(__dirname, '..', 'test-fixtures', 'opto'))
   fs.mkdirSync(outDir, { recursive: true })
   const specs = []
   const controlScales = [0.88, 0.95, 1.01, 1.06, 1.12, 1.18, 1.24, 1.3]

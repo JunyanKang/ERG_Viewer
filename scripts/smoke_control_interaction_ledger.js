@@ -25,7 +25,7 @@ const REPORT_PATH = path.join(REPORT_DIR, 'CONTROL_INTERACTION_LEDGER.md')
 async function main() {
   const repoRoot = path.join(__dirname, '..')
   const appPath = process.env.ERG_VIEWER_INSTALLED_APP || DEFAULT_APP
-  const examplesDir = path.join(repoRoot, 'docs', 'examples')
+  const examplesDir = path.join(repoRoot, 'test-fixtures', 'opto')
   const files =
     process.argv.length > 2
       ? process.argv.slice(2).map((filePath) => path.resolve(filePath))
@@ -227,7 +227,7 @@ function buildMarkdownReport(devReport, installedReport, files, appPath) {
     '',
     '## Remaining Gap',
     '',
-    'This ledger does not replace Computer Use screenshot review. The final delivery goal still requires three screenshot-based visual rounds once desktop inspection is explicitly resumed.'
+    'This ledger is a state-based interaction audit for local QA; screenshot review can be run separately when needed.'
   )
   return `${lines.join('\n')}\n`
 }

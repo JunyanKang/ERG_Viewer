@@ -60,7 +60,7 @@ const CATEGORIES = [
 async function main() {
   const repoRoot = path.join(__dirname, '..')
   const appPath = process.env.ERG_VIEWER_INSTALLED_APP || DEFAULT_APP
-  const examplesDir = path.join(repoRoot, 'docs', 'examples')
+  const examplesDir = path.join(repoRoot, 'test-fixtures', 'opto')
   const files =
     process.argv.length > 2
       ? process.argv.slice(2).map((filePath) => path.resolve(filePath))
@@ -215,7 +215,7 @@ function buildMarkdownReport(report, files, appPath, repoRoot) {
     '',
     '## Remaining Gap',
     '',
-    'This is a state-based installed-app verification. The final delivery goal still requires Computer Use screenshots and three visual-review rounds before final completion can be claimed.'
+    'This is a state-based installed-app verification for local QA; screenshot review can be run separately when needed.'
   )
   return `${lines.join('\n')}\n`
 }

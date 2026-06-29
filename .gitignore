@@ -30,8 +30,8 @@ docs/qa/
 # OPTOPROBE exports and analysis data may contain patient or study identifiers.
 *.xlsx
 *.xls
-!docs/examples/*.xlsx
-!docs/examples/*.xls
+!test-fixtures/opto/*.xlsx
+!test-fixtures/opto/*.xls
 
 # Local ERG Viewer exports / saved sessions can contain study identifiers.
 *.ep

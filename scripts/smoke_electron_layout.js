@@ -10,7 +10,7 @@ const STEPS = ['Intake', 'Review', 'Analysis', 'Report']
 
 async function main() {
   const repoRoot = path.join(__dirname, '..')
-  const examplesDir = path.join(repoRoot, 'docs', 'examples')
+  const examplesDir = path.join(repoRoot, 'test-fixtures', 'opto')
   const hasCustomFiles = process.argv.length > 2
   const files = hasCustomFiles
     ? process.argv.slice(2).map((filePath) => path.resolve(filePath))

@@ -95,11 +95,11 @@ describe('ERG Viewer v2 report package', () => {
     expect(pkg.summary.figures).toBeGreaterThanOrEqual(1)
   })
 
-  test('plans publication FVEP panels from the root demo template', () => {
-    const file = 'demo/FVEP_demo.xls'
+  test('plans publication FVEP panels from the generated fixture', () => {
+    const file = 'test-fixtures/opto/demo-control-1_FVEP.xlsx'
     const records = projectCore.parseWorkbookToSamples(XLSX.readFile(file), file)
     const project = projectCore.normalizeProject({
-      title: 'Root FVEP demo template',
+      title: 'FVEP fixture project',
       savedAt: '2026-06-28T00:00:00.000Z',
       samples: records,
     })
@@ -114,7 +114,7 @@ describe('ERG Viewer v2 report package', () => {
     const pkg = report.buildReportPackage(project, result)
     const figures = new Map(pkg.figures.map((figure) => [figure.id, figure]))
 
-    expect(project.samples.length).toBe(2)
+    expect(project.samples.length).toBe(3)
     expect(figures.get('fvep_representative_traces')).toMatchObject({ status: 'ready' })
     expect(figures.get('fvep_average_waveform')).toBeTruthy()
     expect(figures.get('fvep_amplitude_quantification')).toMatchObject({ status: 'ready' })
@@ -122,11 +122,11 @@ describe('ERG Viewer v2 report package', () => {
     expect(figures.get('source_data_appendix')).toMatchObject({ status: 'ready' })
   })
 
-  test('plans publication ERG panels from the root demo template', () => {
-    const file = 'demo/ERG_demo.xlsx'
+  test('plans publication ERG panels from the generated fixture', () => {
+    const file = 'test-fixtures/opto/demo-control-1_FERG.xlsx'
     const records = projectCore.parseWorkbookToSamples(XLSX.readFile(file), file)
     const project = projectCore.normalizeProject({
-      title: 'Root ERG demo template',
+      title: 'ERG fixture project',
       savedAt: '2026-06-28T00:00:00.000Z',
       samples: records,
     })
@@ -141,7 +141,7 @@ describe('ERG Viewer v2 report package', () => {
     const pkg = report.buildReportPackage(project, result)
     const figures = new Map(pkg.figures.map((figure) => [figure.id, figure]))
 
-    expect(project.samples.length).toBe(19)
+    expect(project.samples.length).toBe(24)
     expect(figures.get('erg_representative_traces')).toMatchObject({ status: 'ready' })
     expect(figures.get('erg_awave_response_curve')).toBeTruthy()
     expect(figures.get('erg_bwave_response_curve')).toBeTruthy()

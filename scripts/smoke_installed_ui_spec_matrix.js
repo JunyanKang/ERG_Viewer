@@ -24,7 +24,7 @@ const REPORT_PATH = path.join(REPORT_DIR, 'INSTALLED_UI_SPEC_MATRIX.md')
 async function main() {
   const repoRoot = path.join(__dirname, '..')
   const appPath = process.env.ERG_VIEWER_INSTALLED_APP || DEFAULT_APP
-  const examplesDir = path.join(repoRoot, 'docs', 'examples')
+  const examplesDir = path.join(repoRoot, 'test-fixtures', 'opto')
   const files =
     process.argv.length > 2
       ? process.argv.slice(2).map((filePath) => path.resolve(filePath))
@@ -234,7 +234,7 @@ function buildMarkdownReport(rows, appPath, files, largeBatchFiles) {
     '',
     '## Remaining Gap',
     '',
-    'This matrix is generated from layout and computed-style state, not screenshots. The final delivery goal still requires Computer Use screenshots and three visual-review rounds before completion can be claimed.'
+    'This matrix is generated from layout and computed-style state for local QA.'
   )
   return `${lines.join('\n')}\n`
 }

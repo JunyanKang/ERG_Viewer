@@ -22,7 +22,7 @@ const REPORT_PATH = path.join(REPORT_DIR, 'INSTALLED_INPUT_MODE_MATRIX.md')
 async function main() {
   const repoRoot = path.join(__dirname, '..')
   const appPath = process.env.ERG_VIEWER_INSTALLED_APP || DEFAULT_APP
-  const examplesDir = path.join(repoRoot, 'docs', 'examples')
+  const examplesDir = path.join(repoRoot, 'test-fixtures', 'opto')
   assert(fs.existsSync(appPath), `Installed app executable not found: ${appPath}`)
   const scenarios = scenarioDefinitions(examplesDir)
 

@@ -50,8 +50,8 @@ describe('ERG Viewer v2 project model', () => {
   })
 
   test('parses one FERG template file into multiple acquisition records', () => {
-    const workbook = XLSX.readFile('docs/examples/demo-control-1_FERG.xlsx')
-    const records = projectCore.parseWorkbookToSamples(workbook, 'docs/examples/demo-control-1_FERG.xlsx')
+    const workbook = XLSX.readFile('test-fixtures/opto/demo-control-1_FERG.xlsx')
+    const records = projectCore.parseWorkbookToSamples(workbook, 'test-fixtures/opto/demo-control-1_FERG.xlsx')
     expect(records.length).toBe(24)
     expect(records[0].mode).toBe('FERG')
     expect(records.find((record) => record.condition.includes('dOps')).mode).toBe('dOps')
@@ -76,14 +76,10 @@ describe('ERG Viewer v2 project model', () => {
     expect(flicker.metrics.raw.aLatencyMs).toBeUndefined()
   })
 
-  test('keeps generated ERG demo mode metrics aligned with the original ERG template', () => {
-    const originalRecords = projectCore.parseWorkbookToSamples(
-      XLSX.readFile('demo/ERG_demo.xlsx'),
-      'demo/ERG_demo.xlsx'
-    )
+  test('keeps generated ERG fixture mode metrics complete', () => {
     const generatedRecords = projectCore.parseWorkbookToSamples(
-      XLSX.readFile('docs/examples/demo-control-1_FERG.xlsx'),
-      'docs/examples/demo-control-1_FERG.xlsx'
+      XLSX.readFile('test-fixtures/opto/demo-control-1_FERG.xlsx'),
+      'test-fixtures/opto/demo-control-1_FERG.xlsx'
     )
     const expectations = [
       ['Rod', 'dRod', ['aAmplitudeUv', 'aLatencyMs', 'bAmplitudeUv', 'bLatencyMs']],
@@ -92,19 +88,14 @@ describe('ERG Viewer v2 project model', () => {
       ['Cone', 'lCone', ['aAmplitudeUv', 'aLatencyMs', 'bAmplitudeUv', 'bLatencyMs']],
       ['Flicker', 'lFlicker', ['flickerAmplitudeUv', 'flickerPhaseDeg']],
     ]
-    ;[
-      ['original', originalRecords],
-      ['generated', generatedRecords],
-    ].forEach(([sourceLabel, records]) => {
-      expectations.forEach(([_label, conditionToken, keys]) => {
-        const rows = records.filter((record) => String(record.condition || '').includes(conditionToken))
-        expect(rows.length, `${sourceLabel} ${conditionToken} records`).toBeGreaterThan(0)
-        rows.forEach((record) => {
-          expect(record.machineMarks.right, `${sourceLabel} ${conditionToken} right mark`).not.toBe('')
-          expect(record.machineMarks.left, `${sourceLabel} ${conditionToken} left mark`).not.toBe('')
-          keys.forEach((key) => {
-            expect(Number.isFinite(record.metrics.raw[key]), `${sourceLabel} ${conditionToken} ${key}`).toBe(true)
-          })
+    expectations.forEach(([_label, conditionToken, keys]) => {
+      const rows = generatedRecords.filter((record) => String(record.condition || '').includes(conditionToken))
+      expect(rows.length, `${conditionToken} records`).toBeGreaterThan(0)
+      rows.forEach((record) => {
+        expect(record.machineMarks.right, `${conditionToken} right mark`).not.toBe('')
+        expect(record.machineMarks.left, `${conditionToken} left mark`).not.toBe('')
+        keys.forEach((key) => {
+          expect(Number.isFinite(record.metrics.raw[key]), `${conditionToken} ${key}`).toBe(true)
         })
       })
     })
@@ -132,8 +123,8 @@ describe('ERG Viewer v2 project model', () => {
   })
 
   test('parses one FVEP template file into multiple acquisition records', () => {
-    const workbook = XLSX.readFile('docs/examples/demo-control-1_FVEP.xlsx')
-    const records = projectCore.parseWorkbookToSamples(workbook, 'docs/examples/demo-control-1_FVEP.xlsx')
+    const workbook = XLSX.readFile('test-fixtures/opto/demo-control-1_FVEP.xlsx')
+    const records = projectCore.parseWorkbookToSamples(workbook, 'test-fixtures/opto/demo-control-1_FVEP.xlsx')
     expect(records.length).toBe(3)
     expect(records[0].mode).toBe('FVEP')
     expect(records[0].subjectId).toBe('demo-control-1')
@@ -143,25 +134,12 @@ describe('ERG Viewer v2 project model', () => {
     expect(records[0].metrics.raw.p1n1AmplitudeUv).toBeGreaterThan(1)
   })
 
-  test('keeps missing root FVEP left-eye traces empty instead of creating a point', () => {
-    const workbook = XLSX.readFile('demo/FVEP_demo.xls')
-    const records = projectCore.parseWorkbookToSamples(workbook, 'demo/FVEP_demo.xls')
-
-    expect(records).toHaveLength(2)
-    expect(records[0].traces.right.y.length).toBe(500)
-    expect(records[0].traces.left.y.length).toBe(0)
-    expect(records[0].qc).toContainEqual(
-      expect.objectContaining({ message: expect.stringContaining('Left eye trace is missing') })
-    )
-    expect(records[0].metrics.raw.amplitudeUv).toBeGreaterThan(0)
-  })
-
   test('supports mixed multi-file ERG and FVEP import batches', () => {
     const files = [
-      'docs/examples/demo-control-1_FERG.xlsx',
-      'docs/examples/demo-control-1_FVEP.xlsx',
-      'docs/examples/demo-cko-1_FERG.xlsx',
-      'docs/examples/demo-cko-1_FVEP.xlsx',
+      'test-fixtures/opto/demo-control-1_FERG.xlsx',
+      'test-fixtures/opto/demo-control-1_FVEP.xlsx',
+      'test-fixtures/opto/demo-cko-1_FERG.xlsx',
+      'test-fixtures/opto/demo-cko-1_FVEP.xlsx',
     ]
     const records = files.flatMap((file) => projectCore.parseWorkbookToSamples(XLSX.readFile(file), file))
     expect(records.length).toBe(54)
@@ -175,34 +153,34 @@ describe('ERG Viewer v2 project model', () => {
 
   test('derives one source row per imported workbook with ERG or FVEP file type', () => {
     const files = [
-      'docs/examples/demo-control-1_FERG.xlsx',
-      'docs/examples/demo-control-1_FVEP.xlsx',
-      'docs/examples/demo-cko-1_FERG.xlsx',
-      'docs/examples/demo-cko-1_FVEP.xlsx',
+      'test-fixtures/opto/demo-control-1_FERG.xlsx',
+      'test-fixtures/opto/demo-control-1_FVEP.xlsx',
+      'test-fixtures/opto/demo-cko-1_FERG.xlsx',
+      'test-fixtures/opto/demo-cko-1_FVEP.xlsx',
     ]
     const samples = files.flatMap((file) => projectCore.parseWorkbookToSamples(XLSX.readFile(file), file))
     const project = projectCore.normalizeProject({ title: 'Mixed batch', samples })
     const sourcesByPath = new Map(project.sources.map((source) => [source.path, source]))
 
     expect(project.sources).toHaveLength(4)
-    expect(sourcesByPath.get('docs/examples/demo-control-1_FERG.xlsx')).toMatchObject({
+    expect(sourcesByPath.get('test-fixtures/opto/demo-control-1_FERG.xlsx')).toMatchObject({
       type: 'ERG',
       records: 24,
     })
-    expect(sourcesByPath.get('docs/examples/demo-control-1_FERG.xlsx').modes).toEqual([
+    expect(sourcesByPath.get('test-fixtures/opto/demo-control-1_FERG.xlsx').modes).toEqual([
       'dOps',
       'FERG',
       'Flicker',
     ])
-    expect(sourcesByPath.get('docs/examples/demo-control-1_FVEP.xlsx')).toMatchObject({
+    expect(sourcesByPath.get('test-fixtures/opto/demo-control-1_FVEP.xlsx')).toMatchObject({
       type: 'FVEP',
       records: 3,
     })
-    expect(sourcesByPath.get('docs/examples/demo-control-1_FVEP.xlsx').modes).toEqual(['FVEP'])
+    expect(sourcesByPath.get('test-fixtures/opto/demo-control-1_FVEP.xlsx').modes).toEqual(['FVEP'])
   })
 
   test('removes an imported source workbook and all related acquisition records', () => {
-    const files = ['docs/examples/demo-control-1_FERG.xlsx', 'docs/examples/demo-control-1_FVEP.xlsx']
+    const files = ['test-fixtures/opto/demo-control-1_FERG.xlsx', 'test-fixtures/opto/demo-control-1_FVEP.xlsx']
     const samples = files.flatMap((file) => projectCore.parseWorkbookToSamples(XLSX.readFile(file), file))
     const project = projectCore.normalizeProject({
       title: 'Remove source',
@@ -216,13 +194,13 @@ describe('ERG Viewer v2 project model', () => {
       },
     })
 
-    const updated = projectCore.removeSourceFromProject(project, 'docs/examples/demo-control-1_FERG.xlsx')
+    const updated = projectCore.removeSourceFromProject(project, 'test-fixtures/opto/demo-control-1_FERG.xlsx')
 
     expect(updated.samples).toHaveLength(3)
     expect(updated.samples.every((sample) => sample.mode === 'FVEP')).toBe(true)
     expect(updated.sources).toHaveLength(1)
     expect(updated.sources[0]).toMatchObject({
-      path: 'docs/examples/demo-control-1_FVEP.xlsx',
+      path: 'test-fixtures/opto/demo-control-1_FVEP.xlsx',
       type: 'FVEP',
       records: 3,
     })

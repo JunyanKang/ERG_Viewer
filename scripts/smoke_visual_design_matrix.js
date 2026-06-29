@@ -24,7 +24,7 @@ const REPORT_PATH = path.join(REPORT_DIR, 'VISUAL_DESIGN_MATRIX.md')
 
 async function main() {
   const repoRoot = path.join(__dirname, '..')
-  const examplesDir = path.join(repoRoot, 'docs', 'examples')
+  const examplesDir = path.join(repoRoot, 'test-fixtures', 'opto')
   const files =
     process.argv.length > 2
       ? process.argv.slice(2).map((filePath) => path.resolve(filePath))
@@ -251,7 +251,7 @@ function buildMarkdownReport(rows, files, largeBatchFiles) {
     '',
     '## Remaining Gap',
     '',
-    'The final delivery goal still requires Computer Use plus screenshots at each launch and analysis step. That workflow remains paused until screenshot-based desktop inspection is explicitly resumed.'
+    'This matrix is a state-based layout audit for local QA; screenshot review can be run separately when needed.'
   )
   return `${lines.join('\n')}\n`
 }

@@ -40,7 +40,7 @@ function main() {
 }
 
 function defaultSuites() {
-  const examplesDir = path.join(__dirname, '..', 'docs', 'examples')
+  const examplesDir = path.join(__dirname, '..', 'test-fixtures', 'opto')
   const allExampleFiles = fs
     .readdirSync(examplesDir)
     .filter((name) => name.endsWith('.xlsx'))
