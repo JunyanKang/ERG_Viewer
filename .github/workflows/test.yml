@@ -1,0 +1,50 @@
+name: Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    name: Lint + unit tests + coverage
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install cnpm
+        run: npm install -g cnpm --registry=https://registry.npmmirror.com
+
+      - name: Install dependencies
+        run: cnpm install
+
+      - name: Syntax check
+        run: npm run check:syntax
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Workflow smoke
+        run: npm run smoke:v2
+
+      - name: Scientific output smoke
+        run: npm run smoke:scientific-output
+
+      - name: Unit tests + coverage
+        run: npm run test:coverage
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 14

@@ -2,7 +2,7 @@
 
 [English](README_EN.md)
 
-ERG Viewer 是面向 OPTOPROBE Excel 导出文件的视觉电生理桌面分析工具。它把 ERG/FVEP 数据加载、左右眼波形复核、机器识别结果比较、手动标注、图像导出和数据导出整合在一个 Electron 应用中，服务于眼科电生理实验、临床科研质控和文章图表整理。
+ERG Viewer 是面向 OPTOPROBE Excel 导出文件的视觉电生理桌面分析工作站。它把 ERG/FVEP 数据加载、单样本波形复核、机器识别结果比较、人工修正、批量分组、统计分析、图像导出和源数据导出整合在一个 Electron 应用中，服务于眼科电生理实验、临床科研质控和文章图表整理。
 
 ## 功能概览
 
@@ -12,7 +12,10 @@ ERG Viewer 是面向 OPTOPROBE Excel 导出文件的视觉电生理桌面分析�
 - Ops 分析：支持 dOps 的 Op1-Op5 波峰/波谷标注与 sum O 计算。
 - Flicker 分析：读取机器幅值/相位，并基于波形重新计算傅里叶分量。
 - FVEP 分析：展示 N1/P1/N2/P2 机器识别结果，并支持手动复核标注。
-- Lab 实验分析：支持多文件导入、control/cko 等 cohort 自动推断、FERG/FVEP/dOps/Flicker 指标提取、分组均值/SEM 汇总和原始指标导出。
+- v2 实验工作流：支持 Intake / Review / Analysis / Report 四个工作区，覆盖项目新建、项目保存/导入、批量导入、cohort 分组、单记录 raw/manual/corrected 校正、分组作图、统计检验和完整项目导出。
+- 指标体系：FERG 支持 a-wave/b-wave latency、amplitude、b/a ratio；FVEP 支持 N1/P1/N2/P2 latency、amplitude 和 P1-N1、P1-N2、P2-N2 peak-to-peak amplitude；dOps 支持 summed OP amplitude；Flicker 支持机器 amplitude/phase 与波形 Fourier 重算 amplitude/phase。
+- 统计分析：两组默认 Welch t-test，多组默认 one-way ANOVA，并支持 Mann-Whitney、Kruskal-Wallis、效应量和 Benjamini-Hochberg FDR。
+- 产品级多语言：中文、英文、俄文、拉丁文、法文、德文界面切换，语言状态持久化，About 页面随语言切换并显示版本号。
 - Demo 展示：内置匿名 synthetic demo 数据，并提供脚本生成 OPTOPROBE 风格 Excel 示例文件。
 - 导出共享：支持 PNG、SVG、PDF 图像导出，Excel 绘图数据导出，以及图像/数据复制到剪贴板。
 
@@ -24,10 +27,10 @@ ERG_Viewer/
 ├── build/                   # electron-builder 资源：图标、Windows 附加文件
 ├── docs/                    # 架构、发布、实验分析、评审和示例数据
 ├── scripts/                 # 命令行工具：图标生成、Excel 解析冒烟测试、demo 数据生成
-├── src/
+├── src-v2/
 │   ├── main/                # Electron main process
 │   ├── preload/             # contextBridge / IPC API
-│   └── renderer/            # React + Plotly renderer
+│   └── renderer/            # React + Plotly renderer and core analysis modules
 ├── package.json             # 依赖、脚本和 electron-builder 配置
 └── README.md
 ```
@@ -45,6 +48,10 @@ cnpm run start
 
 如果本机默认 `node` 损坏，可以先确认 `cnpm -v` 输出中的 Node 路径是否可用。
 
+仓库根目录的 `.npmrc` 已经把 `registry` 指向 `https://registry.npmmirror.com`，所以直接 `npm install` / `pnpm install` 也会走镜像；`cnpm` 行为不变。
+
+> **注意 lockfile 一致性**：`cnpm` 与 `npm` 生成的 `package-lock.json` 格式不互通，混用会导致冲突。请团队统一只用 `cnpm install`（CI 也已经统一走 cnpm），避免 PR 互相覆盖 lockfile。
+
 ## 检查与冒烟测试
 
 ```bash
@@ -57,11 +64,13 @@ cnpm run gen:demo
 
 ## 实验分析与 Demo
 
-顶部 `Lab` 入口用于实验级批量分析。进入 Lab 后可以：
+v2 顶部工作流用于实验级分析。进入工作站后可以：
 
-- 点击 `Demo` 直接加载内置匿名 control/cko 示例。
-- 点击 `Add files` 批量导入 OPTOPROBE Excel。
-- 导出 raw metrics 或 cohort summary Excel。
+- 在 `Intake` 批量导入 OPTOPROBE Excel，并设置 cohort 分组、纳入/排除和统计设计。
+- 在 `Review` 查看单个 acquisition record 的 raw/manual/corrected 波形和校正后指标。
+- 在 `Analysis` 工作区选择指标、刺激条件、眼别、raw/corrected 版本和统计方法，生成分组图与统计结果；ERG/FVEP 统计不会混合不同刺激强度或信号条件。
+- 在 `Report` 工作区导出 samples、groups、metrics_raw、metrics_corrected、stats、figure_source 和 corrections_log。
+- 通过顶部 `Save Project / Open Project` 管理 `.ep` 项目文件，完整恢复样本、分组、纳入/排除、校正和分析设置；旧 `.ergproject` 文件仍可读取。
 
 示例数据可以通过以下命令重新生成：
 

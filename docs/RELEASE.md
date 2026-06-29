@@ -6,7 +6,7 @@ Keep `package.json` and the Git tag aligned:
 
 ```bash
 cnpm run check
-git tag v2.1.0
+git tag v3.0.0
 ```
 
 ## Build artifacts

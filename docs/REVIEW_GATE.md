@@ -16,7 +16,7 @@ Representative data:
 
 - Existing FERG demo: `Copy of 20250728#1.xlsx`
 - Supplied FVEP files: `Abhd11-ckoFVEP_2025-08-12.xls`, `Abhd11-ctrlFVEP_2025-08-12.xls`
-- Generated synthetic demos: `docs/examples/demo-*_FERG.xlsx`, `docs/examples/demo-*_FVEP.xls`
+- Generated synthetic demos: `docs/examples/demo-*_FERG.xlsx`, `docs/examples/demo-*_FVEP.xlsx`
 
 ## Round 1 review
 
@@ -117,11 +117,48 @@ Evidence:
 
 ## Final gate decision
 
-Status: pass.
+Status: v3 implementation review required after packaged UI verification.
+
+## Round 3 v3 review criteria
+
+### Product manager
+
+Decision: pending verification.
+
+Required checks:
+
+- Lab must read as a workflow, not as a raw-row dump: Project, Sample, Groups, Analysis and Export are separate.
+- Top-level actions must be project lifecycle actions: New, Save and Import.
+- A saved `.ep` project must restore samples, grouping, Include/Exclude state, corrections and analysis selectors.
+- Single-sample waveform review must be a subordinate project action with explicit return/close controls.
+- Window size must remain stable when switching groups, pages and languages.
+- About must be localized, product-grade and include the software version.
+- Export must contain source data, corrected data, statistics and correction provenance.
+
+### Biologist
+
+Decision: pending verification.
+
+Required checks:
+
+- Raw and corrected metrics must coexist; correction must not overwrite raw data.
+- FERG, FVEP, dOps and Flicker metrics must remain mode-specific with units.
+- ERG/FVEP statistics and figures must distinguish stimulus strength or signal condition.
+- FVEP parser must accept incomplete unit strings such as trailing `u` and must not fabricate missing paired peaks.
+- Group plots and statistics must preserve sample identity and group assignment.
+
+### Neurobiologist
+
+Decision: pending verification.
+
+Required checks:
+
+- ERG and FVEP remain interpretable as retinal versus visual-pathway modalities.
+- Latency, amplitude and peak-to-peak endpoints are separated.
+- Statistics must show descriptive-only status when sample size is insufficient.
+- Effect size and FDR must be displayed when inferential tests are valid.
 
 Remaining recommendations for future versions:
 
 - Add explicit metadata editor for cohort, genotype, age, treatment, and time point.
-- Add dot plots with mean/SEM and individual subject overlays.
-- Add statistical tests only after metadata is explicit enough to choose paired/unpaired and repeated-measures designs safely.
 - Add publication figure export for selected Lab panels.

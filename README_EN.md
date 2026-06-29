@@ -2,7 +2,7 @@
 
 [中文](README.md)
 
-ERG Viewer is a desktop visual electrophysiology analysis tool for OPTOPROBE Excel exports. It brings ERG/FVEP data loading, right/left eye waveform review, machine-result comparison, manual annotation, figure export, and data export into a single Electron application for ophthalmic electrophysiology experiments, clinical research quality control, and manuscript figure preparation.
+ERG Viewer is a desktop visual electrophysiology workstation for OPTOPROBE Excel exports. It brings ERG/FVEP loading, single-sample waveform review, machine-result comparison, manual correction, batch grouping, statistical analysis, figure export, and source-data export into one Electron application for ophthalmic electrophysiology experiments, clinical research quality control, and manuscript figure preparation.
 
 ## Features
 
@@ -12,7 +12,10 @@ ERG Viewer is a desktop visual electrophysiology analysis tool for OPTOPROBE Exc
 - Ops analysis: annotate Op1-Op5 peaks/troughs for dOps and calculate sum O.
 - Flicker analysis: read machine-reported amplitude/phase and recompute Fourier-based components from the waveform.
 - FVEP analysis: display machine-recognized N1/P1/N2/P2 results and support manual review annotations.
-- Lab analysis: import multiple files, infer cohorts such as control/cko, extract FERG/FVEP/dOps/Flicker metrics, summarize cohorts with mean/SEM, and export raw metrics.
+- v2 experiment workflow: use Intake / Review / Analysis / Report workspaces for project creation, project save/import, batch import, cohort grouping, raw/manual/corrected record review, grouped plots, statistical tests, and full project export.
+- Metric system: FERG a-wave/b-wave latency, amplitude, and b/a ratio; FVEP N1/P1/N2/P2 latency/amplitude plus P1-N1, P1-N2, and P2-N2 peak-to-peak amplitudes; dOps summed OP amplitude; Flicker machine amplitude/phase plus waveform-based Fourier amplitude/phase.
+- Statistics: Welch t-test by default for two groups, one-way ANOVA by default for multiple groups, with Mann-Whitney, Kruskal-Wallis, effect sizes, and Benjamini-Hochberg FDR.
+- Product localization: Chinese, English, Russian, Latin, French, and German UI switching, persisted language state, and a localized product-grade About window with version information.
 - Demo mode: load anonymized synthetic demo data in-app and generate OPTOPROBE-style Excel examples from a script.
 - Export and sharing: export PNG, SVG, and PDF figures, export plotting data as Excel, and copy images/data to the clipboard.
 
@@ -24,10 +27,10 @@ ERG_Viewer/
 ├── build/                   # electron-builder resources: icons and Windows extra files
 ├── docs/                    # Architecture, release, experiment analysis, review, and examples
 ├── scripts/                 # CLI tools: icon generation, smoke test, and demo data generation
-├── src/
+├── src-v2/
 │   ├── main/                # Electron main process
 │   ├── preload/             # contextBridge / IPC API
-│   └── renderer/            # React + Plotly renderer
+│   └── renderer/            # React + Plotly renderer and core analysis modules
 ├── package.json             # Dependencies, scripts, and electron-builder config
 └── README.md
 ```
@@ -45,6 +48,10 @@ cnpm run start
 
 If the system default `node` is broken, first check whether `cnpm -v` reports a usable Node path.
 
+The repo-root `.npmrc` already pins `registry` to `https://registry.npmmirror.com`, so plain `npm install` / `pnpm install` also routes through the mirror. `cnpm` behavior is unchanged.
+
+> **Lockfile consistency**: `cnpm` and `npm` produce incompatible `package-lock.json` formats; mixing them causes conflicts. Please standardize on `cnpm install` across the team (CI is already on cnpm) to avoid lockfile thrash in PRs.
+
 ## Checks and Smoke Test
 
 ```bash
@@ -57,11 +64,13 @@ cnpm run gen:demo
 
 ## Experiment Analysis and Demo
 
-The top toolbar `Lab` entry opens experiment-level batch analysis. In Lab you can:
+The v2 top workflow opens experiment-level analysis. In the workstation you can:
 
-- click `Demo` to load built-in anonymous control/cko examples,
-- click `Add files` to import multiple OPTOPROBE Excel files,
-- export raw metrics or cohort summary Excel workbooks.
+- use `Intake` to import multiple OPTOPROBE Excel files and assign cohort groups, inclusion state, and statistical design,
+- use `Review` to inspect raw/manual/corrected waveforms and corrected metrics for one acquisition record,
+- use `Analysis` to select metric, stimulus condition, eye, raw/corrected version, and statistical method; ERG/FVEP statistics do not mix different stimulus strengths or signal conditions,
+- use `Report` to write samples, groups, metrics_raw, metrics_corrected, stats, figure_source, and corrections_log sheets.
+- use top-level `Save Project / Open Project` actions to manage `.ep` project files that restore samples, groups, inclusion state, corrections, and analysis settings; legacy `.ergproject` files remain readable.
 
 Example files can be regenerated with:
 
