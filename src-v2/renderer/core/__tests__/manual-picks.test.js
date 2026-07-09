@@ -1,6 +1,6 @@
 const manualPicks = require('../manual-picks')
 
-describe('ERG Viewer v2 manual point helpers', () => {
+describe('OptoERGViewer v2 manual point helpers', () => {
   test('sets, nudges and clears an a/b-wave point without mutating the source', () => {
     const source = {}
     const withA = manualPicks.setManualPoint(source, 'right', 'a', { x: 30, y: -80 })

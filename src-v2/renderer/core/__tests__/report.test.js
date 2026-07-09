@@ -27,7 +27,7 @@ function sample(overrides) {
   }
 }
 
-describe('ERG Viewer v2 report package', () => {
+describe('OptoERGViewer v2 report package', () => {
   test('builds a report manifest from stimulus-aware FVEP analysis', () => {
     const project = projectCore.normalizeProject({
       title: 'FVEP report',

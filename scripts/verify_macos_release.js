@@ -3,8 +3,8 @@ const path = require('path')
 const { spawnSync } = require('child_process')
 
 const repoRoot = path.join(__dirname, '..')
-const installedApp = '/Applications/ERG Viewer.app'
-const installedExecutable = path.join(installedApp, 'Contents', 'MacOS', 'ERG Viewer')
+const installedApp = '/Applications/OptoERGViewer.app'
+const installedExecutable = path.join(installedApp, 'Contents', 'MacOS', 'OptoERGViewer')
 
 const steps = [
   ['npm', ['run', 'smoke:electron-state'], 'development Electron page state gates'],
@@ -17,7 +17,7 @@ const steps = [
   ['npm', ['run', 'smoke:electron-project-roundtrip'], 'development Electron project roundtrip gate'],
   ['npm', ['run', 'smoke:electron-quit'], 'development Electron quit gate'],
   ['npm', ['run', 'build:mac'], 'macOS DMG/ZIP build'],
-  ['ditto', [path.join(repoRoot, 'dist', 'mac-arm64', 'ERG Viewer.app'), installedApp], 'install app bundle into /Applications'],
+  ['ditto', [path.join(repoRoot, 'dist', 'mac-arm64', 'OptoERGViewer.app'), installedApp], 'install app bundle into /Applications'],
   ['npm', ['run', 'smoke:mac-release-artifacts'], 'macOS release artifact metadata gate'],
   ['npm', ['run', 'smoke:installed-app-ui'], 'installed app UI/layout/design/interaction gate'],
   ['npm', ['run', 'smoke:installed-visual-design-matrix'], 'installed app visual design matrix gate'],

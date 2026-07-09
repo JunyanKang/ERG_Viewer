@@ -6,7 +6,7 @@ const { spawn } = require('child_process')
 
 const electron = require('electron')
 
-const DEFAULT_APP = '/Applications/ERG Viewer.app/Contents/MacOS/ERG Viewer'
+const DEFAULT_APP = '/Applications/OptoERGViewer.app/Contents/MacOS/OptoERGViewer'
 const DEFAULT_FILES = [
   'demo-control-1_FERG.xlsx',
   'demo-cko-1_FERG.xlsx',

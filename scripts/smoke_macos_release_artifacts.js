@@ -3,14 +3,14 @@ const fs = require('fs')
 const path = require('path')
 const { spawnSync } = require('child_process')
 
-const INSTALLED_APP = '/Applications/ERG Viewer.app'
+const INSTALLED_APP = '/Applications/OptoERGViewer.app'
 
 function main() {
   const repoRoot = path.join(__dirname, '..')
   const packageJson = JSON.parse(fs.readFileSync(path.join(repoRoot, 'package.json'), 'utf8'))
   const version = String(packageJson.version || '').trim()
   const appId = String(packageJson.build && packageJson.build.appId ? packageJson.build.appId : '').trim()
-  const productName = String(packageJson.build && packageJson.build.productName ? packageJson.build.productName : 'ERG Viewer')
+  const productName = String(packageJson.build && packageJson.build.productName ? packageJson.build.productName : 'OptoERGViewer')
   assert(version, 'package.json version is missing')
   assert(appId, 'package.json build.appId is missing')
 

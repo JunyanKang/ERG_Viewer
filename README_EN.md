@@ -1,8 +1,8 @@
-# ERG Viewer
+# OptoERGViewer
 
 [中文](README.md)
 
-ERG Viewer is a desktop visual electrophysiology workstation for OPTOPROBE Excel exports. It brings ERG/FVEP loading, single-sample waveform review, machine-result comparison, manual correction, batch grouping, statistical analysis, figure export, and source-data export into one Electron application for ophthalmic electrophysiology experiments, clinical research quality control, and manuscript figure preparation.
+OptoERGViewer is a desktop visual electrophysiology workstation for OPTOPROBE Excel exports. It brings ERG/FVEP loading, single-sample waveform review, machine-result comparison, manual correction, batch grouping, statistical analysis, figure export, and source-data export into one Electron application for ophthalmic electrophysiology experiments, clinical research quality control, and manuscript figure preparation.
 
 ## Features
 

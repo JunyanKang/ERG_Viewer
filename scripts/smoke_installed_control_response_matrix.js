@@ -4,7 +4,7 @@ const os = require('os')
 const path = require('path')
 const { spawn } = require('child_process')
 
-const DEFAULT_APP = '/Applications/ERG Viewer.app/Contents/MacOS/ERG Viewer'
+const DEFAULT_APP = '/Applications/OptoERGViewer.app/Contents/MacOS/OptoERGViewer'
 const DEFAULT_FILES = [
   'demo-control-1_FERG.xlsx',
   'demo-cko-1_FERG.xlsx',
@@ -175,7 +175,7 @@ function buildMarkdownReport(report, files, appPath, repoRoot) {
     '',
     'Date: 2026-06-28',
     '',
-    'This non-screenshot matrix verifies the installed macOS app by launching `/Applications/ERG Viewer.app`, importing a representative mixed ERG/FVEP batch, clicking the instrumented controls, and recording expected versus actual state after each click. It complements, but does not replace, the paused Computer Use screenshot review.',
+    'This non-screenshot matrix verifies the installed macOS app by launching `/Applications/OptoERGViewer.app`, importing a representative mixed ERG/FVEP batch, clicking the instrumented controls, and recording expected versus actual state after each click. It complements, but does not replace, the paused Computer Use screenshot review.',
     '',
     '## Inputs',
     '',

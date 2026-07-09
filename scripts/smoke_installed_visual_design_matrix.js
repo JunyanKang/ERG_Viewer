@@ -4,7 +4,7 @@ const os = require('os')
 const path = require('path')
 const { spawn } = require('child_process')
 
-const DEFAULT_APP = '/Applications/ERG Viewer.app/Contents/MacOS/ERG Viewer'
+const DEFAULT_APP = '/Applications/OptoERGViewer.app/Contents/MacOS/OptoERGViewer'
 const STEPS = ['Intake', 'Review', 'Analysis', 'Report']
 const DEFAULT_FILES = [
   'demo-control-1_FERG.xlsx',

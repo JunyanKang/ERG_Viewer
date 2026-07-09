@@ -5,7 +5,7 @@ const path = require('path')
 const { spawn } = require('child_process')
 const XLSX = require('xlsx')
 
-const DEFAULT_APP = '/Applications/ERG Viewer.app/Contents/MacOS/ERG Viewer'
+const DEFAULT_APP = '/Applications/OptoERGViewer.app/Contents/MacOS/OptoERGViewer'
 
 async function main() {
   const repoRoot = path.join(__dirname, '..')

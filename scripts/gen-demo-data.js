@@ -90,7 +90,7 @@ function rowsForSample({ patient, cohort, item, date, scale, seed }) {
   const rows = [
     ['Item', 'Param', 'Value'],
     [item, '[检查项目]', item],
-    [item, '[医院_医院名字]', 'ERG Viewer Demo'],
+    [item, '[医院_医院名字]', 'OptoERGViewer Demo'],
     [item, '[病人_姓名]', patient],
     [item, '[病人_性别]', seed % 2 ? '女' : '男'],
     [item, '[病人_年龄]', '0岁'],

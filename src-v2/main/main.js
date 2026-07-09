@@ -16,7 +16,7 @@ const MIN_WINDOW_HEIGHT = 760
 
 let mainWindow = null
 
-app.setName('ERG Viewer')
+app.setName('OptoERGViewer')
 if (process.env.ERG_VIEWER_DISABLE_GPU === '1') {
   app.disableHardwareAcceleration()
 }
@@ -144,7 +144,7 @@ function createWindow() {
 function installApplicationMenu() {
   const template = [
     {
-      label: 'ERG Viewer',
+      label: 'OptoERGViewer',
       submenu: [
         { role: 'about' },
         { type: 'separator' },
@@ -153,7 +153,7 @@ function installApplicationMenu() {
         { role: 'unhide' },
         { type: 'separator' },
         {
-          label: 'Quit ERG Viewer',
+          label: 'Quit OptoERGViewer',
           accelerator: 'CommandOrControl+Q',
           click: () => app.quit(),
         },
@@ -163,7 +163,7 @@ function installApplicationMenu() {
       label: 'File',
       submenu: [
         {
-          label: 'Quit ERG Viewer',
+          label: 'Quit OptoERGViewer',
           accelerator: 'CommandOrControl+Q',
           click: () => app.quit(),
         },
@@ -237,10 +237,10 @@ ipcMain.handle('dialog:open-excel', async (_event, options) => {
 
 ipcMain.handle('dialog:open-project', async () => {
   const result = await dialog.showOpenDialog(mainWindow, {
-    title: 'Open ERG Viewer Project',
+    title: 'Open OptoERGViewer Project',
     properties: ['openFile'],
     filters: [
-      { name: 'ERG Viewer Project', extensions: ['ep', 'ergproject', 'json'] },
+      { name: 'OptoERGViewer Project', extensions: ['ep', 'ergproject', 'json'] },
       { name: 'All Files', extensions: ['*'] },
     ],
   })

@@ -28,7 +28,7 @@ function sample(overrides) {
   }
 }
 
-describe('ERG Viewer v2 scientific analysis model', () => {
+describe('OptoERGViewer v2 scientific analysis model', () => {
   test('builds an ERG analysis result with cohort summary and Welch statistics', () => {
     const project = projectCore.normalizeProject({
       samples: [

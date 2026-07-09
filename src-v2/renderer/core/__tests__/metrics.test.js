@@ -1,7 +1,7 @@
 const metrics = require('../metrics')
 const demo = require('../demo-data')
 
-describe('ERG Viewer v2 metrics', () => {
+describe('OptoERGViewer v2 metrics', () => {
   test('derives amplitude and latency metrics from bilateral traces', () => {
     const project = demo.createDemoProject()
     const sample = project.samples[0]

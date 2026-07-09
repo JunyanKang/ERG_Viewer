@@ -1,8 +1,8 @@
-# ERG Viewer
+# OptoERGViewer
 
 [English](README_EN.md)
 
-ERG Viewer 是面向 OPTOPROBE Excel 导出文件的视觉电生理桌面分析工作站。它把 ERG/FVEP 数据加载、单样本波形复核、机器识别结果比较、人工修正、批量分组、统计分析、图像导出和源数据导出整合在一个 Electron 应用中，服务于眼科电生理实验、临床科研质控和文章图表整理。
+OptoERGViewer 是面向 OPTOPROBE Excel 导出文件的视觉电生理桌面分析工作站。它把 ERG/FVEP 数据加载、单样本波形复核、机器识别结果比较、人工修正、批量分组、统计分析、图像导出和源数据导出整合在一个 Electron 应用中，服务于眼科电生理实验、临床科研质控和文章图表整理。
 
 ## 功能概览
 

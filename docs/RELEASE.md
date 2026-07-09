@@ -13,11 +13,11 @@ git tag v3.0.0
 
 Recommended release assets:
 
-- macOS: `ERG Viewer-<version>-mac-arm64.dmg`
-- macOS archive: `ERG Viewer-<version>-mac-arm64.zip`
-- Windows: `ERG Viewer-<version>-win-x64.exe`
-- Linux: `ERG Viewer-<version>-linux-x86_64.AppImage`
-- Optional Linux deb: `ERG Viewer-<version>-linux-amd64.deb` after Linux verification
+- macOS: `OptoERGViewer-<version>-mac-arm64.dmg`
+- macOS archive: `OptoERGViewer-<version>-mac-arm64.zip`
+- Windows: `OptoERGViewer-<version>-win-x64.exe`
+- Linux: `OptoERGViewer-<version>-linux-x86_64.AppImage`
+- Optional Linux deb: `OptoERGViewer-<version>-linux-amd64.deb` after Linux verification
 
 ## Privacy boundary
 

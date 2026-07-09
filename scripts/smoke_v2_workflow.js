@@ -125,7 +125,7 @@ function runSuite(name, files) {
     const htmlPath = path.join(tempDir, `${name}-report.html`)
     fs.writeFileSync(htmlPath, html, 'utf8')
     const restoredHtml = fs.readFileSync(htmlPath, 'utf8')
-    assert(restoredHtml.includes('ERG Viewer report'), `${name}: report HTML missing report title`)
+    assert(restoredHtml.includes('OptoERGViewer report'), `${name}: report HTML missing report title`)
     assert(restoredHtml.includes('Publication Figure Plan'), `${name}: report HTML missing figure plan`)
 
     console.log(

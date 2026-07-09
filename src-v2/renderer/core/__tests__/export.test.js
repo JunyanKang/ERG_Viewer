@@ -4,7 +4,7 @@ const analysis = require('../analysis')
 const report = require('../report')
 const demo = require('../demo-data')
 
-describe('ERG Viewer v2 project workbook export', () => {
+describe('OptoERGViewer v2 project workbook export', () => {
   test('builds reproducible workbook sheets with raw, manual and correction provenance', () => {
     const project = projectCore.normalizeProject(demo.createDemoProject())
     project.samples[0].corrections.manualPoints.right.a = { x: 30, y: -80 }

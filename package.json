@@ -2,7 +2,7 @@
   "name": "erg-viewer",
   "version": "3.0.0",
   "private": true,
-  "description": "ERG Viewer for OPTOPROBE Excel exports; plotting, annotation and export.",
+  "description": "OptoERGViewer for OPTOPROBE Excel exports; plotting, annotation and export.",
   "author": "KangLab",
   "license": "UNLICENSED",
   "main": "src-v2/main/main.js",
@@ -80,7 +80,7 @@
   },
   "build": {
     "appId": "com.kanglab.ergviewer",
-    "productName": "ERG Viewer",
+    "productName": "OptoERGViewer",
     "asar": true,
     "files": [
       "src-v2/**/*",
@@ -108,14 +108,14 @@
     "fileAssociations": [
       {
         "ext": "ep",
-        "name": "ERG Viewer Project",
-        "description": "ERG Viewer project file",
+        "name": "OptoERGViewer Project",
+        "description": "OptoERGViewer project file",
         "role": "Editor"
       },
       {
         "ext": "ergproject",
-        "name": "Legacy ERG Viewer Project",
-        "description": "Legacy ERG Viewer project file",
+        "name": "Legacy OptoERGViewer Project",
+        "description": "Legacy OptoERGViewer project file",
         "role": "Editor"
       }
     ],
@@ -150,7 +150,7 @@
       "perMachine": false,
       "allowToChangeInstallationDirectory": false,
       "deleteAppDataOnUninstall": false,
-      "shortcutName": "ERG Viewer"
+      "shortcutName": "OptoERGViewer"
     }
   }
 }

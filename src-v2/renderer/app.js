@@ -18,6 +18,8 @@
   const STEPS = ['Intake', 'Review', 'Analysis', 'Report']
   const FILTERS = ['ERG', 'FVEP']
   const ACQUISITION_CATEGORY_ORDER = ['Rod', 'Max', 'Cone', 'OPs', 'Flicker', 'Other']
+  const Y_AXIS_STEP_OPTIONS = [1, 2, 3, 5, 10, 15, 20, 25, 30, 50, 100]
+  const ALL_REPRESENTATIVE_SAMPLES = '__all_representative_samples__'
   const WORKBOOK_SHEETS = [
     'samples',
     'groups',
@@ -393,7 +395,7 @@
         const qaActiveStep = api.getQaActiveStep ? api.getQaActiveStep() : ''
         const parsed = JSON.parse(text)
         if (!isExpectedProjectPayload(parsed)) {
-          throw new Error('not an ERG Viewer project file')
+          throw new Error('not an OptoERGViewer project file')
         }
         const loaded = projectCore.normalizeProject({
           ...parsed,
@@ -432,11 +434,11 @@
       if (!api) return
       try {
         const filePath = await api.saveDialog({
-          title: 'Save ERG Viewer v2 Project',
+          title: 'Save OptoERGViewer Project',
           defaultPath: project.projectFilePath || `${projectCore.makeId(project.title)}.${PROJECT_FILE_EXTENSION}`,
           filters: [
-            { name: 'ERG Viewer Project', extensions: [PROJECT_FILE_EXTENSION] },
-            { name: 'Legacy ERG Viewer Project', extensions: LEGACY_PROJECT_FILE_EXTENSIONS },
+            { name: 'OptoERGViewer Project', extensions: [PROJECT_FILE_EXTENSION] },
+            { name: 'Legacy OptoERGViewer Project', extensions: LEGACY_PROJECT_FILE_EXTENSIONS },
           ],
         })
         if (!filePath) return
@@ -503,7 +505,7 @@
       }
       try {
         const filePath = await api.saveDialog({
-          title: 'Export ERG Viewer Analysis Workbook',
+          title: 'Export OptoERGViewer Analysis Workbook',
           defaultPath: `${projectCore.makeId(project.title)}-analysis.xlsx`,
           filters: [{ name: 'Excel Workbook', extensions: ['xlsx'] }],
         })
@@ -537,7 +539,7 @@
       }
       try {
         const filePath = await api.saveDialog({
-          title: 'Export ERG Viewer Report PDF',
+          title: 'Export OptoERGViewer Report PDF',
           defaultPath: `${projectCore.makeId(project.title)}-report.pdf`,
           filters: [{ name: 'PDF Report', extensions: ['pdf'] }],
         })
@@ -947,7 +949,7 @@
           e(
             'div',
             null,
-            e('div', { className: 'brand-title' }, 'ERG Viewer v2'),
+            e('div', { className: 'brand-title' }, 'OptoERGViewer'),
             e(
               'div',
               { className: 'brand-subtitle' },
@@ -982,8 +984,8 @@
           'button',
           {
             className: 'quit-action',
-            title: 'Quit ERG Viewer completely.',
-            'aria-label': 'Quit ERG Viewer completely',
+            title: 'Quit OptoERGViewer completely.',
+            'aria-label': 'Quit OptoERGViewer completely',
             onClick: onQuit,
           },
           'Quit'
@@ -1010,8 +1012,9 @@
     onNudgeManualPoint,
   }) {
     const [activePick, setActivePick] = React.useState(null)
-    const [lastPicked, setLastPicked] = React.useState(null)
     const [plotYMode, setPlotYMode] = React.useState('auto')
+    const [plotYRangeOverride, setPlotYRangeOverride] = React.useState(null)
+    const [plotYStep, setPlotYStep] = React.useState(10)
     const [plotResetToken, setPlotResetToken] = React.useState(0)
     React.useEffect(() => setActivePick(null), [sample && sample.id])
     const raw = sample && sample.metrics ? sample.metrics.raw : {}
@@ -1020,7 +1023,9 @@
       : {}
     const pickTargets = sample ? manualTargetsForMode(sample.mode) : []
     const reviewScope = buildReviewScope(project && project.samples, sample)
-    const sharedYRange = sharedWaveformYRange(sample, plotYMode)
+    const navigation = reviewNavigation(project && project.samples, sample)
+    const autoYRange = sharedWaveformYRange(sample, plotYMode)
+    const sharedYRange = normalizedYRange(plotYRangeOverride) || autoYRange
     const qaManualPick = api && api.getQaManualPick ? api.getQaManualPick() : ''
     const qaActivePick = parseQaManualPickPreset(qaManualPick, pickTargets)
     const manualPoints = sample
@@ -1033,7 +1038,6 @@
     function handlePick(side, point) {
       if (!activePick || activePick.side !== side) return
       onManualPick(side, activePick.key, point)
-      setLastPicked({ ...activePick, point })
     }
     function activatePick(side, target) {
       setActivePick({ side, key: target.key, label: target.label })
@@ -1041,11 +1045,29 @@
     function clearActivePick() {
       if (!activePick) return
       onClearManualPoint(activePick.side, activePick.key)
-      setLastPicked(null)
     }
     function nudgeActivePick(delta) {
       if (!activePick || !selectedPoint) return
       onNudgeManualPoint(activePick.side, activePick.key, delta)
+    }
+    function setYMode(mode) {
+      setPlotYMode(mode)
+      setPlotYRangeOverride(null)
+      setPlotResetToken((value) => value + 1)
+    }
+    function resetYRange() {
+      setPlotYRangeOverride(null)
+      setPlotResetToken((value) => value + 1)
+    }
+    function adjustYLimit(limit, direction) {
+      const currentRange = normalizedYRange(plotYRangeOverride) || autoYRange
+      if (!currentRange) return
+      setPlotYRangeOverride(adjustYRangeLimit(currentRange, limit, direction, plotYStep))
+      setPlotResetToken((value) => value + 1)
+    }
+    function goToSample(target) {
+      if (!target || !onReviewScope) return
+      onReviewScope({ sampleId: target.id })
     }
     React.useEffect(() => {
       if (!qaActivePick) return
@@ -1123,24 +1145,29 @@
         }),
         e(
           'div',
-          { className: 'review-plot-actions' },
+          { className: 'review-nav-actions' },
           e(
             'button',
             {
-              className: plotYMode === 'auto' ? 'active' : '',
-              onClick: () => setPlotYMode('auto'),
+              type: 'button',
+              disabled: !navigation.previous,
+              title: navigation.previous ? 'Previous record' : 'No previous record',
+              'aria-label': 'Previous record',
+              onClick: () => goToSample(navigation.previous),
             },
-            'Y Auto'
+            '←'
           ),
           e(
             'button',
             {
-              className: plotYMode === 'symmetric' ? 'active' : '',
-              onClick: () => setPlotYMode('symmetric'),
+              type: 'button',
+              disabled: !navigation.next,
+              title: navigation.next ? 'Next record' : 'No next record',
+              'aria-label': 'Next record',
+              onClick: () => goToSample(navigation.next),
             },
-            'Y +/-'
-          ),
-          e('button', { onClick: () => setPlotResetToken((value) => value + 1) }, 'Reset zoom')
+            '→'
+          )
         )
       ),
       e(
@@ -1182,6 +1209,16 @@
             onPick: handlePick,
           })
         ),
+        e(ReviewYAxisControls, {
+          mode: plotYMode,
+          range: sharedYRange,
+          step: plotYStep,
+          hasTrace: Boolean(sharedYRange),
+          onMode: setYMode,
+          onReset: resetYRange,
+          onAdjust: adjustYLimit,
+          onStep: setPlotYStep,
+        }),
         e(ManualPickPanel, {
           sample,
           raw,
@@ -1189,7 +1226,6 @@
           pickTargets,
           activePick,
           selectedPoint,
-          lastPicked,
           manualPoints,
           onArm: activatePick,
           onCancel: () => setActivePick(null),
@@ -1216,6 +1252,130 @@
         },
         optionList.map((option) =>
           e('option', { key: option || label, value: option || '' }, (labels && labels[option]) || option || label)
+        )
+      )
+    )
+  }
+
+  function ReviewYAxisControls({
+    mode,
+    range,
+    step,
+    hasTrace,
+    onMode,
+    onReset,
+    onAdjust,
+    onStep,
+    className = 'review-plot-actions',
+    ariaLabel = 'Review waveform y-axis controls',
+  }) {
+    const stepValue = Y_AXIS_STEP_OPTIONS.includes(Number(step)) ? Number(step) : 10
+    const compact = String(className || '').includes('analysis-axis-controls')
+    return e(
+      'div',
+      { className, 'aria-label': ariaLabel },
+      e(
+        'div',
+        { className: 'y-mode-buttons' },
+        e(
+          'button',
+          {
+            type: 'button',
+            className: mode === 'auto' ? 'active' : '',
+            disabled: !hasTrace,
+            title: hasTrace ? 'Use a padded waveform y-axis range.' : 'Y-axis controls require waveform data.',
+            'aria-label': 'Use automatic y-axis range',
+            onClick: () => onMode && onMode('auto'),
+          },
+          'Y Auto'
+        ),
+        e(
+          'button',
+          {
+            type: 'button',
+            className: mode === 'symmetric' ? 'active' : '',
+            disabled: !hasTrace,
+            title: hasTrace ? 'Use a symmetric positive and negative y-axis range.' : 'Y-axis controls require waveform data.',
+            'aria-label': 'Use symmetric y-axis range',
+            onClick: () => onMode && onMode('symmetric'),
+          },
+          'Y +/-'
+        ),
+        e(
+          'button',
+          {
+            type: 'button',
+            disabled: !hasTrace,
+            title: hasTrace ? 'Reset plot zoom and y-axis range.' : 'Y-axis controls require waveform data.',
+            'aria-label': 'Reset review plot zoom',
+            onClick: () => onReset && onReset(),
+          },
+          'Reset'
+        )
+      ),
+      e(YAxisLimitStepper, {
+        label: compact ? 'Min' : 'Y min',
+        value: range && range[0],
+        disabled: !hasTrace,
+        onAdjust: (direction) => onAdjust && onAdjust('min', direction),
+      }),
+      e(YAxisLimitStepper, {
+        label: compact ? 'Max' : 'Y max',
+        value: range && range[1],
+        disabled: !hasTrace,
+        onAdjust: (direction) => onAdjust && onAdjust('max', direction),
+      }),
+      e(
+        'label',
+        { className: 'y-step-select' },
+        e('span', null, 'Step'),
+        e('select', {
+          value: stepValue,
+          disabled: !hasTrace,
+          title: hasTrace ? 'Step used by y-min/y-max buttons and mouse wheel.' : 'Y-axis controls require waveform data.',
+          'aria-label': 'Y-axis adjustment step',
+          onChange: (event) => onStep && onStep(Number(event.target.value)),
+        }, Y_AXIS_STEP_OPTIONS.map((option) => e('option', { key: option, value: option }, option)))
+      )
+    )
+  }
+
+  function YAxisLimitStepper({ label, value, disabled, onAdjust }) {
+    const displayValue = Number.isFinite(Number(value)) ? formatAxisLimit(value) : '—'
+    function handleWheel(event) {
+      if (disabled) return
+      event.preventDefault()
+      onAdjust && onAdjust(event.deltaY < 0 ? 1 : -1)
+    }
+    return e(
+      'div',
+      { className: 'y-limit-stepper', onWheel: handleWheel },
+      e('span', { className: 'y-limit-label' }, label),
+      e('span', { className: 'y-limit-value', title: `${label}: ${displayValue} µV` }, displayValue),
+      e(
+        'div',
+        { className: 'y-limit-buttons' },
+        e(
+          'button',
+          {
+            type: 'button',
+            disabled,
+            title: `Increase ${label}`,
+            'aria-label': `Increase ${label}`,
+            onClick: () => onAdjust && onAdjust(1),
+          },
+          '+'
+        ),
+        e(
+          'button',
+          {
+            type: 'button',
+            disabled,
+            title: `Decrease ${label}`,
+            'aria-label': `Decrease ${label}`,
+            onClick: () => onAdjust && onAdjust(-1),
+          },
+          '-'
         )
       )
     )
@@ -1257,6 +1417,9 @@
   function selectReviewSample(samples, currentSample, patch) {
     const allSamples = Array.isArray(samples) ? samples : []
     if (!allSamples.length) return null
+    if (patch && patch.sampleId) {
+      return allSamples.find((sample) => sample.id === patch.sampleId) || currentSample || allSamples[0]
+    }
     const current = currentSample || allSamples[0]
     const currentCategory = acquisitionCategory(current)
     const target = {
@@ -1279,6 +1442,51 @@
       if (conditioned.length) candidates = conditioned
     }
     return sortSamplesByStimulus(candidates)[0] || current || allSamples[0]
+  }
+
+  function reviewNavigation(samples, sample) {
+    const ordered = sortReviewSamples(samples)
+    if (!ordered.length || !sample) return { previous: null, next: null, index: -1, count: ordered.length }
+    const index = ordered.findIndex((row) => row.id === sample.id)
+    if (index === -1) return { previous: null, next: null, index: -1, count: ordered.length }
+    return {
+      previous: ordered[index - 1] || null,
+      next: ordered[index + 1] || null,
+      index,
+      count: ordered.length,
+    }
+  }
+
+  function sortReviewSamples(samples) {
+    return [...(samples || [])].sort((left, right) => {
+      const leftType = recordSourceType(left)
+      const rightType = recordSourceType(right)
+      if (leftType !== rightType) return leftType.localeCompare(rightType)
+      const leftName = reviewSampleName(left)
+      const rightName = reviewSampleName(right)
+      if (leftName !== rightName) return leftName.localeCompare(rightName, undefined, { numeric: true })
+      const leftCategory = acquisitionCategory(left)
+      const rightCategory = acquisitionCategory(right)
+      const categoryDiff = acquisitionCategoryRank(leftCategory.key) - acquisitionCategoryRank(rightCategory.key)
+      if (categoryDiff) return categoryDiff
+      const stimulusDiff = conditionSortValue(left) - conditionSortValue(right)
+      if (stimulusDiff) return stimulusDiff
+      const leftNo = Number(left && left.acquisitionId)
+      const rightNo = Number(right && right.acquisitionId)
+      if (Number.isFinite(leftNo) && Number.isFinite(rightNo) && leftNo !== rightNo) return leftNo - rightNo
+      return String(left && left.id).localeCompare(String(right && right.id), undefined, { numeric: true })
+    })
+  }
+
+  function acquisitionCategoryRank(key) {
+    const plainKey = String(key || '').startsWith('FVEP:') ? 'FVEP' : key
+    const index = ACQUISITION_CATEGORY_ORDER.indexOf(plainKey)
+    return index === -1 ? ACQUISITION_CATEGORY_ORDER.length : index
+  }
+
+  function conditionSortValue(sample) {
+    const meta = parseConditionLabel(sample && sample.condition)
+    return Number.isFinite(meta.stimulusValue) ? meta.stimulusValue : Number.MAX_SAFE_INTEGER
   }
 
   function firstSampleForAnalysisCategory(samples, sourceType, categoryKey) {
@@ -1307,26 +1515,45 @@
     return matched ? acquisitionCategory(matched).key : ''
   }
 
-  function representativeSample(samples, plan, group) {
+  function representativeSampleRows(samples, plan, group, condition, eye = 'average-eyes') {
     const activePlan = plan || {}
-    const rows = (Array.isArray(samples) ? samples : []).filter((sample) => {
+    return (Array.isArray(samples) ? samples : []).filter((sample) => {
       if (sample.included === false) return false
       if (group && group !== 'All' && sample.cohort !== group) return false
+      if (condition && sample.condition !== condition) return false
       if (activePlan.sourceType && activePlan.sourceType !== 'All' && recordSourceType(sample) !== activePlan.sourceType) return false
       if (activePlan.protocolMode && activePlan.protocolMode !== 'All' && sample.mode !== activePlan.protocolMode) return false
       const family = parseConditionLabel(sample.condition).protocolFamily || 'All'
       if (activePlan.protocolFamily && activePlan.protocolFamily !== 'All' && family !== activePlan.protocolFamily) return false
-      return hasTrace(sample && sample.traces && sample.traces.right) || hasTrace(sample && sample.traces && sample.traces.left)
+      return Boolean(representativeTrace(sample, eye))
     })
+  }
+
+  function representativeSampleOptions(samples, plan, group, condition, eye = 'average-eyes') {
+    const rows = sortSamplesByStimulus(representativeSampleRows(samples, plan, group, condition, eye))
+    return rows.map((sample) => ({
+      id: sample.id,
+      label: sample.subjectId || reviewSampleName(sample) || sample.label || sample.id,
+    }))
+  }
+
+  function representativeSample(samples, plan, group, condition, sampleId, eye = 'average-eyes') {
+    const rows = sortSamplesByStimulus(representativeSampleRows(samples, plan, group, condition, eye))
+    if (sampleId) {
+      const selected = rows.find((sample) => sample.id === sampleId)
+      if (selected) return selected
+    }
     return sortSamplesByStimulus(rows)[0] || null
   }
 
   function representativeTrace(sample, eye) {
-    if (!sample || !sample.traces) return null
-    if (eye === 'left') return hasTrace(sample.traces.left) ? sample.traces.left : null
-    if (eye !== 'average') return hasTrace(sample.traces.right) ? sample.traces.right : null
-    const right = sample.traces.right
-    const left = sample.traces.left
+    if (!sample || !sample.traces || sample.included === false) return null
+    const right = isAnalysisEyeIncluded(sample, 'right') ? sample.traces.right : null
+    const left = isAnalysisEyeIncluded(sample, 'left') ? sample.traces.left : null
+    if (eye === 'left' || eye === 'left-eye') return hasTrace(left) ? left : null
+    if (eye === 'right' || eye === 'right-eye') return hasTrace(right) ? right : null
+    const useAverage = eye === 'average' || eye === 'average-eyes'
+    if (!useAverage) return hasTrace(right) ? right : null
     if (!hasTrace(right) && !hasTrace(left)) return null
     if (!hasTrace(right)) return left
     if (!hasTrace(left)) return right
@@ -1335,6 +1562,195 @@
       x: right.x.slice(0, length),
       y: right.y.slice(0, length).map((value, index) => (Number(value) + Number(left.y[index])) / 2),
     }
+  }
+
+  function representativeEyeSides(eye) {
+    if (eye === 'left' || eye === 'left-eye') return ['left']
+    if (eye === 'average' || eye === 'average-eyes') return ['right', 'left']
+    return ['right']
+  }
+
+  function representativeRawPointForTarget(sample, side, target, raw) {
+    const match = String(target && target.key).match(/^op([1-5])-(peak|valley)$/i)
+    if (match) return inferredRawOpPoint(sample, side, Number(match[1]), match[2].toLowerCase())
+    return inferredRawPointForTarget(sample, side, target && target.key, raw)
+  }
+
+  function representativeTargetKeysForMetric(metricKey, mode) {
+    const key = String(metricKey || '')
+    if (key === 'aAmplitudeUv' || key === 'aLatencyMs') return ['a']
+    if (key === 'bAmplitudeUv' || key === 'bLatencyMs') return ['b']
+    const opMatch = key.match(/^op([1-5])AmplitudeUv$/)
+    if (opMatch) return [`op${opMatch[1]}-peak`, `op${opMatch[1]}-valley`]
+    if (key === 'sumOpAmplitudeUv') {
+      return [1, 2, 3, 4, 5].flatMap((index) => [`op${index}-peak`, `op${index}-valley`])
+    }
+    if (/^flicker/.test(key)) return ['flickerTrough', 'flickerPeak']
+    if (key === 'p1n1AmplitudeUv') return ['N1', 'P1']
+    if (key === 'p1n2AmplitudeUv') return ['P1', 'N2']
+    if (key === 'p2n2AmplitudeUv') return ['N2', 'P2']
+    if (key === 'n1LatencyMs') return ['N1']
+    if (key === 'p1LatencyMs') return ['P1']
+    if (key === 'n2LatencyMs') return ['N2']
+    if (key === 'p2LatencyMs') return ['P2']
+    return manualTargetsForMode(mode).map((target) => target.key)
+  }
+
+  function hasManualRepresentativePoint(samples, eye, metricKey) {
+    return (Array.isArray(samples) ? samples : []).some((sample) =>
+      representativeEyeSides(eye)
+        .filter((side) => isAnalysisEyeIncluded(sample, side) && hasTrace(sample && sample.traces && sample.traces[side]))
+        .some((side) =>
+          representativeTargetKeysForMetric(metricKey, sample && sample.mode).some((key) =>
+            Boolean(manualPicks.getManualPoint(sample.corrections && sample.corrections.manualPoints, side, key))
+          )
+        )
+    )
+  }
+
+  function representativeSeries(rows, group, sampleId, eye) {
+    const samples = sortSamplesByStimulus(rows || [])
+    if (sampleId && sampleId !== ALL_REPRESENTATIVE_SAMPLES) {
+      const sample = samples.find((row) => row.id === sampleId) || samples[0]
+      const trace = representativeTrace(sample, eye)
+      return trace
+        ? [
+            {
+              key: sample.id,
+              label: sample.subjectId || reviewSampleName(sample) || sample.label || 'Sample',
+              trace,
+              sample,
+              samples: sample ? [sample] : [],
+            },
+          ]
+        : []
+    }
+    const groups = group === 'All'
+      ? uniqueSorted(samples.map((sample) => sample.cohort || 'Group').filter(Boolean))
+      : [group || 'Group']
+    return groups
+      .map((groupName) => {
+        const groupSamples = group === 'All'
+          ? samples.filter((sample) => (sample.cohort || 'Group') === groupName)
+          : samples
+        const trace = averageRepresentativeTrace(groupSamples, eye)
+        return trace
+          ? {
+              key: groupName,
+              label:
+                groupName === 'All'
+                  ? `All groups n=${groupSamples.length}`
+                  : `${groupName} n=${groupSamples.length}`,
+              trace,
+              sample: groupSamples[0] || null,
+              samples: groupSamples,
+            }
+          : null
+      })
+      .filter(Boolean)
+  }
+
+  function averageRepresentativeTrace(samples, eye) {
+    const traces = (samples || []).map((sample) => representativeTrace(sample, eye)).filter(hasTrace)
+    if (!traces.length) return null
+    const length = Math.min(...traces.map((trace) => Math.min(trace.x.length, trace.y.length)))
+    if (!length) return null
+    return {
+      x: traces[0].x.slice(0, length),
+      y: Array.from({ length }, (_item, index) => {
+        const values = traces.map((trace) => Number(trace.y[index])).filter(Number.isFinite)
+        return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : NaN
+      }),
+    }
+  }
+
+  function representativeMarkersForSeries(series, eye, layer, metricKey) {
+    return (series || []).flatMap((item, seriesIndex) => {
+      const samples = Array.isArray(item.samples) ? item.samples : item.sample ? [item.sample] : []
+      const mode = item.sample && item.sample.mode
+      const targets = representativeTargetKeysForMetric(metricKey, mode)
+        .map((key) => manualTargetsForMode(mode).find((target) => target.key === key))
+        .filter(Boolean)
+      if (layer !== 'manual') {
+        return targets
+          .map((target) => {
+            const point = representativePointOnTrace(item.trace, target)
+            return point
+              ? {
+                  ...point,
+                  key: `${item.key}-${target.key}`,
+                  side: eye,
+                  seriesIndex,
+                  label: target.label,
+                }
+              : null
+          })
+          .filter(Boolean)
+      }
+      return targets.map((target) => {
+        const manualX = meanFinite(samples.flatMap((sample) =>
+          representativeEyeSides(eye)
+            .filter((side) => isAnalysisEyeIncluded(sample, side))
+            .map((side) => manualPicks.getManualPoint(sample.corrections && sample.corrections.manualPoints, side, target.key))
+            .filter(Boolean)
+            .map((point) => point.x)
+        ))
+        const y = traceYAtX(item.trace, manualX)
+        return {
+          key: `${item.key}-${target.key}`,
+          x: manualX,
+          y,
+          side: eye,
+          seriesIndex,
+          label: target.label,
+        }
+      })
+    }).filter((point) => Number.isFinite(Number(point.x)) && Number.isFinite(Number(point.y)))
+  }
+
+  function representativePointOnTrace(trace, target) {
+    if (!hasTrace(trace) || !target) return null
+    const sample = { traces: { right: trace } }
+    const match = String(target.key).match(/^op([1-5])-(peak|valley)$/i)
+    if (match) return inferredRawOpPoint(sample, 'right', Number(match[1]), match[2].toLowerCase())
+    return inferredRawPointForTarget(sample, 'right', target.key, null)
+  }
+
+  function traceYAtX(trace, xValue) {
+    if (!hasTrace(trace) || !Number.isFinite(Number(xValue))) return NaN
+    const x = Number(xValue)
+    const xs = trace.x.map(Number)
+    const ys = trace.y.map(Number)
+    let nearestIndex = -1
+    for (let index = 0; index < xs.length; index += 1) {
+      const currentX = xs[index]
+      const currentY = ys[index]
+      if (!Number.isFinite(currentX) || !Number.isFinite(currentY)) continue
+      if (nearestIndex < 0 || Math.abs(currentX - x) < Math.abs(xs[nearestIndex] - x)) nearestIndex = index
+      if (index === 0) continue
+      const previousX = xs[index - 1]
+      const previousY = ys[index - 1]
+      if (!Number.isFinite(previousX) || !Number.isFinite(previousY)) continue
+      const between = (previousX <= x && x <= currentX) || (currentX <= x && x <= previousX)
+      if (!between || currentX === previousX) continue
+      const ratio = (x - previousX) / (currentX - previousX)
+      return previousY + ratio * (currentY - previousY)
+    }
+    return nearestIndex >= 0 ? ys[nearestIndex] : NaN
+  }
+
+  function meanFinite(values) {
+    const finite = (values || []).map(Number).filter(Number.isFinite)
+    return finite.length ? finite.reduce((sum, value) => sum + value, 0) / finite.length : NaN
+  }
+
+  function selectedResponseCondition(conditionRows, currentCondition) {
+    const rows = Array.isArray(conditionRows) ? conditionRows : []
+    if (currentCondition && rows.some((row) => row.condition === currentCondition)) return currentCondition
+    const conditions = Array.from(new Set(rows.map((row) => row.condition).filter(Boolean))).sort((left, right) =>
+      conditionSort(left, right, rows)
+    )
+    return conditions[0] || ''
   }
 
   function hasTrace(trace) {
@@ -1386,11 +1802,118 @@
     if (mode === 'symmetric') {
       const amplitude = Math.max(Math.abs(min), Math.abs(max), 1)
       const pad = Math.max(5, amplitude * 0.08)
-      return [-(amplitude + pad), amplitude + pad]
+      const bound = roundAxisLimitUp(amplitude + pad, 5)
+      return [-bound, bound]
     }
     const span = Math.max(max - min, 1)
     const pad = Math.max(5, span * 0.08)
-    return [min - pad, max + pad]
+    return [roundAxisLimitDown(min - pad, 5), roundAxisLimitUp(max + pad, 5)]
+  }
+
+  function paddedYRange(values, mode, { includeZero = false } = {}) {
+    const finiteValues = (values || []).map(Number).filter(Number.isFinite)
+    if (includeZero) finiteValues.push(0)
+    if (!finiteValues.length) return null
+    const min = Math.min(...finiteValues)
+    const max = Math.max(...finiteValues)
+    if (mode === 'symmetric') {
+      const amplitude = Math.max(Math.abs(min), Math.abs(max), 1)
+      const pad = Math.max(5, amplitude * 0.08)
+      const bound = roundAxisLimitUp(amplitude + pad, 5)
+      return [-bound, bound]
+    }
+    const span = Math.max(max - min, 1)
+    const pad = Math.max(5, span * 0.08)
+    return [roundAxisLimitDown(min - pad, 5), roundAxisLimitUp(max + pad, 5)]
+  }
+
+  function conditionCurveYRange(rows, sourceRows, dispersion, showRepeats, mode) {
+    const values = []
+    ;(rows || []).forEach((row) => {
+      const mean = Number(row && row.mean)
+      if (!Number.isFinite(mean)) return
+      const spread = dispersionValue(row, dispersion)
+      values.push(mean, mean - spread, mean + spread)
+    })
+    if (showRepeats) {
+      ;(sourceRows || []).forEach((row) => {
+        if (rows && rows.length) {
+          const matching = rows.some(
+            (summaryRow) => summaryRow.cohort === row.cohort && summaryRow.condition === row.condition
+          )
+          if (!matching) return
+        }
+        values.push(Number(row && row.value))
+      })
+    }
+    return paddedYRange(values, mode, { includeZero: true })
+  }
+
+  function representativeYRange(series, markers, mode) {
+    return paddedYRange(
+      [
+        ...(series || []).flatMap((item) => (item.trace && item.trace.y ? item.trace.y : [])),
+        ...(markers || []).map((marker) => marker.y),
+      ],
+      mode
+    )
+  }
+
+  function normalizedYRange(range) {
+    if (!Array.isArray(range) || range.length < 2) return null
+    const min = Number(range[0])
+    const max = Number(range[1])
+    if (!Number.isFinite(min) || !Number.isFinite(max) || max <= min) return null
+    return [min, max]
+  }
+
+  function adjustYRangeLimit(range, limit, direction, stepValue) {
+    const current = normalizedYRange(range)
+    if (!current) return null
+    const step = Y_AXIS_STEP_OPTIONS.includes(Number(stepValue)) ? Number(stepValue) : 10
+    const next = [...current]
+    if (limit === 'min') {
+      next[0] += direction * step
+      if (next[0] >= next[1] - step) next[0] = next[1] - step
+    } else {
+      next[1] += direction * step
+      if (next[1] <= next[0] + step) next[1] = next[0] + step
+    }
+    return next.map((value) => roundToIntegerAxisLimit(value))
+  }
+
+  function roundAxisLimitDown(value, multiple) {
+    return Math.floor(Number(value) / multiple) * multiple
+  }
+
+  function roundAxisLimitUp(value, multiple) {
+    return Math.ceil(Number(value) / multiple) * multiple
+  }
+
+  function roundToIntegerAxisLimit(value) {
+    return Math.round(Number(value))
+  }
+
+  function formatAxisLimit(value) {
+    const numeric = Number(value)
+    if (!Number.isFinite(numeric)) return '—'
+    return String(roundToIntegerAxisLimit(numeric))
+  }
+
+  function linearAxisTicks(minValue, maxValue, count = 5) {
+    const min = Number(minValue)
+    const max = Number(maxValue)
+    const tickCount = Math.max(2, Number(count) || 5)
+    if (!Number.isFinite(min) || !Number.isFinite(max)) return []
+    if (max <= min) return [roundToIntegerAxisLimit(min)]
+    const seen = new Set()
+    return Array.from({ length: tickCount }, (_item, index) =>
+      roundToIntegerAxisLimit(min + ((max - min) * index) / (tickCount - 1))
+    ).filter((tick) => {
+      if (seen.has(tick)) return false
+      seen.add(tick)
+      return true
+    })
   }
 
   function WaveformPlot({
@@ -1417,7 +1940,7 @@
               y: trace.y,
               type: 'scatter',
               mode: 'lines',
-              line: { color, width: 2 },
+              line: { color, width: 2.2 },
               hovertemplate: '%{x:.1f} ms<br>%{y:.2f} µV<extra></extra>',
             },
             {
@@ -1442,14 +1965,18 @@
         data,
         {
           autosize: true,
-          margin: { l: 62, r: 14, t: 12, b: 66 },
+          margin: { l: 66, r: 16, t: 12, b: 66 },
           paper_bgcolor: 'rgba(0,0,0,0)',
           plot_bgcolor: '#ffffff',
           xaxis: hasTrace
             ? {
                 title: { text: '' },
-                gridcolor: '#e6ebf1',
+                showgrid: false,
+                zeroline: true,
                 zerolinecolor: '#cbd5e1',
+                showline: true,
+                linecolor: '#94a3b8',
+                linewidth: 1,
                 ticks: 'outside',
                 ticklen: 5,
                 tickcolor: '#cbd5e1',
@@ -1460,9 +1987,14 @@
             : { visible: false, showgrid: false, zeroline: false },
           yaxis: hasTrace
             ? {
-                title: { text: 'Amp (µV)', standoff: 18, font: { size: 10, color: '#64748b' } },
-                gridcolor: '#e6ebf1',
+                title: { text: 'Amplitude (µV)', standoff: 18, font: { size: 10, color: '#64748b' } },
+                showgrid: true,
+                gridcolor: '#eef2f7',
+                zeroline: true,
                 zerolinecolor: '#cbd5e1',
+                showline: true,
+                linecolor: '#94a3b8',
+                linewidth: 1,
                 ticks: 'outside',
                 ticklen: 5,
                 tickcolor: '#cbd5e1',
@@ -1566,7 +2098,6 @@
     pickTargets,
     activePick,
     selectedPoint,
-    lastPicked,
     manualPoints,
     onArm,
     onCancel,
@@ -1579,8 +2110,6 @@
     }, [activePick && activePick.side])
 	    if (!sample)
 	      return e('div', { className: 'manual-strip empty' }, 'Select a record to review manual points.')
-	    const pointCount = manualPicks.countManualPoints(manualPoints)
-	    const workflowHint = manualWorkflowHint(sample.mode, pointCount)
 	    function sideTabs(selectedSide, onSelect) {
 	      return e(
 	        'div',
@@ -1638,9 +2167,8 @@
 	              target.label
 	            )
 	          )
-	        ),
-	        manualPointHint(side)
-	      )
+        )
+      )
     }
     function manualPointPanel() {
       const isActive = Boolean(activePick)
@@ -1725,22 +2253,6 @@
         e('span', null, point && Number.isFinite(Number(point.y)) ? formatPointValue(point.y) : 'NA')
       )
     }
-    function manualPointHint(side) {
-      const sideCount = manualSidePointCount(manualPoints, side)
-      const sideLastPicked = lastPicked && lastPicked.side === side ? lastPicked : null
-      return e(
-        'div',
-        { className: 'manual-hint' },
-        e(
-          'span',
-          { className: 'manual-hint-count' },
-          sideLastPicked
-            ? `Last: ${sideLastPicked.label}`
-            : `${sideCount} point${sideCount === 1 ? '' : 's'} recorded`
-        ),
-        e('span', { className: 'manual-hint-rule' }, workflowHint)
-      )
-    }
 	    return e(
 	      'div',
 	      { className: 'manual-strip' },
@@ -1773,28 +2285,6 @@
       ? trace.y.reduce((best, value, index) => (Number(value) < Number(trace.y[best]) ? index : best), 0)
       : trace.y.reduce((best, value, index) => (Number(value) > Number(trace.y[best]) ? index : best), 0)
     return { x: trace.x[findPoint], y: trace.y[findPoint] }
-  }
-
-  function manualSidePointCount(manualPoints, side) {
-    const points = manualPoints && manualPoints[side] ? manualPoints[side] : {}
-    return Object.values(points).filter((point) => point && Number.isFinite(Number(point.x)) && Number.isFinite(Number(point.y))).length
-  }
-
-  function manualWorkflowHint(mode, pointCount) {
-    const normalized = String(mode || '').toLowerCase()
-    if (normalized === 'dops') {
-      return pointCount
-        ? 'Corrected OP amp updates from complete peak-valley pairs.'
-        : 'Pick OP peak and valley pairs.'
-    }
-    if (normalized === 'fvep') {
-      return pointCount
-        ? 'Corrected latency and amp use picked N/P points.'
-        : 'Pick N/P response points.'
-    }
-    return pointCount
-      ? 'Corrected a/b metrics use picked a-wave and b-wave points.'
-      : 'Pick a-wave and b-wave points.'
   }
 
   function IntakePanel({
@@ -1943,7 +2433,7 @@
                 )
               ),
             ]
-          : e('div', { className: 'empty' }, 'Select a source file before reviewing records.')
+          : null
       )
     )
     return e(
@@ -2087,7 +2577,7 @@
                     )
                   )
                 )
-              : e('div', { className: 'empty' }, 'Import ERG/FVEP workbooks before assigning groups.'),
+              : null,
             null
           )
         ),
@@ -2103,7 +2593,6 @@
     result,
     options,
     settings,
-    scopeLabel,
     onCopy,
     onPlan,
     onMode,
@@ -2120,9 +2609,11 @@
     const [summaryGroup, setSummaryGroup] = React.useState('All')
     const [dispersion, setDispersion] = React.useState('sd')
     const [showRepeats, setShowRepeats] = React.useState(true)
-    const [smooth, setSmooth] = React.useState('none')
     const [waveGroup, setWaveGroup] = React.useState('All')
-    const [waveEye, setWaveEye] = React.useState('right')
+    const [waveEye, setWaveEye] = React.useState('average-eyes')
+    const [waveSampleId, setWaveSampleId] = React.useState('')
+    const [waveLayer, setWaveLayer] = React.useState('raw')
+    const [waveCondition, setWaveCondition] = React.useState('')
     const conditionRows = result && Array.isArray(result.conditionSummary) ? result.conditionSummary : []
     const groupOptions = ['All', ...uniqueSorted((rows || []).map((row) => row.cohort).filter(Boolean))]
     const activePlan = (result && result.plan) || {}
@@ -2132,16 +2623,25 @@
     const sourceTypes = detectedSourceTypes.length ? detectedSourceTypes : ['ERG', 'FVEP']
     const activeSourceType = ['ERG', 'FVEP'].includes(activePlan.sourceType) ? activePlan.sourceType : sourceTypes[0]
     const modeOptions = analysisModeOptions(project && project.samples, activeSourceType)
+    const metricPlan = { ...activePlan, sourceType: activeSourceType }
     const activeCategoryKey =
       modeOptions.find((item) => item.key === settings.analysisCategoryKey)?.key ||
       analysisCategoryKeyFromPlan(project && project.samples, activePlan) ||
       (modeOptions[0] && modeOptions[0].key) ||
       ''
-    const metricOptions = metricOptionsForPlan((options && options.metrics) || null, activePlan)
+    const metricOptions = analysisMetricOptionsForPlan(
+      metricOptionsForPlan((options && options.metrics) || null, metricPlan),
+      metricPlan
+    )
     const metricValue = metricOptions.includes(settings.metricKey || activePlan.metricKey)
       ? settings.metricKey || activePlan.metricKey
       : metricOptions[0] || settings.metricKey || activePlan.metricKey || 'bAmplitudeUv'
     const versions = ((options && options.metricVersions) || ['raw', 'manual']).filter((item) => item === 'raw' || item === 'manual')
+    const activeEyeAggregation = ['average-eyes', 'right-eye', 'left-eye'].includes(
+      activePlan.eyeAggregation || settings.eyeAggregation
+    )
+      ? activePlan.eyeAggregation || settings.eyeAggregation
+      : 'average-eyes'
     const activeSummaryGroup = groupOptions.includes(summaryGroup) ? summaryGroup : 'All'
     const activeWaveGroup = groupOptions.includes(waveGroup) ? waveGroup : 'All'
     const linkedRows =
@@ -2153,6 +2653,20 @@
     const linkedSummary =
       activeSummaryGroup === 'All' ? summary : summary.filter((row) => row.cohort === activeSummaryGroup)
     const maxValue = Math.max(1, ...linkedSummary.map((row) => Math.abs(row.mean || 0)))
+    const selectedWaveCondition = selectedResponseCondition(linkedConditionRows, waveCondition)
+    React.useEffect(() => {
+      if (metricOptions[0] && !metricOptions.includes(activeMetricKey) && onMetric) onMetric(metricOptions[0])
+    }, [activeMetricKey, metricOptions.join('|')])
+    function handleConditionPointSelect(row) {
+      if (!row || !row.condition) return
+      setWaveCondition(row.condition)
+      setWaveSampleId('')
+      if (row.cohort && groupOptions.includes(row.cohort)) setWaveGroup(row.cohort)
+    }
+    function handleWaveGroup(value) {
+      setWaveGroup(value)
+      setWaveSampleId('')
+    }
     return e(
       'section',
       { className: compact ? 'analysis-grid compact-analysis' : 'analysis-grid' },
@@ -2173,7 +2687,6 @@
         conditionRows: linkedConditionRows,
         settings,
         summaryTitle,
-        scopeLabel,
         stratified,
         maxValue,
         activeMetricKey,
@@ -2195,15 +2708,24 @@
         onDispersion: setDispersion,
         showRepeats,
         onShowRepeats: setShowRepeats,
-        smooth,
-        onSmooth: setSmooth,
+        eyeAggregation: activeEyeAggregation,
+        onEyeAggregation: (value) => onPlan && onPlan({ eyeAggregation: value }),
+        selectedCondition: selectedWaveCondition,
+        selectedGroup: activeWaveGroup,
+        onConditionSelect: handleConditionPointSelect,
       }),
       e(RepresentativeWaveformPanel, {
         project,
         plan: result && result.plan,
         groupOptions,
         group: activeWaveGroup,
-        onGroup: setWaveGroup,
+        onGroup: handleWaveGroup,
+        condition: selectedWaveCondition,
+        sampleId: waveSampleId,
+        onSample: setWaveSampleId,
+        layer: waveLayer,
+        onLayer: setWaveLayer,
+        metricKey: activeMetricKey,
         eye: waveEye,
         onEye: setWaveEye,
       })
@@ -2333,7 +2855,6 @@
     conditionRows,
     settings,
     summaryTitle,
-    scopeLabel,
     stratified,
     maxValue,
     activeMetricKey,
@@ -2355,11 +2876,39 @@
     onDispersion,
     showRepeats,
     onShowRepeats,
-    smooth,
-    onSmooth,
+    eyeAggregation,
+    onEyeAggregation,
+    selectedCondition,
+    selectedGroup,
+    onConditionSelect,
   }) {
     const conditionCount = new Set(conditionRows.map((row) => row.condition).filter(Boolean)).size
     const title = conditionCount > 1 ? 'Response Summary' : summaryTitle
+    const [yMode, setYMode] = React.useState('auto')
+    const [yRangeOverride, setYRangeOverride] = React.useState(null)
+    const [yStep, setYStep] = React.useState(10)
+    const modeLabel = (modeOptions.find((item) => item.key === activeCategoryKey) || {}).label || activeCategoryKey || 'Mode'
+    const plotTitle = responseSummaryPlotTitle({
+      modeLabel,
+      metricKey: activeMetricKey,
+      group,
+      dispersion,
+      eye: eyeAggregation,
+    })
+    const autoYRange = conditionCurveYRange(conditionRows, rows, dispersion, showRepeats, yMode)
+    const yRange = normalizedYRange(yRangeOverride) || autoYRange
+    function setAxisMode(value) {
+      setYMode(value)
+      setYRangeOverride(null)
+    }
+    function resetAxisRange() {
+      setYRangeOverride(null)
+    }
+    function adjustAxisLimit(limit, direction) {
+      const currentRange = normalizedYRange(yRangeOverride) || autoYRange
+      if (!currentRange) return
+      setYRangeOverride(adjustYRangeLimit(currentRange, limit, direction, yStep))
+    }
     return e(
       'div',
       { className: 'panel analysis-figure-panel analysis-summary-panel' },
@@ -2367,16 +2916,7 @@
         'div',
         { className: 'panel-header' },
         e('div', { className: 'panel-title' }, title),
-        e(
-          'span',
-          { className: 'pill' },
-          [
-            metricOptionLabel(activeMetricKey, metricLabel(activeMetricKey)),
-            conditionCount > 1 ? `mean ± ${dispersion.toUpperCase()}` : stratified ? 'stratified' : scopeLabel,
-          ]
-            .filter(Boolean)
-            .join(' · ')
-        )
+        null
       ),
       e(
         'div',
@@ -2434,11 +2974,11 @@
           onChange: (value) => onShowRepeats(value === 'show'),
         }),
         e(InlineSelect, {
-          label: 'Smooth',
-          value: smooth,
-          options: ['none', 'line'],
-          labels: { none: 'None', line: 'Line only' },
-          onChange: onSmooth,
+          label: 'Eye',
+          value: eyeAggregation || 'average-eyes',
+          options: ['average-eyes', 'right-eye', 'left-eye'],
+          labels: { 'average-eyes': 'Average', 'right-eye': 'OD', 'left-eye': 'OS' },
+          onChange: onEyeAggregation,
         })
       ),
       conditionCount > 1
@@ -2448,7 +2988,24 @@
             yAxisLabel: metricLabel(activeMetricKey),
             dispersion,
             showRepeats,
-            smooth,
+            selectedCondition,
+            selectedGroup,
+            onPointSelect: onConditionSelect,
+            plotTitle,
+            showSourceNote: false,
+            yRange,
+            axisControls: e(ReviewYAxisControls, {
+              mode: yMode,
+              range: yRange,
+              step: yStep,
+              hasTrace: Boolean(yRange),
+              onMode: setAxisMode,
+              onReset: resetAxisRange,
+              onAdjust: adjustAxisLimit,
+              onStep: setYStep,
+              className: 'analysis-axis-controls',
+              ariaLabel: 'Response summary y-axis controls',
+            }),
             note:
               result && result.waveformSummary && result.waveformSummary.status !== 'not-applicable'
                 ? result.waveformSummary.message
@@ -2458,17 +3015,71 @@
     )
   }
 
-  function RepresentativeWaveformPanel({ project, plan, groupOptions, group, onGroup, eye, onEye }) {
-    const sample = representativeSample(project && project.samples, plan, group)
-    const trace = representativeTrace(sample, eye)
+  function RepresentativeWaveformPanel({
+    project,
+    plan,
+    groupOptions,
+    group,
+    onGroup,
+    condition,
+    sampleId,
+    onSample,
+    layer,
+    onLayer,
+    metricKey,
+    eye,
+    onEye,
+  }) {
+    const [yMode, setYMode] = React.useState('auto')
+    const [yRangeOverride, setYRangeOverride] = React.useState(null)
+    const [yStep, setYStep] = React.useState(10)
+    const rows = representativeSampleRows(project && project.samples, plan, group, condition, eye)
+    const sampleOptions = representativeSampleOptions(project && project.samples, plan, group, condition, eye)
+    const sampleSelectOptions = [
+      { id: ALL_REPRESENTATIVE_SAMPLES, label: 'All samples' },
+      ...sampleOptions,
+    ]
+    const sampleLabels = Object.fromEntries(sampleSelectOptions.map((sample) => [sample.id, sample.label]))
+    const activeSampleId = sampleSelectOptions.some((sample) => sample.id === sampleId)
+      ? sampleId
+      : ALL_REPRESENTATIVE_SAMPLES
+    const selectedRows =
+      activeSampleId === ALL_REPRESENTATIVE_SAMPLES
+        ? rows
+        : rows.filter((sample) => sample.id === activeSampleId)
+    const manualAvailable = hasManualRepresentativePoint(selectedRows, eye, metricKey)
+    const activeLayer = layer === 'manual' && manualAvailable ? 'manual' : 'raw'
+    const series = representativeSeries(rows, group, activeSampleId, eye)
+    const markers = representativeMarkersForSeries(series, eye, activeLayer, metricKey)
+    const captionSample =
+      (activeSampleId !== ALL_REPRESENTATIVE_SAMPLES ? selectedRows[0] : null) || (series[0] && series[0].sample)
+    const plotTitle = representativePlotTitle({
+      sample: captionSample,
+      condition,
+      metricKey,
+    })
+    const autoYRange = representativeYRange(series, markers, yMode)
+    const yRange = normalizedYRange(yRangeOverride) || autoYRange
+    function setAxisMode(value) {
+      setYMode(value)
+      setYRangeOverride(null)
+    }
+    function resetAxisRange() {
+      setYRangeOverride(null)
+    }
+    function adjustAxisLimit(limit, direction) {
+      const currentRange = normalizedYRange(yRangeOverride) || autoYRange
+      if (!currentRange) return
+      setYRangeOverride(adjustYRangeLimit(currentRange, limit, direction, yStep))
+    }
+    const legendTitle = activeSampleId === ALL_REPRESENTATIVE_SAMPLES ? 'Group' : 'Trace'
     return e(
       'div',
       { className: 'panel representative-waveform-panel' },
       e(
         'div',
         { className: 'panel-header' },
-        e('div', { className: 'panel-title' }, 'Representative Waveform'),
-        e('span', { className: 'pill' }, sample ? `${sample.cohort || 'Unassigned'} · ${recordProtocolLabel(sample)}` : 'No trace')
+        e('div', { className: 'panel-title' }, 'Representative Waveform')
       ),
       e(
         'div',
@@ -2481,46 +3092,95 @@
           onChange: onGroup,
         }),
         e(InlineSelect, {
+          label: 'Sample',
+          value: activeSampleId,
+          options: sampleSelectOptions.map((sampleOption) => sampleOption.id),
+          labels: sampleLabels,
+          onChange: onSample,
+        }),
+        e(InlineSelect, {
+          label: 'Layer',
+          value: activeLayer,
+          options: ['raw', 'manual'],
+          labels: { raw: 'Raw', manual: 'Manual' },
+          disabledOptions: manualAvailable ? [] : ['manual'],
+          onChange: onLayer,
+        }),
+        e(InlineSelect, {
           label: 'Eye',
           value: eye,
-          options: ['right', 'left', 'average'],
-          labels: { right: 'Right', left: 'Left', average: 'Average' },
+          options: ['average-eyes', 'right-eye', 'left-eye'],
+          labels: { 'average-eyes': 'Average', 'right-eye': 'OD', 'left-eye': 'OS' },
           onChange: onEye,
         })
       ),
       e(
         'div',
         { className: 'panel-body representative-waveform-body' },
-        sample && trace
-          ? e(RepresentativeTraceSvg, { trace, sample })
+        series.length
+          ? e(RepresentativeTraceSvg, {
+              series,
+              markers,
+              legendTitle,
+              plotTitle,
+              yRange,
+              axisControls: e(ReviewYAxisControls, {
+                mode: yMode,
+                range: yRange,
+                step: yStep,
+                hasTrace: Boolean(yRange),
+                onMode: setAxisMode,
+                onReset: resetAxisRange,
+                onAdjust: adjustAxisLimit,
+                onStep: setYStep,
+                className: 'analysis-axis-controls',
+                ariaLabel: 'Representative waveform y-axis controls',
+              }),
+            })
           : e('div', { className: 'empty' }, 'No included repeat with trace data matches the current analysis mode.')
       )
     )
   }
 
-  function RepresentativeTraceSvg({ trace, sample }) {
-    const xValues = (trace && trace.x ? trace.x : []).map(Number).filter(Number.isFinite)
-    const yValues = (trace && trace.y ? trace.y : []).map(Number).filter(Number.isFinite)
+  function RepresentativeTraceSvg({
+    series,
+    markers = [],
+    legendTitle = 'Trace',
+    plotTitle = '',
+    yRange,
+    axisControls = null,
+  }) {
+    const traces = Array.isArray(series) ? series : []
+    const xValues = traces.flatMap((item) => (item.trace && item.trace.x ? item.trace.x : [])).map(Number).filter(Number.isFinite)
+    const yValues = [
+      ...traces.flatMap((item) => (item.trace && item.trace.y ? item.trace.y : [])),
+      ...markers.map((marker) => marker.y),
+    ].map(Number).filter(Number.isFinite)
     const minX = xValues.length ? Math.min(...xValues) : 0
     const maxX = xValues.length ? Math.max(...xValues) : 1
-    const minY = yValues.length ? Math.min(...yValues) : -1
-    const maxY = yValues.length ? Math.max(...yValues) : 1
+    const normalizedRange = normalizedYRange(yRange)
+    const rawMinY = yValues.length ? Math.min(...yValues) : -1
+    const rawMaxY = yValues.length ? Math.max(...yValues) : 1
+    const rawRange = Math.max(1, rawMaxY - rawMinY)
+    const minY = normalizedRange ? normalizedRange[0] : roundAxisLimitDown(rawMinY - rawRange * 0.08, 5)
+    let maxY = normalizedRange ? normalizedRange[1] : roundAxisLimitUp(rawMaxY + rawRange * 0.08, 5)
     const width = 520
     const height = 205
     const left = 58
-    const right = 18
+    const right = 112
     const top = 16
     const bottom = 58
     const plotWidth = width - left - right
     const plotHeight = height - top - bottom
+    const legendX = left + plotWidth + 42
+    const xTicks = linearAxisTicks(minX, maxX, 5)
+    const yTicks = linearAxisTicks(minY, maxY, 5)
     const xFor = (value) => left + ((value - minX) / Math.max(1e-9, maxX - minX)) * plotWidth
     const yFor = (value) => top + ((maxY - value) / Math.max(1e-9, maxY - minY)) * plotHeight
-    const points = (trace.x || [])
-      .map((xValue, index) => `${xFor(Number(xValue))},${yFor(Number(trace.y[index]))}`)
-      .join(' ')
     return e(
       'div',
-      { className: 'representative-trace-wrap' },
+      { className: plotTitle ? 'representative-trace-wrap has-plot-title' : 'representative-trace-wrap' },
+      plotTitle ? e('div', { className: 'plot-title' }, plotTitle) : null,
       e(
         'svg',
         { className: 'analysis-curve', viewBox: `0 0 ${width} ${height}`, role: 'img' },
@@ -2538,27 +3198,62 @@
           textAnchor: 'middle',
           className: 'axis-title',
           transform: `rotate(-90 15 ${top + plotHeight / 2})`,
-        }, 'Amp (µV)'),
+        }, 'Amplitude (µV)'),
         e('text', { x: left + plotWidth / 2, y: height - 17, textAnchor: 'middle', className: 'axis-title' }, 'Time (ms)'),
-        e('text', { x: left - 6, y: yFor(maxY) + 4, textAnchor: 'end', className: 'tick-label' }, formatValue(maxY)),
-        e('text', { x: left - 6, y: yFor(minY) + 4, textAnchor: 'end', className: 'tick-label' }, formatValue(minY)),
-        e('text', { x: xFor(minX), y: top + plotHeight + 17, textAnchor: 'middle', className: 'tick-label' }, formatValue(minX)),
-        e('text', { x: xFor(maxX), y: top + plotHeight + 17, textAnchor: 'middle', className: 'tick-label' }, formatValue(maxX)),
-        e('polyline', { className: 'curve-line series-a', points })
+        yTicks.map((tick) =>
+          e(
+            React.Fragment,
+            { key: `y-${tick}` },
+            e('line', { x1: left - 4, y1: yFor(tick), x2: left, y2: yFor(tick), className: 'axis-line' }),
+            e('text', { x: left - 8, y: yFor(tick) + 4, textAnchor: 'end', className: 'tick-label' }, formatAxisLimit(tick))
+          )
+        ),
+        xTicks.map((tick) =>
+          e(
+            React.Fragment,
+            { key: `x-${tick}` },
+            e('line', { x1: xFor(tick), y1: top + plotHeight, x2: xFor(tick), y2: top + plotHeight + 4, className: 'axis-line' }),
+            e('text', { x: xFor(tick), y: top + plotHeight + 17, textAnchor: 'middle', className: 'tick-label' }, formatAxisLimit(tick))
+          )
+        ),
+        e('text', { x: legendX, y: top + 5, className: 'legend-title' }, legendTitle),
+        traces.map((item, index) => {
+          const colorClass = index % 2 === 0 ? 'series-a' : 'series-b'
+          const points = (item.trace.x || [])
+            .map((xValue, pointIndex) => `${xFor(Number(xValue))},${yFor(Number(item.trace.y[pointIndex]))}`)
+            .join(' ')
+          return e('polyline', { key: item.key, className: `curve-line ${colorClass}`, points })
+        }),
+        traces.map((item, index) => {
+          const colorClass = index % 2 === 0 ? 'series-a' : 'series-b'
+          const y = top + 22 + index * 17
+          return e(
+            'g',
+            { key: `${item.key}-legend` },
+            e('line', { x1: legendX, y1: y, x2: legendX + 14, y2: y, className: `legend-swatch ${colorClass}` }),
+            e('circle', { cx: legendX + 7, cy: y, r: 2.8, className: `legend-dot ${colorClass}` }),
+            e('text', { x: legendX + 20, y: y + 4, className: `legend-label ${colorClass}` }, item.label)
+          )
+        }),
+        markers.map((marker) =>
+          e('circle', {
+            key: marker.key,
+            cx: xFor(Number(marker.x)),
+            cy: yFor(Number(marker.y)),
+            r: 3.6,
+            className: `representative-marker ${marker.seriesIndex % 2 === 0 ? 'series-a' : 'series-b'}`,
+          })
+        )
       ),
-      e(
-        'div',
-        { className: 'waveform-caption' },
-        sample
-          ? `${sample.subjectId || sample.label} · ${recordProtocolLabel(sample)} · ${displayConditionLabel(sample)}`
-          : ''
-      )
+      axisControls
     )
   }
 
-  function InlineSelect({ label, value, options, labels, onChange, control = false }) {
+  function InlineSelect({ label, value, options, labels, disabledOptions, onChange, control = false }) {
     const optionList = Array.isArray(options) && options.length ? options : ['All']
-    const normalized = optionList.includes(value) ? value : optionList[0]
+    const disabled = new Set(Array.isArray(disabledOptions) ? disabledOptions : [])
+    const firstEnabled = optionList.find((option) => !disabled.has(option)) || optionList[0]
+    const normalized = optionList.includes(value) && !disabled.has(value) ? value : firstEnabled
     return e(
       'label',
       { className: control ? 'inline-select analysis-control' : 'inline-select' },
@@ -2567,7 +3262,7 @@
         'select',
         { value: normalized, onChange: (event) => onChange && onChange(event.target.value) },
         optionList.map((option) =>
-          e('option', { key: option, value: option }, (labels && labels[option]) || option)
+          e('option', { key: option, value: option, disabled: disabled.has(option) }, (labels && labels[option]) || option)
         )
       )
     )
@@ -2745,7 +3440,13 @@
     embedded = false,
     dispersion = 'sem',
     showRepeats = false,
-    smooth = 'none',
+    selectedCondition = '',
+    selectedGroup = 'All',
+    onPointSelect,
+    plotTitle = '',
+    showSourceNote = true,
+    yRange,
+    axisControls = null,
   }) {
     const cohorts = Array.from(new Set(rows.map((row) => row.cohort).filter(Boolean))).sort()
     const conditions = Array.from(new Set(rows.map((row) => row.condition).filter(Boolean))).sort(
@@ -2756,19 +3457,21 @@
     const conditionIndex = new Map(conditions.map((condition, index) => [condition, index]))
     const previewRows = rows.length > 4 ? [] : rows
     const values = rows.map((row) => Number(row.mean)).filter(Number.isFinite)
+    const normalizedRange = normalizedYRange(yRange)
     const rawMax = values.length ? Math.max(...values) : 1
     const rawMin = values.length ? Math.min(0, ...values) : 0
     const rawRange = Math.max(1, rawMax - rawMin)
-    const max = rawMax + rawRange * 0.08
-    const min = Math.min(0, rawMin - rawRange * 0.05)
+    const max = normalizedRange ? normalizedRange[1] : roundAxisLimitUp(rawMax + rawRange * 0.08, 5)
+    const min = normalizedRange ? normalizedRange[0] : roundAxisLimitDown(Math.min(0, rawMin - rawRange * 0.05), 5)
     const width = 520
     const height = 230
     const left = 62
-    const right = 64
+    const right = 116
     const top = 18
     const bottom = 52
     const plotWidth = width - left - right
     const plotHeight = height - top - bottom
+    const legendX = left + plotWidth + 42
     const xFor = (condition) => {
       return (
         left +
@@ -2780,7 +3483,8 @@
     const yFor = (value) => top + ((max - value) / Math.max(1e-9, max - min)) * plotHeight
     return e(
       'div',
-      { className: 'panel-body analysis-curve-wrap' },
+      { className: plotTitle ? 'panel-body analysis-curve-wrap has-plot-title' : 'panel-body analysis-curve-wrap' },
+      plotTitle ? e('div', { className: 'plot-title' }, plotTitle) : null,
       rows.length
         ? e(
             'svg',
@@ -2803,14 +3507,15 @@
             e(
               'text',
               { x: left - 6, y: yFor(max) + 4, textAnchor: 'end', className: 'tick-label' },
-              formatValue(max)
+              formatAxisLimit(max)
             ),
             e(
               'text',
               { x: left - 6, y: yFor(min) + 4, textAnchor: 'end', className: 'tick-label' },
-              formatValue(min)
+              formatAxisLimit(min)
             ),
             e('text', { x: left + plotWidth / 2, y: height - 7, textAnchor: 'middle', className: 'axis-title' }, stimulusAxis.label),
+            e('text', { x: legendX, y: top + 5, className: 'legend-title' }, 'Group'),
             conditions.map((condition) =>
               e(
                 React.Fragment,
@@ -2829,7 +3534,6 @@
                     y: top + plotHeight + 18,
                     className: 'tick-label',
                     textAnchor: 'middle',
-                    transform: `rotate(-28 ${xFor(condition)} ${top + plotHeight + 18})`,
                   },
                   stimulusAxis.enabled
                     ? formatCompactNumber(stimulusAxis.values.get(condition))
@@ -2842,7 +3546,7 @@
               const cohortRows = conditions
                 .map((condition) => rows.find((row) => row.cohort === cohort && row.condition === condition))
                 .filter(Boolean)
-              const segments = smooth === 'none' ? conditionSegments(cohortRows) : [{ family: 'smoothed', rows: cohortRows }]
+              const segments = conditionSegments(cohortRows)
               return [
                 ...segments.map((segment) =>
                   e('polyline', {
@@ -2874,67 +3578,86 @@
                       className: `sem-line ${colorClass}`,
                     }),
                     ...repeatRows.map((sourceRow, repeatIndex) =>
-                      e('circle', {
+                      e('line', {
                         key: `${cohort}-${row.condition}-${sourceRow.sampleId}-repeat`,
-                        cx: x + (repeatIndex - (repeatRows.length - 1) / 2) * 4,
-                        cy: yFor(Number(sourceRow.value)),
-                        r: 2.4,
-                        className: `repeat-point ${colorClass}`,
+                        x1: x + (repeatIndex - (repeatRows.length - 1) / 2) * 3.2,
+                        y1: yFor(Number(sourceRow.value)) - 3,
+                        x2: x + (repeatIndex - (repeatRows.length - 1) / 2) * 3.2,
+                        y2: yFor(Number(sourceRow.value)) + 3,
+                        className: `repeat-tick ${colorClass}`,
                       })
                     ),
                     e('circle', {
                       key: `${cohort}-${row.condition}-point`,
                       cx: x,
                       cy: y,
-                      r: 4,
-                      className: `curve-point ${colorClass}`,
+                      r: 3.5,
+                      className: `curve-point ${colorClass} ${
+                        selectedCondition === row.condition && (selectedGroup === 'All' || selectedGroup === row.cohort)
+                          ? 'selected'
+                          : ''
+                      }`,
+                      role: onPointSelect ? 'button' : undefined,
+                      tabIndex: onPointSelect ? 0 : undefined,
+                      onClick: onPointSelect ? () => onPointSelect(row) : undefined,
+                      onKeyDown: onPointSelect
+                        ? (event) => {
+                            if (event.key === 'Enter' || event.key === ' ') {
+                              event.preventDefault()
+                              onPointSelect(row)
+                            }
+                          }
+                        : undefined,
                     }),
                   ]
                 }),
-                e(
-                  'text',
-                  {
-                    key: `${cohort}-label`,
-                    x: left + plotWidth + 12,
-                    y: top + 16 + cohortIndex * 15,
-                    textAnchor: 'start',
-                    className: `legend-label ${colorClass}`,
-                  },
-                  cohort
-                ),
               ]
+            }),
+            cohorts.map((cohort, cohortIndex) => {
+              const colorClass = cohortIndex % 2 === 0 ? 'series-a' : 'series-b'
+              const y = top + 22 + cohortIndex * 17
+              const cohortRows = rows.filter((row) => row.cohort === cohort)
+              return e(
+                'g',
+                { key: `${cohort}-legend` },
+                e('line', { x1: legendX, y1: y, x2: legendX + 14, y2: y, className: `legend-swatch ${colorClass}` }),
+                e('circle', { cx: legendX + 7, cy: y, r: 2.8, className: `legend-dot ${colorClass}` }),
+                e('text', { x: legendX + 20, y: y + 4, className: `legend-label ${colorClass}` }, legendCountLabel(cohort, cohortRows))
+              )
             })
           )
         : e('div', { className: 'empty' }, 'No finite included records for this analysis scope.'),
-      e(
-        'div',
-        { className: embedded ? 'curve-source-grid embedded' : 'curve-source-grid' },
-        embedded
-          ? e(
-              'div',
-              { className: note ? 'curve-source-note' : 'curve-source-row' },
-              note || curveSummaryLabel(rows.length, familyCount)
-            )
-          : [
-              note ? e('div', { key: 'note', className: 'curve-source-note' }, note) : null,
-              ...previewRows.map((row) =>
-                e(
+      showSourceNote
+        ? e(
+            'div',
+            { className: embedded ? 'curve-source-grid embedded' : 'curve-source-grid' },
+            embedded
+              ? e(
                   'div',
-                  { key: `${row.condition}-${row.cohort}`, className: 'curve-source-row' },
-                  e('span', null, `${summaryConditionLabel(row)} · ${row.cohort}`),
-                  e('strong', null, `${formatValue(row.mean)} ± ${formatValue(row.sem)} · n=${row.n}`)
+                  { className: note ? 'curve-source-note' : 'curve-source-row' },
+                  note || curveSummaryLabel(rows.length, familyCount)
                 )
-              ),
-              rows.length > previewRows.length
-                ? e(
-                    'div',
-                    { key: 'more', className: 'curve-source-row muted' },
-                    e('span', null, `${curveSummaryLabel(rows.length, familyCount)} in source data`),
-                    e('strong', null, 'xlsx')
-                  )
-                : null,
-            ]
-      )
+              : [
+                  note ? e('div', { key: 'note', className: 'curve-source-note' }, note) : null,
+                  ...previewRows.map((row) =>
+                    e(
+                      'div',
+                      { key: `${row.condition}-${row.cohort}`, className: 'curve-source-row' },
+                      e('span', null, `${summaryConditionLabel(row)} · ${row.cohort}`),
+                      e('strong', null, `${formatValue(row.mean)} ± ${formatValue(row.sem)} · n=${row.n}`)
+                    )
+                  ),
+                  rows.length > previewRows.length
+                    ? e(
+                        'div',
+                        { key: 'more', className: 'curve-source-row publication-note' },
+                        e('span', null, curveSourceNote(rows.length, familyCount, dispersion, showRepeats))
+                      )
+                    : null,
+                ]
+          )
+        : null,
+      axisControls
     )
   }
 
@@ -3448,6 +4171,14 @@
     return protocols.metricOptionsForPlan(optionKeys, plan)
   }
 
+  function analysisMetricOptionsForPlan(optionKeys, plan) {
+    const keys = Array.isArray(optionKeys) ? optionKeys : []
+    const sourceType = plan && plan.sourceType && plan.sourceType !== 'All' ? plan.sourceType : ''
+    if (sourceType !== 'ERG') return keys
+    const filtered = keys.filter((key) => metricUnit(key) !== 'ms')
+    return filtered.length ? filtered : keys
+  }
+
   function compactConditionLabel(condition) {
     const text = String(condition || '').trim()
     const parts = text
@@ -3461,6 +4192,57 @@
       return `${parts[0]} ${stimulus}`.trim()
     }
     return parts[0] || text || 'Stimulus'
+  }
+
+  function responseSummaryPlotTitle({ modeLabel, metricKey, group, dispersion, eye }) {
+    const groupText = group === 'All' ? 'all groups' : group || 'group'
+    const eyeText = eyeTitleLabel(eye)
+    return [
+      modeLabel || 'Mode',
+      metricLabel(metricKey),
+      groupText,
+      `mean ± ${dispersionLegendLabel(dispersion)}`,
+      eyeText === 'Average' ? '' : eyeText,
+    ]
+      .filter(Boolean)
+      .join(' · ')
+  }
+
+  function representativePlotTitle({ sample, condition, metricKey }) {
+    const modeText = sample ? acquisitionCategory(sample).label : 'Representative waveform'
+    const stimulusText = stimulusTitleLabel(condition || (sample && sample.condition))
+    return [modeText, stimulusText, metricPointTitle(metricKey)].filter(Boolean).join(' · ')
+  }
+
+  function stimulusTitleLabel(condition) {
+    const display = displayConditionLabel({ condition })
+    const match = display.match(/(?:white light:\s*)?([+-]?\d+(?:\.\d+)?)\s+([^,]+),\s*([+-]?\d+(?:\.\d+)?)\s*ms/i)
+    if (match) return `${formatCompactNumber(Number(match[1]))} ${match[2].trim()}, ${formatCompactNumber(Number(match[3]))} ms`
+    return display || compactConditionLabel(condition)
+  }
+
+  function metricPointTitle(metricKey) {
+    const key = String(metricKey || '')
+    if (key === 'aAmplitudeUv' || key === 'aLatencyMs') return 'a-wave point'
+    if (key === 'bAmplitudeUv' || key === 'bLatencyMs') return 'b-wave point'
+    if (key === 'sumOpAmplitudeUv') return 'OP peak/valley points'
+    const opMatch = key.match(/^op([1-5])AmplitudeUv$/)
+    if (opMatch) return `OP${opMatch[1]} peak/valley`
+    if (/^flicker/.test(key)) return 'flicker trough/peak'
+    if (key === 'p1n1AmplitudeUv') return 'N1/P1 points'
+    if (key === 'p1n2AmplitudeUv') return 'P1/N2 points'
+    if (key === 'p2n2AmplitudeUv') return 'N2/P2 points'
+    if (key === 'n1LatencyMs') return 'N1 point'
+    if (key === 'p1LatencyMs') return 'P1 point'
+    if (key === 'n2LatencyMs') return 'N2 point'
+    if (key === 'p2LatencyMs') return 'P2 point'
+    return metricLabel(key).replace(/\s*\([^)]*\)/g, '').trim() || 'measurement point'
+  }
+
+  function eyeTitleLabel(value) {
+    if (value === 'right-eye' || value === 'right') return 'OD'
+    if (value === 'left-eye' || value === 'left') return 'OS'
+    return 'Average'
   }
 
   function summaryConditionLabel(row) {
@@ -3523,6 +4305,23 @@
     return familyCount > 1
       ? `${rowCount} stimulus/group summaries · ${familyCount} protocol families`
       : `${rowCount} stimulus/group summaries`
+  }
+
+  function curveSourceNote(rowCount, familyCount, dispersion, showRepeats) {
+    return `Source data: ${curveSummaryLabel(rowCount, familyCount)}; mean ± ${dispersionLegendLabel(dispersion)}${showRepeats ? '; repeat ticks shown' : ''}`
+  }
+
+  function dispersionLegendLabel(dispersion) {
+    if (dispersion === 'sem') return 'SEM'
+    if (dispersion === 'variance') return 'variance'
+    return 'SD'
+  }
+
+  function legendCountLabel(label, rows) {
+    const counts = uniqueSorted((rows || []).map((row) => Number(row.n)).filter(Number.isFinite))
+    if (!counts.length) return label
+    if (counts.length === 1) return `${label} n=${counts[0]}`
+    return `${label} n=${counts[0]}-${counts[counts.length - 1]}`
   }
 
   function conditionSort(left, right, rows) {
@@ -3693,9 +4492,9 @@
   function friendlyImportError(error, kind) {
     const message = error && error.message ? String(error.message) : ''
     if (/not an ERG\/FVEP acquisition workbook/i.test(message)) return 'not an ERG/FVEP acquisition workbook'
-    if (/not an ERG Viewer project file/i.test(message)) return 'not an ERG Viewer project file'
+    if (/not an (ERG Viewer|OptoERGViewer) project file/i.test(message)) return 'not an OptoERGViewer project file'
     if (/read denied/i.test(message)) return `${kind || 'File'} type is not allowed`
-    if (/unexpected token|json/i.test(message)) return 'file content is not a valid ERG Viewer project'
+    if (/unexpected token|json/i.test(message)) return 'file content is not a valid OptoERGViewer project'
     return message || `${kind || 'File'} could not be opened`
   }
 
@@ -3798,7 +4597,7 @@
       )
     }
     const raw = sample.metrics.raw
-    const corrected = metrics.correctedMetrics(raw, { ...sample.corrections, mode: sample.mode })
+    const manual = metrics.deriveManualMetrics(raw, { ...sample.corrections, mode: sample.mode })
     const manualCount = manualPicks.countManualPoints(sample.corrections && sample.corrections.manualPoints)
     return e(
       'aside',
@@ -3842,20 +4641,20 @@
         e(
           'div',
           { className: 'panel-body compact-metric-list' },
-          e(MetricSideBlock, { label: 'OD', sample, side: 'right', fallbackRaw: raw, fallbackCorrected: corrected }),
-          e(MetricSideBlock, { label: 'OS', sample, side: 'left', fallbackRaw: raw, fallbackCorrected: corrected })
+          e(MetricSideBlock, { label: 'OD', sample, side: 'right', fallbackRaw: raw, fallbackManual: manual }),
+          e(MetricSideBlock, { label: 'OS', sample, side: 'left', fallbackRaw: raw, fallbackManual: manual })
         )
       )
     )
   }
 
-  function MetricSideBlock({ label, sample, side, fallbackRaw, fallbackCorrected }) {
+  function MetricSideBlock({ label, sample, side, fallbackRaw, fallbackManual }) {
     const scoped = sideScopedSample(sample, side)
     const raw = scoped ? metrics.deriveRawMetrics(scoped) : fallbackRaw
-    const corrected = scoped
-      ? metrics.correctedMetrics(raw, { ...scoped.corrections, mode: sample.mode })
-      : fallbackCorrected
-    const rows = metricCompareRows(raw, corrected, sample)
+    const manual = scoped
+      ? metrics.deriveManualMetrics(raw, { ...scoped.corrections, mode: sample.mode })
+      : fallbackManual
+    const rows = metricCompareRows(raw, manual, sample)
     return e(
       'div',
       { className: 'metric-side-block' },
@@ -3947,10 +4746,10 @@
     return target ? { side, key: target.key, label: target.label } : null
   }
 
-  function metricCompareRows(raw, corrected, sample) {
+  function metricCompareRows(raw, manual, sample) {
     const mode = sample && sample.mode
     const hideImplicitTime = ['Rod', 'Cone', 'Max'].includes(acquisitionCategory(sample).key)
-    return METRICS.filter(([key]) => raw[key] != null || corrected[key] != null)
+    return METRICS.filter(([key]) => raw[key] != null || manual[key] != null)
       .filter(([key]) => !(String(mode || '').toLowerCase() === 'dops' && /^op[1-5]AmplitudeUv$/.test(key)))
       .filter(([key]) => !(hideImplicitTime && /LatencyMs$/.test(key)))
       .sort(([left], [right]) => metricReviewPriority(left, mode) - metricReviewPriority(right, mode))
@@ -3960,7 +4759,7 @@
           { className: 'compact-metric-row', key },
           e('span', { className: 'compact-metric-name', title: metricNote(key) }, metricLabel(key)),
           e('span', { className: 'compact-metric-value' }, formatMetricNumber(raw[key], key)),
-          e('span', { className: 'compact-metric-value corrected' }, formatMetricNumber(corrected[key], key))
+          e('span', { className: 'compact-metric-value corrected' }, formatManualMetricNumber(manual[key], key))
         )
       )
   }
@@ -3981,7 +4780,7 @@
           { className: 'compact-metric-row op-point-row', key: `${side}-${key}` },
           e('span', { className: 'compact-metric-name', title: `${key} time and amp point` }, `OP${opIndex} ${kind}`),
           e('span', { className: 'compact-metric-value', title: formatPointCell(rawPoint) }, formatPointCell(rawPoint)),
-          e('span', { className: 'compact-metric-value corrected', title: formatPointCell(manualPoint) }, formatPointCell(manualPoint))
+          e('span', { className: 'compact-metric-value corrected', title: formatManualPointCell(manualPoint) }, formatManualPointCell(manualPoint))
         )
       })
     }).flat()
@@ -4042,6 +4841,14 @@
   function formatMetricNumber(value, metricKey) {
     if (!Number.isFinite(Number(value))) return 'NA'
     return displayMetricNumberValue(value, metricKey).toFixed(metricUnit(metricKey) === 'ratio' ? 3 : 2)
+  }
+
+  function formatManualMetricNumber(value, metricKey) {
+    return Number.isFinite(Number(value)) ? formatMetricNumber(value, metricKey) : ''
+  }
+
+  function formatManualPointCell(point) {
+    return point && Number.isFinite(Number(point.x)) && Number.isFinite(Number(point.y)) ? formatPointCell(point) : ''
   }
 
   function displayMetricNumberValue(value, metricKey) {
@@ -4169,16 +4976,14 @@
   }
 
   function acquisitionNumberLabel(sample) {
-    const category = acquisitionCategory(sample)
-    const prefix =
-      recordSourceType(sample) === 'FVEP'
+    const conditionMatch = String((sample && sample.condition) || '').match(/\b([A-Za-z]+)\((\d+)\)/)
+    const prefix = conditionMatch
+      ? conditionMatch[1].toUpperCase()
+      : recordSourceType(sample) === 'FVEP'
         ? 'FVEP'
-        : category.key === 'OPs'
-          ? 'OPs'
-          : category.key === 'Flicker'
-            ? 'Flicker'
-            : 'FERG'
-    return [prefix, sample && sample.acquisitionId ? sample.acquisitionId : '']
+        : 'FERG'
+    const number = conditionMatch ? conditionMatch[2] : sample && sample.acquisitionId ? sample.acquisitionId : ''
+    return [prefix, number]
       .filter(Boolean)
       .join(' ')
   }
@@ -5322,22 +6127,66 @@
 
     await run(
       'review-plot-range-controls',
-      'Clicking Y +/-, Y Auto, and Reset zoom updates the Review waveform range controls.',
-      () => firstElementText('.review-plot-actions button.active'),
+      'Clicking Y +/-, Y Auto, Reset, and y-limit steppers updates the Review waveform range controls.',
+      () => ({
+        activeRange: firstElementText('.review-plot-actions button.active'),
+        yLimits: textList('.y-limit-value'),
+      }),
       async () => {
         await clickButtonByText('Review', '.tabs')
         await afterNextLayoutFrame()
         await clickButtonByText('Y +/-', '.review-plot-actions')
         await afterNextLayoutFrame()
+        changeLabeledSelect('.y-step-select', 'Step', '25')
+        await afterNextLayoutFrame()
+        const yMinIncrease = visibleElements('.y-limit-stepper .y-limit-buttons button')[0]
+        if (!yMinIncrease) throw new Error('Y-limit stepper was not visible.')
+        yMinIncrease.click()
+        await afterNextLayoutFrame()
         await clickButtonByText('Y Auto', '.review-plot-actions')
         await afterNextLayoutFrame()
-        await clickButtonByText('Reset zoom', '.review-plot-actions')
+        await clickButtonByText('Reset', '.review-plot-actions')
       },
-      () => ({
-        pass: firstElementText('.review-plot-actions button.active') === 'Y Auto',
-        activeRange: firstElementText('.review-plot-actions button.active'),
-        buttons: textList('.review-plot-actions button'),
-      })
+      () => {
+        const limits = textList('.y-limit-value')
+        return {
+          pass:
+            firstElementText('.review-plot-actions button.active') === 'Y Auto' &&
+            controlValuesByLabel('.y-step-select').Step === '25' &&
+            limits.length === 2 &&
+            limits.every((value) => isIntegerAxisLabel(value)) &&
+            limits.every((value) => Number(value) % 5 === 0),
+          activeRange: firstElementText('.review-plot-actions button.active'),
+          buttons: textList('.review-plot-actions button'),
+          step: controlValuesByLabel('.y-step-select').Step,
+          limits,
+        }
+      }
+    )
+
+    let reviewNavigationBefore = null
+    await run(
+      'review-record-navigation',
+      'Clicking Review previous/next navigation switches the currently displayed record.',
+      () => metadataFieldValues(),
+      async () => {
+        await clickButtonByText('Review', '.tabs')
+        await afterNextLayoutFrame()
+        reviewNavigationBefore = metadataFieldValues()
+        const button = visibleElements('.review-nav-actions button').find((item) => !item.disabled)
+        if (!button) throw new Error('No enabled Review navigation button found.')
+        button.click()
+      },
+      () => {
+        const fields = metadataFieldValues()
+        const beforeKey = [reviewNavigationBefore && reviewNavigationBefore.Filename, reviewNavigationBefore && reviewNavigationBefore.Acquisition, reviewNavigationBefore && reviewNavigationBefore.Stimulus].join('|')
+        const afterKey = [fields.Filename, fields.Acquisition, fields.Stimulus].join('|')
+        return {
+          pass: Boolean(fields.Filename && fields.Acquisition) && beforeKey !== afterKey,
+          before: reviewNavigationBefore,
+          fields,
+        }
+      }
     )
 
     await run(
@@ -5455,6 +6304,41 @@
       }
     )
 
+    let representativeExcludedTarget = null
+    await run(
+      'analysis-representative-excludes-out-eye',
+      'Representative Waveform excludes sample-eye rows marked Out in the Analysis Data table.',
+      () => firstAnalysisMatrixRowByState('Out') || firstAnalysisMatrixRowByState('In'),
+      async () => {
+        await clickButtonByText('Analysis', '.tabs')
+        await afterNextLayoutFrame()
+        representativeExcludedTarget = firstAnalysisMatrixRowByState('Out')
+        if (!representativeExcludedTarget) {
+          const target = firstAnalysisMatrixRowByState('In')
+          if (!target || !target.button) throw new Error('No Analysis table row is available for exclusion.')
+          target.button.click()
+          await afterNextLayoutFrame()
+          representativeExcludedTarget = firstAnalysisMatrixRowByState('Out') || target
+        }
+        const eyeValue = representativeExcludedTarget.eye === 'OS' ? 'left-eye' : 'right-eye'
+        changeLabeledSelect('.representative-waveform-panel .inline-select', 'Eye', eyeValue)
+        await afterNextLayoutFrame()
+      },
+      () => {
+        const sampleOptions = selectOptionTexts('.representative-waveform-panel .inline-select', 'Sample')
+        const waveformValues = controlValuesByLabel('.representative-waveform-panel .inline-select')
+        return {
+          pass:
+            Boolean(representativeExcludedTarget && representativeExcludedTarget.name) &&
+            !sampleOptions.includes(representativeExcludedTarget.name) &&
+            waveformValues.Sample !== representativeExcludedTarget.name,
+          excludedTarget: representativeExcludedTarget,
+          waveformValues,
+          sampleOptions,
+        }
+      }
+    )
+
     await run(
       'analysis-source-links-metric',
       'Changing Analysis Type to FVEP exposes FVEP metrics without requiring a duplicate acquisition list.',
@@ -5511,25 +6395,66 @@
 
     await run(
       'analysis-plot-controls',
-      'Analysis plot controls update group/spread/repeat/smoothing and representative waveform eye controls.',
-      () => inlineControlValues(),
+      'Analysis plot controls update group/spread/repeat/eye aggregation and representative waveform sample/layer/eye controls.',
+      () => ({
+        summary: controlValuesByLabel('.analysis-summary-panel .inline-select'),
+        waveform: controlValuesByLabel('.representative-waveform-panel .inline-select'),
+      }),
       async () => {
         await clickButtonByText('Analysis', '.tabs')
         await afterNextLayoutFrame()
-        changeLabeledSelect('.inline-select', 'Spread', 'sem')
-        changeLabeledSelect('.inline-select', 'Repeats', 'hide')
-        changeLabeledSelect('.inline-select', 'Smooth', 'line')
-        changeLabeledSelect('.representative-waveform-panel .inline-select', 'Eye', 'average')
+        changeLabeledSelect('.analysis-summary-panel .inline-select', 'Spread', 'sem')
+        changeLabeledSelect('.analysis-summary-panel .inline-select', 'Repeats', 'hide')
+        changeLabeledSelect('.analysis-summary-panel .inline-select', 'Eye', 'right-eye')
+        const curvePoint = visibleElements('.analysis-summary-panel .curve-point').slice(-1)[0]
+        if (curvePoint) curvePoint.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+        await afterNextLayoutFrame()
+        changeLabeledSelect('.representative-waveform-panel .inline-select', 'Sample', ALL_REPRESENTATIVE_SAMPLES)
+        const layerSelect = labeledControl('.representative-waveform-panel .inline-select', 'Layer')
+        const manualOption = layerSelect && Array.from(layerSelect.options).find((option) => option.value === 'manual')
+        if (manualOption && !manualOption.disabled) changeLabeledSelect('.representative-waveform-panel .inline-select', 'Layer', 'manual')
+        changeLabeledSelect('.representative-waveform-panel .inline-select', 'Eye', 'left-eye')
+        clickButtonByText('Y +/-', '.analysis-summary-panel .analysis-axis-controls')
+        await afterNextLayoutFrame()
+        clickButtonByText('Y Auto', '.analysis-summary-panel .analysis-axis-controls')
       },
       () => {
-        const values = inlineControlValues()
+        const summaryValues = controlValuesByLabel('.analysis-summary-panel .inline-select')
+        const waveformValues = controlValuesByLabel('.representative-waveform-panel .inline-select')
+        const metricOptions = selectOptionTexts('.analysis-summary-panel .analysis-control', 'Metric')
+        const sampleOptions = selectOptionTexts('.representative-waveform-panel .inline-select', 'Sample')
+        const layerSelect = labeledControl('.representative-waveform-panel .inline-select', 'Layer')
+        const manualOption = layerSelect && Array.from(layerSelect.options).find((option) => option.value === 'manual')
+        const manualDisabled = Boolean(manualOption && manualOption.disabled)
         return {
           pass:
-            values.Spread === 'sem' &&
-            values.Repeats === 'hide' &&
-            values.Smooth === 'line' &&
-            values.Eye === 'average',
-          values,
+            summaryValues.Spread === 'sem' &&
+            summaryValues.Repeats === 'hide' &&
+            summaryValues.Eye === 'right-eye' &&
+            sampleOptions.includes('All samples') &&
+            waveformValues.Sample === ALL_REPRESENTATIVE_SAMPLES &&
+            (manualDisabled ? waveformValues.Layer === 'raw' : waveformValues.Layer === 'manual') &&
+            waveformValues.Eye === 'left-eye' &&
+            metricOptions.every((value) => !/\bms\b/i.test(value)) &&
+            Boolean(document.querySelector('.analysis-summary-panel .curve-point.selected')) &&
+            Boolean(document.querySelector('.representative-waveform-panel .representative-marker')) &&
+            Boolean(firstElementText('.analysis-summary-panel .plot-title')) &&
+            Boolean(firstElementText('.representative-waveform-panel .plot-title')) &&
+            visibleElements('.analysis-axis-controls').length >= 2 &&
+            !/dRod|dMax|dOPs|ICone|IFlicker/.test(firstElementText('.representative-waveform-panel .plot-title')) &&
+            !allTextList('.analysis-summary-panel .curve-source-row, .analysis-summary-panel .curve-source-note').some(
+              (value) => /Source data|stimulus\/group summaries/i.test(value)
+            ) &&
+            !firstElementText('.representative-waveform-panel .waveform-caption'),
+          summaryValues,
+          waveformValues,
+          sampleOptions,
+          manualDisabled,
+          metricOptions,
+          summaryPlotTitle: firstElementText('.analysis-summary-panel .plot-title'),
+          representativePlotTitle: firstElementText('.representative-waveform-panel .plot-title'),
+          representativeMarkers: document.querySelectorAll('.representative-waveform-panel .representative-marker').length,
+          axisControls: visibleElements('.analysis-axis-controls').length,
         }
       }
     )
@@ -5624,7 +6549,12 @@
           textList('.manual-point-side-title').includes('OD') &&
           textList('.manual-point-side-title').includes('OS') &&
           !document.querySelector('.manual-metrics') &&
-          !textList('.manual-strip th').some((value) => ['Endpoint', 'Raw', 'Manual'].includes(value)),
+          !textList('.manual-strip th').some((value) => ['Endpoint', 'Raw', 'Manual'].includes(value)) &&
+          !manualStripText().includes('Last:') &&
+          !manualStripText().includes('points recorded') &&
+          allTextList('.compact-metric-row:not(.compact-metric-head) .compact-metric-value.corrected').some(
+            (value) => value === ''
+          ),
         activeCard: Boolean(document.querySelector('.manual-point-panel.active')),
         pickPanels: visibleElements('.manual-pick-panel').length,
         manualPointPanels: visibleElements('.manual-point-panel').length,
@@ -5633,6 +6563,8 @@
         sideTitles: textList('.manual-point-side-title'),
         manualHeaders: textList('.manual-strip th'),
         pointRows: textList('.manual-point-row span'),
+        manualStripText: manualStripText(),
+        manualMeasurementCells: allTextList('.compact-metric-row:not(.compact-metric-head) .compact-metric-value.corrected'),
       })
     )
 
@@ -5808,8 +6740,10 @@
     if (element.matches('.analysis-data-panel .sample-include-toggle')) return coverageRule('analysis-include-toggle')
     if (element.matches('.cohort-setup-row .row-action.danger')) return coverageRule('source-file-remove-button')
     if (element.closest('.review-select')) return coverageRule('review-scope-selects')
+    if (element.closest('.review-nav-actions')) return coverageRule('review-record-navigation')
     if (element.closest('.field-grid') && element.matches('input')) return coverageRule('inspector-metadata-inputs')
     if (element.closest('.review-plot-actions')) return coverageRule('review-plot-range-controls')
+    if (element.closest('.analysis-axis-controls')) return coverageRule('analysis-plot-controls')
     if (element.closest('.manual-buttons')) return coverageRule('review-manual-pick-arm-and-done')
     if (element.closest('.manual-strip .eye-tabs')) return coverageRule('review-manual-pick-arm-and-done')
     if (element.closest('.manual-point-panel')) return coverageRule('review-manual-pick-arm-and-done')
@@ -5992,6 +6926,41 @@
     return visibleElements(selector).map((element) => textSnippet(element.textContent || element.value || ''))
   }
 
+  function allTextList(selector) {
+    return Array.from(document.querySelectorAll(selector)).map((element) =>
+      textSnippet(element.textContent || element.value || '')
+    )
+  }
+
+  function firstAnalysisMatrixRowByState(state) {
+    const targetState = String(state || '')
+    const rows = visibleElements('.analysis-matrix-table tbody tr')
+    for (const row of rows) {
+      const cells = Array.from(row.querySelectorAll('td'))
+      const button = row.querySelector('.sample-include-toggle')
+      const rowState = textSnippet(button ? button.textContent || '' : '')
+      if (rowState !== targetState) continue
+      return {
+        name: textSnippet(cells[0] ? cells[0].textContent || '' : ''),
+        eye: textSnippet(cells[1] ? cells[1].textContent || '' : ''),
+        state: rowState,
+        button,
+      }
+    }
+    return null
+  }
+
+  function manualStripText() {
+    const strip = document.querySelector('.manual-strip')
+    return textSnippet(strip ? strip.textContent || '' : '')
+  }
+
+  function isIntegerAxisLabel(value) {
+    const text = String(value || '')
+    const numeric = Number(text)
+    return Number.isInteger(numeric) && String(numeric) === text
+  }
+
   function clickDifferentSampleRow() {
     const current = activeSampleKey()
     const rows = visibleElements('.acquisition-record-row .acquisition-select-action')
@@ -6041,10 +7010,6 @@
     return controlValuesByLabel('.analysis-control')
   }
 
-  function inlineControlValues() {
-    return controlValuesByLabel('.inline-select')
-  }
-
   function controlValuesByLabel(rowSelector) {
     return visibleElements(rowSelector).reduce((values, row) => {
       const label = textSnippet(row.querySelector('span, label')?.textContent || '')
@@ -6060,6 +7025,12 @@
       return rowLabel && textSnippet(rowLabel.textContent) === label
     })
     return row ? row.querySelector('select, input, button') : null
+  }
+
+  function selectOptionTexts(rowSelector, label) {
+    const select = labeledControl(rowSelector, label)
+    if (!select || !select.options) return []
+    return Array.from(select.options).map((option) => textSnippet(option.textContent || option.value || ''))
   }
 
   function firstNonAllOption(rowSelector, label) {

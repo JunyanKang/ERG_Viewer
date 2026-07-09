@@ -994,17 +994,83 @@ input {
   width: 100%;
 }
 
-.review-plot-actions {
+.review-nav-actions {
   flex: 0 0 auto;
   display: flex;
   align-items: center;
   gap: 6px;
 }
 
+.review-nav-actions button {
+  width: var(--control-height);
+  min-width: var(--control-height);
+  padding: 0;
+  font-size: var(--control-font-size);
+}
+
+.review-plot-actions {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 0 10px 8px;
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.analysis-axis-controls {
+  min-width: 0;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 2px 8px 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.y-mode-buttons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.y-step-select {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto 70px;
+  align-items: center;
+  gap: 6px;
+}
+
+.y-step-select span {
+  color: var(--muted);
+  font-size: var(--text-label);
+  font-weight: var(--weight-title);
+  text-transform: uppercase;
+}
+
+.y-step-select select {
+  min-width: 0;
+  width: 100%;
+}
+
 .review-plot-actions button {
-  min-width: 62px;
+  min-width: 72px;
   height: var(--control-height);
   padding: 0 8px;
+  border-radius: var(--control-radius);
+  font-size: var(--control-font-size);
+  font-weight: var(--control-font-weight);
+}
+
+.analysis-axis-controls button {
+  min-width: 44px;
+  height: var(--control-height);
+  padding: 0 5px;
   border-radius: var(--control-radius);
   font-size: var(--control-font-size);
   font-weight: var(--control-font-weight);
@@ -1016,11 +1082,53 @@ input {
   background: var(--accent-soft);
 }
 
+.analysis-axis-controls button.active {
+  color: var(--accent);
+  border-color: var(--accent-border);
+  background: var(--accent-soft);
+}
+
+.analysis-axis-controls .y-mode-buttons {
+  flex: 0 0 auto;
+  gap: 4px;
+}
+
+.analysis-axis-controls .y-limit-stepper {
+  flex: 0 0 auto;
+  grid-template-columns: auto 46px 38px;
+  gap: 4px;
+}
+
+.analysis-axis-controls .y-limit-label,
+.analysis-axis-controls .y-step-select span {
+  font-size: var(--text-label);
+  text-transform: none;
+}
+
+.analysis-axis-controls .y-limit-value {
+  padding: 0 5px;
+}
+
+.analysis-axis-controls .y-limit-buttons {
+  grid-template-columns: 17px 17px;
+  gap: 4px;
+}
+
+.analysis-axis-controls .y-limit-buttons button {
+  width: 17px;
+}
+
+.analysis-axis-controls .y-step-select {
+  flex: 0 0 auto;
+  grid-template-columns: auto 56px;
+  gap: 4px;
+}
+
 .review-body {
   min-height: 0;
   min-width: 0;
   display: grid;
-  grid-template-rows: minmax(0, 1fr) 250px;
+  grid-template-rows: minmax(0, 1fr) 42px 250px;
   overflow: hidden;
 }
 
@@ -1033,8 +1141,53 @@ input {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 10px;
   padding: 10px;
-  padding-bottom: 6px;
+  padding-bottom: 8px;
   overflow: hidden;
+}
+
+.y-limit-stepper {
+  min-width: 0;
+  height: var(--control-height);
+  display: grid;
+  grid-template-columns: auto 72px 44px;
+  align-items: center;
+  gap: 6px;
+}
+
+.y-limit-label {
+  color: var(--muted);
+  font-size: var(--text-label);
+  font-weight: var(--weight-title);
+  text-transform: uppercase;
+}
+
+.y-limit-value {
+  min-width: 0;
+  height: var(--control-height);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 8px;
+  border: 1px solid var(--material-border);
+  border-radius: var(--control-radius);
+  background: var(--material-control);
+  color: var(--text);
+  font-size: var(--control-font-size);
+  font-weight: var(--control-font-weight);
+  font-variant-numeric: tabular-nums;
+  box-shadow: var(--material-shadow-control);
+}
+
+.y-limit-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+}
+
+.y-limit-buttons button {
+  min-width: 0;
+  width: 20px;
+  padding: 0;
 }
 
 .plot-card {
@@ -1914,7 +2067,7 @@ tr.excluded-row {
   grid-row: 2;
   min-height: 0;
   display: grid;
-  grid-template-rows: var(--panel-header-height) var(--control-height) minmax(0, 1fr);
+  grid-template-rows: var(--panel-header-height) calc(var(--control-height) + 13px) minmax(0, 1fr);
   overflow: hidden;
 }
 
@@ -1930,11 +2083,20 @@ tr.excluded-row {
 }
 
 .representative-waveform-panel .analysis-plot-control-strip {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns:
+    minmax(130px, 180px)
+    minmax(170px, 250px)
+    minmax(120px, 145px)
+    minmax(120px, 145px);
+  justify-content: start;
+  column-gap: 10px;
+  align-items: center;
+  box-sizing: border-box;
 }
 
 .inline-select {
   min-width: 0;
+  height: var(--control-height);
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
@@ -1951,6 +2113,7 @@ tr.excluded-row {
 
 .inline-select select {
   width: 100%;
+  height: var(--control-height);
   min-width: 0;
 }
 
@@ -1960,6 +2123,10 @@ tr.excluded-row {
   grid-template-rows: minmax(0, 1fr) auto;
   gap: 8px;
   overflow: hidden;
+}
+
+.analysis-curve-wrap.has-plot-title {
+  grid-template-rows: auto minmax(0, 1fr) auto;
 }
 
 .fvep-waveform-wrap {
@@ -1987,14 +2154,50 @@ tr.excluded-row {
 
 .axis-title,
 .tick-label,
+.legend-title,
 .legend-label {
   font-size: var(--text-label);
+  fill: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.legend-title {
+  font-weight: var(--weight-title);
+  text-transform: uppercase;
+}
+
+.legend-divider {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.legend-swatch {
+  stroke-width: 2.1;
+  stroke-linecap: round;
+}
+
+.legend-dot {
+  stroke: var(--white);
+  stroke-width: 1;
+}
+
+.legend-swatch.neutral {
+  stroke: var(--muted);
+}
+
+.legend-dot.neutral {
+  fill: var(--muted);
+}
+
+.legend-label.neutral {
   fill: var(--muted);
 }
 
 .curve-line {
   fill: none;
-  stroke-width: 2.5;
+  stroke-width: 2.15;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .curve-line.series-a,
@@ -2004,17 +2207,43 @@ tr.excluded-row {
 
 .curve-point {
   stroke: var(--white);
-  stroke-width: 1.5;
+  stroke-width: 1.25;
+  cursor: pointer;
+}
+
+.curve-point.selected {
+  stroke: var(--text);
+  stroke-width: 2.1;
 }
 
 .repeat-point {
-  opacity: 0.72;
+  opacity: 0.58;
   stroke: var(--white);
   stroke-width: 0.8;
 }
 
+.repeat-tick {
+  opacity: 0.62;
+  stroke-width: 1.25;
+  stroke-linecap: round;
+}
+
+.representative-marker {
+  fill: var(--surface);
+  stroke-width: 2;
+}
+
+.representative-marker.series-a {
+  stroke: var(--accent);
+}
+
+.representative-marker.series-b {
+  stroke: var(--accent-2);
+}
+
 .sem-line {
-  stroke-width: 1.5;
+  stroke-width: 1.25;
+  stroke-linecap: round;
 }
 
 .sem-band {
@@ -2030,6 +2259,26 @@ tr.excluded-row {
 .series-b {
   stroke: var(--accent-2);
   fill: var(--accent-2);
+}
+
+.legend-label.series-a,
+.legend-label.series-b {
+  fill: var(--muted);
+}
+
+.plot-title {
+  display: block;
+  min-width: 0;
+  padding: 0 10px 2px;
+  border: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text);
+  font-size: var(--text-body);
+  font-weight: 400;
+  line-height: 1.2;
+  text-align: center;
 }
 
 .curve-source-grid {
@@ -2076,6 +2325,12 @@ tr.excluded-row {
   background: var(--surface);
 }
 
+.curve-source-row.publication-note {
+  grid-template-columns: minmax(0, 1fr);
+  color: var(--muted);
+  background: var(--surface);
+}
+
 .curve-source-note,
 .waveform-caption {
   min-width: 0;
@@ -2104,13 +2359,35 @@ tr.excluded-row {
   align-items: center;
 }
 
-.representative-waveform-body,
+.representative-waveform-panel .waveform-caption {
+  width: min(100%, 430px);
+  height: var(--control-height);
+  padding: 0 10px;
+  border: 1px solid var(--material-border);
+  border-radius: var(--control-radius);
+  background: var(--material-control);
+  box-shadow: var(--material-shadow-control);
+  backdrop-filter: var(--material-backdrop);
+}
+
+.representative-waveform-body {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+  overflow: hidden;
+}
+
 .representative-trace-wrap {
   min-height: 0;
   display: grid;
-  grid-template-rows: minmax(0, 1fr) 24px;
-  gap: 6px;
+  grid-template-rows: minmax(0, 1fr);
+  align-content: stretch;
+  gap: 8px;
   overflow: hidden;
+}
+
+.representative-trace-wrap.has-plot-title {
+  grid-template-rows: auto minmax(0, 1fr) auto;
 }
 
 .representative-trace-wrap .analysis-curve {

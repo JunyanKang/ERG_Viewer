@@ -2,7 +2,7 @@ const projectCore = require('../project')
 const demo = require('../demo-data')
 const XLSX = require('xlsx')
 
-describe('ERG Viewer v2 project model', () => {
+describe('OptoERGViewer v2 project model', () => {
   test('normalizes imported project shape', () => {
     const project = projectCore.normalizeProject({
       title: 'Example',
